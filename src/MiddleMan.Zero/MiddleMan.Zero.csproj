@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFramework is inherited from Directory.Build.props -->
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
