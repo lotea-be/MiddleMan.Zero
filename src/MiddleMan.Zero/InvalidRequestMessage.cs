@@ -25,8 +25,3 @@ public class InvalidRequestMessage : MessageBase
         Code = code ?? throw new ArgumentNullException(nameof(code));
     }
 }
-
-public class FailureMessage : MessageBase
-{
-
-}
