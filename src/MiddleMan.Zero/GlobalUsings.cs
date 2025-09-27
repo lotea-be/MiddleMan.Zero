@@ -1,0 +1,1 @@
+global using MiddleMan.Zero.Abstractions;

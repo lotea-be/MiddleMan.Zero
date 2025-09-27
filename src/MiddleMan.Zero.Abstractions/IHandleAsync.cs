@@ -8,7 +8,7 @@
 /// <typeparam name="TRequest">The type of the request to be handled.</typeparam>
 public interface IHandleAsync<TRequest>
 {
-    ValueTask HandleAsync(TRequest request);
+    ValueTask<ResultBase> HandleAsync(TRequest request);
 }
 
 /// <summary>
@@ -20,5 +20,5 @@ public interface IHandleAsync<TRequest>
 /// <typeparam name="TResponse">The type of the response to be returned.</typeparam>
 public interface IHandleAsync<TRequest, TResponse>
 {
-    ValueTask<TResponse> HandleAsync(TRequest request);
+    ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request);
 }
