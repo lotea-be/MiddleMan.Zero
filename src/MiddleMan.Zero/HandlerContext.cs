@@ -18,6 +18,9 @@ public class HandlerContext
     /// </summary>
     public bool IsRequestValid { get; private set; } = true;
 
+    /// <summary>
+    /// Gets a value indicating whether the operation was successful.
+    /// </summary>
     public bool IsSuccesful { get; private set; } = true;
 
     /// <summary>
@@ -40,10 +43,19 @@ public class HandlerContext
         _messages.Add(message);
     }
 
+    /// <summary>
+    /// Gets all messages of the specified type from the context.
+    /// </summary>
+    /// <typeparam name="TMessage">The type of messages to retrieve.</typeparam>
+    /// <returns>An enumerable collection of messages of the specified type.</returns>
     internal IEnumerable<TMessage> Get<TMessage>()
         where TMessage : MessageBase
         => _messages.OfType<TMessage>();
 
+    /// <summary>
+    /// Gets all messages from the context.
+    /// </summary>
+    /// <returns>An enumerable collection of all messages.</returns>
     internal IEnumerable<MessageBase> GetAllMessages()
         => _messages;
 }
