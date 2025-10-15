@@ -1,5 +1,10 @@
 namespace MiddleMan.Zero.Abstractions;
 
+/// <summary>
+/// Represents the result of an operation without a specific response.
+/// </summary>
+/// <param name="resultStatus">The status of the operation result.</param>
+/// <param name="messages">Collection of messages associated with the operation.</param>
 public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageBase> messages)
 {
     public ResultStatus ResultStatus { get; } = resultStatus;

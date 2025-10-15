@@ -1,9 +1,24 @@
 namespace MiddleMan.Zero.Abstractions;
 
+/// <summary>
+/// Defines the status of an operation result.
+/// </summary>
 public enum ResultStatus
 {
+    /// <summary>
+    /// The result status is undefined.
+    /// </summary>
     Undefined = 0,
-    Succesful = 1,
+    /// <summary>
+    /// The operation was successful.
+    /// </summary>
+    Successful = 1,
+    /// <summary>
+    /// The operation failed.
+    /// </summary>
     Failure = 2,
+    /// <summary>
+    /// The operation was invalid.
+    /// </summary>
     Invalid = 3
 }

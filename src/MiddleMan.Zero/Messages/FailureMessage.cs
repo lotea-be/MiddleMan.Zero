@@ -5,5 +5,4 @@ namespace MiddleMan.Zero;
 /// </summary>
 public class FailureMessage : MessageBase
 {
-
 }

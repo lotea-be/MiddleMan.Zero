@@ -3,25 +3,17 @@ namespace MiddleMan.Zero;
 using MiddleMan.Zero.Abstractions;
 using System.Threading.Tasks;
 
-/// <summary>
-/// Base class for handlers that process requests without returning a specific response type.
-/// Implements common validation and handling logic, with template methods for specific behaviors.
-/// </summary>
-/// <typeparam name="TRequest">The type of the request to handle.</typeparam>
+/// <inheritdoc/>
 public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
 {
-    /// <summary>
-    /// Handles the specified request by validating it and then processing it if valid.
-    /// </summary>
-    /// <param name="request">The request to handle.</param>
-    /// <returns>A <see cref="ValueTask{ResultBase}"/> containing the result of the operation.</returns>
+    /// <inheritdoc/>
     public async ValueTask<ResultBase> HandleAsync(TRequest request)
     {
         var context = new HandlerContext();
 
         if (request == null)
         {
-            context.LogMessage(new InvalidRequestMessage("Request is null.", "middleman_request_null"));
+            context.Log(new InvalidRequestMessage("Request is null.", "middleman_request_null"));
 
             return CreateResult(context);
         }
@@ -38,29 +30,6 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
         await HandleAsync(request, context);
 
         return CreateResult(context);
-    }
-
-    /// <summary>
-    /// Creates a result based on the current state of the handler context.
-    /// </summary>
-    /// <param name="context">The handler context containing messages and state.</param>
-    /// <returns>A <see cref="Result"/> with the appropriate status and messages.</returns>
-    private static Result CreateResult(HandlerContext context)
-    {
-        // Check for invalid
-        if (!context.IsRequestValid)
-        {
-            return new(ResultStatus.Invalid, context.Get<InvalidRequestMessage>());
-        }
-
-        // Check for Failure
-        if (!context.IsSuccesful)
-        {
-            return new(ResultStatus.Failure, context.Get<FailureMessage>());
-        }
-
-        return new(ResultStatus.Succesful, context.GetAllMessages());
-
     }
 
     /// <summary>
@@ -85,14 +54,31 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// <param name="context">The handler context for logging messages.</param>
     /// <returns>A ValueTask that represents the asynchronous handling operation.</returns>
     protected abstract ValueTask HandleAsync(TRequest request, HandlerContext context);
+
+        /// <summary>
+    /// Creates a result based on the current state of the handler context.
+    /// </summary>
+    /// <param name="context">The handler context containing messages and state.</param>
+    /// <returns>A <see cref="Result"/> with the appropriate status and messages.</returns>
+    private static Result CreateResult(HandlerContext context)
+    {
+        // Check for invalid
+        if (!context.IsRequestValid)
+        {
+            return new(ResultStatus.Invalid, context.Get<InvalidRequestMessage>());
+        }
+
+        // Check for Failure
+        if (!context.IsSuccessful)
+        {
+            return new(ResultStatus.Failure, context.Get<FailureMessage>());
+        }
+
+        return new(ResultStatus.Successful, context.GetAllMessages());
+    }
 }
 
-/// <summary>
-/// Base class for handlers that process requests and return a specific response type.
-/// Implements common validation and handling logic, with template methods for specific behaviors.
-/// </summary>
-/// <typeparam name="TRequest">The type of the request to handle.</typeparam>
-/// <typeparam name="TResponse">The type of the response to return.</typeparam>
+/// <inheritdoc/>
 public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest, TResponse>
     where TResponse : class
 {
@@ -103,7 +89,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
 
         if (request == null)
         {
-            context.LogMessage(new InvalidRequestMessage("Request is null.", "middleman_request_null"));
+            context.Log(new InvalidRequestMessage("Request is null.", "middleman_request_null"));
 
             return CreateResult(null, context);
         }
@@ -156,7 +142,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
         }
 
         // Check for Failure
-        if (!context.IsSuccesful)
+        if (!context.IsSuccessful)
         {
             return new(response, ResultStatus.Failure, context.Get<FailureMessage>());
         }
@@ -166,6 +152,6 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
             throw new ArgumentNullException(nameof(response), "Response is null.");
         }
 
-        return new(response, ResultStatus.Succesful, context.GetAllMessages());
+        return new(response, ResultStatus.Successful, context.GetAllMessages());
     }
 }
