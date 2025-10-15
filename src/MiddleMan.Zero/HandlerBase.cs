@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
 {
     /// <inheritdoc/>
-    public async ValueTask<ResultBase> HandleAsync(TRequest request)
+    public async ValueTask<ResultBase> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
     {
         var context = new HandlerContext();
 
@@ -19,7 +19,7 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
         }
 
         // Validate request before handling
-        await ValidateAsync(request, context);
+        await ValidateAsync(request, context, cancellationToken);
 
         // Fail fast if the request is not valid
         if (!context.IsRequestValid)
@@ -27,7 +27,7 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
             return CreateResult(context);
         }
 
-        await HandleAsync(request, context);
+        await HandleAsync(request, context, cancellationToken);
 
         return CreateResult(context);
     }
@@ -43,8 +43,9 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// </summary>
     /// <param name="request">The request to validate.</param>
     /// <param name="context">The handler context for logging messages.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A ValueTask that represents the asynchronous validation operation.</returns>
-    protected abstract ValueTask ValidateAsync(TRequest request, HandlerContext context);
+    protected abstract ValueTask ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Handles the request after validation is complete.
@@ -52,8 +53,9 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// </summary>
     /// <param name="request">The request to handle.</param>
     /// <param name="context">The handler context for logging messages.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A ValueTask that represents the asynchronous handling operation.</returns>
-    protected abstract ValueTask HandleAsync(TRequest request, HandlerContext context);
+    protected abstract ValueTask HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
         /// <summary>
     /// Creates a result based on the current state of the handler context.
@@ -83,7 +85,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     where TResponse : class
 {
     /// <inheritdoc/>
-    public async ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request)
+    public async ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
     {
         var context = new HandlerContext();
 
@@ -91,22 +93,22 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
         {
             context.Log(new InvalidRequestMessage("Request is null.", "middleman_request_null"));
 
-            return CreateResult(null, context);
+            return CreateResult(context);
         }
 
         // Validate request before handling
-        await ValidateAsync(request, context);
+        await ValidateAsync(request, context, cancellationToken);
 
         // Fail fast if the request is not valid
         if (!context.IsRequestValid)
         {
             // Validation failed
-            throw new InvalidOperationException($"Request validation failed: {string.Join(", ", context.Messages.Select(m => m.Message))}");
+            return CreateResult(context);
         }
 
-        var response = await HandleAsync(request, context);
+        var response = await HandleAsync(request, context, cancellationToken);
 
-        return CreateResult(response, context);
+        return CreateResult(context, response);
     }
 
     /// <summary>
@@ -115,8 +117,9 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// </summary>
     /// <param name="request">The request to validate.</param>
     /// <param name="context">The handler context for logging messages.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A ValueTask that represents the asynchronous validation operation.</returns>
-    protected abstract ValueTask ValidateAsync(TRequest request, HandlerContext context);
+    protected abstract ValueTask ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Handles the request after validation is complete and returns a response.
@@ -124,8 +127,9 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// </summary>
     /// <param name="request">The request to handle.</param>
     /// <param name="context">The handler context for logging messages.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A ValueTask containing the response.</returns>
-    protected abstract ValueTask<TResponse> HandleAsync(TRequest request, HandlerContext context);
+    protected abstract ValueTask<TResponse> HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a result with response based on the current state of the handler context.
@@ -133,7 +137,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <param name="response">The response to include in the result.</param>
     /// <param name="context">The handler context containing messages and state.</param>
     /// <returns>A <see cref="Result{TResponse}"/> with the appropriate status, messages, and response.</returns>
-    private static Result<TResponse> CreateResult(TResponse? response, HandlerContext context)
+    private static Result<TResponse> CreateResult(HandlerContext context, TResponse? response = null)
     {
         // Check for invalid
         if (!context.IsRequestValid)
