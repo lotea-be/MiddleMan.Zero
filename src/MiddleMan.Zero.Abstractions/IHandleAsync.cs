@@ -12,8 +12,9 @@ public interface IHandleAsync<TRequest>
     /// Handles the specified request asynchronously.
     /// </summary>
     /// <param name="request">The request to handle.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A <see cref="ValueTask"/> containing the result of the operation.</returns>
-    ValueTask<ResultBase> HandleAsync(TRequest request);
+    ValueTask<ResultBase> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -30,6 +31,7 @@ public interface IHandleAsync<TRequest, TResponse>
     /// Handles the specified request asynchronously and returns a typed response.
     /// </summary>
     /// <param name="request">The request to handle.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A <see cref="ValueTask"/> containing the result of the operation with a strongly typed response.</returns>
-    ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request);
+    ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 }
