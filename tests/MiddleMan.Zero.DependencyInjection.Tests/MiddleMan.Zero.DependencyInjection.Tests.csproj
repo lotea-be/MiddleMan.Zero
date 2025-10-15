@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/MiddleMan.Zero.DependencyInjection/MiddleMan.Zero.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/MiddleMan.Zero/MiddleMan.Zero.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -7,8 +7,14 @@ namespace MiddleMan.Zero.Abstractions;
 /// <param name="messages">Collection of messages associated with the operation.</param>
 public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageBase> messages)
 {
+    /// <summary>
+    /// Gets the status of the operation result.
+    /// </summary>
     public ResultStatus ResultStatus { get; } = resultStatus;
 
+    /// <summary>
+    /// Gets the collection of messages associated with the operation.
+    /// </summary>
     public MessageBase[] Messages { get; } = [.. messages];
 }
 

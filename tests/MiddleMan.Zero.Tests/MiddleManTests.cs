@@ -1,14 +1,14 @@
 using MiddleMan.Zero.Abstractions;
-using Xunit;
 
 namespace MiddleMan.Zero.Tests;
+
 public class MiddleManTests
 {
     [Fact]
     public async Task MiddleMan_HandlesRequest_Successfully()
     {
         // Arrange
-        var request = new DummyRequest() { MyInput = "Foo"};
+        var request = new DummyRequest() { MyInput = "Foo" };
         var middleMan = new DummyHandler();
 
         // Act
@@ -19,7 +19,7 @@ public class MiddleManTests
     public async Task MiddleMan_WithResponse_HandlesRequest_Successfully()
     {
         // Arrange
-        var request = new DummyRequest() { MyInput = "Foo"};
+        var request = new DummyRequest() { MyInput = "Foo" };
         var expectedResult = new Result<DummyResponse>(
             new() { MyOutput = "Hello Foo!" },
             Abstractions.ResultStatus.Successful, []);
@@ -30,8 +30,10 @@ public class MiddleManTests
         var result = await requestHandler.HandleAsync(request);
 
         // Assert
-        Assert.Equal(expectedResult.GetType(), result.GetType());
-        Assert.Equal(expectedResult.ResultStatus, result.ResultStatus);
+        result.ShouldSatisfyAllConditions(
+            () => result.GetType().ShouldBe(expectedResult.GetType()),
+            () => result.ResultStatus.ShouldBe(expectedResult.ResultStatus)
+        );
     }
 
     [Fact]
@@ -45,14 +47,15 @@ public class MiddleManTests
         var result = await requestHandler.HandleAsync(null!);
 
         // Assert
-        Assert.Equal(ResultStatus.Invalid, result.ResultStatus);
-        Assert.Single(result.Messages);
-
         var message = result.Messages[0];
 
-        Assert.Equal(expectedLogMessage.GetType(), message.GetType());
-        Assert.Equal(expectedLogMessage.Code, message.Code);
-        Assert.Equal(expectedLogMessage.Message, message.Message);
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Invalid),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => message.GetType().ShouldBe(expectedLogMessage.GetType()),
+            () => message.Code.ShouldBe(expectedLogMessage.Code),
+            () => message.Message.ShouldBe(expectedLogMessage.Message)
+        );
     }
 
     [Fact]
@@ -66,14 +69,15 @@ public class MiddleManTests
         var result = await requestHandler.HandleAsync(null!);
 
         // Assert
-        Assert.Equal(ResultStatus.Invalid, result.ResultStatus);
-        Assert.Single(result.Messages);
-
         var message = result.Messages[0];
 
-        Assert.Equal(expectedLogMessage.GetType(), message.GetType());
-        Assert.Equal(expectedLogMessage.Code, message.Code);
-        Assert.Equal(expectedLogMessage.Message, message.Message);
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Invalid),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => message.GetType().ShouldBe(expectedLogMessage.GetType()),
+            () => message.Code.ShouldBe(expectedLogMessage.Code),
+            () => message.Message.ShouldBe(expectedLogMessage.Message)
+        );
     }
 
     public class DummyRequest { public required string MyInput { get; set; } }
@@ -81,13 +85,13 @@ public class MiddleManTests
 
     public class DummyHandler : HandlerBase<DummyRequest>
     {
-        protected override ValueTask HandleAsync(DummyRequest request, HandlerContext context)
+        protected override ValueTask HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate handling logic
             return ValueTask.CompletedTask;
         }
 
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context)
+        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             return ValueTask.CompletedTask;
         }
@@ -95,7 +99,7 @@ public class MiddleManTests
 
     public class DummyHandlerWithResponse : HandlerBase<DummyRequest, DummyResponse>
     {
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context)
+        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(request.MyInput))
             {
@@ -105,10 +109,10 @@ public class MiddleManTests
             return ValueTask.CompletedTask;
         }
 
-        protected override ValueTask<DummyResponse> HandleAsync(DummyRequest request, HandlerContext context)
+        protected override ValueTask<DummyResponse> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate handling logic and return a response
-            return new ValueTask<DummyResponse>(new DummyResponse() { MyOutput = $"Hello {request.MyInput}!"});
+            return new ValueTask<DummyResponse>(new DummyResponse() { MyOutput = $"Hello {request.MyInput}!" });
         }
     }
 }
