@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiddleMan.Zero", "src\Middl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiddleMan.Zero.Tests", "tests\MiddleMan.Zero.Tests\MiddleMan.Zero.Tests.csproj", "{E5B00422-3D8F-4696-9A8D-5DCA9CE6DD5D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiddleMan.Zero.DependencyInjection", "src\MiddleMan.Zero.DependencyInjection\MiddleMan.Zero.DependencyInjection.csproj", "{06288843-DE22-45B1-9DF3-612FED269BA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiddleMan.Zero.DependencyInjection.Tests", "tests\MiddleMan.Zero.DependencyInjection.Tests\MiddleMan.Zero.DependencyInjection.Tests.csproj", "{DD1CB517-34F1-400A-92B6-FA091CC66622}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,10 +38,20 @@ Global
 		{E5B00422-3D8F-4696-9A8D-5DCA9CE6DD5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5B00422-3D8F-4696-9A8D-5DCA9CE6DD5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5B00422-3D8F-4696-9A8D-5DCA9CE6DD5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06288843-DE22-45B1-9DF3-612FED269BA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06288843-DE22-45B1-9DF3-612FED269BA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06288843-DE22-45B1-9DF3-612FED269BA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06288843-DE22-45B1-9DF3-612FED269BA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD1CB517-34F1-400A-92B6-FA091CC66622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD1CB517-34F1-400A-92B6-FA091CC66622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD1CB517-34F1-400A-92B6-FA091CC66622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD1CB517-34F1-400A-92B6-FA091CC66622}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C5B00422-3D8F-4696-9A8D-5DCA9CE6DD5B} = {108ADD63-4CF9-49CD-9998-6377342C09B4}
 		{D5B00422-3D8F-4696-9A8D-5DCA9CE6DD5C} = {108ADD63-4CF9-49CD-9998-6377342C09B4}
 		{E5B00422-3D8F-4696-9A8D-5DCA9CE6DD5D} = {8C6F7001-5423-4B6B-8AED-91A5E5D44F4D}
+		{06288843-DE22-45B1-9DF3-612FED269BA8} = {108ADD63-4CF9-49CD-9998-6377342C09B4}
+		{DD1CB517-34F1-400A-92B6-FA091CC66622} = {8C6F7001-5423-4B6B-8AED-91A5E5D44F4D}
 	EndGlobalSection
 EndGlobal

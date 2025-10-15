@@ -1,29 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <!-- TargetFramework is inherited from Directory.Build.props -->
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-  </PropertyGroup>
-
-<PropertyGroup>
-  <CollectCoverage>true</CollectCoverage>
-  <CoverletOutputFormat>lcov,cobertura</CoverletOutputFormat>
-  <ExcludeByFile>**/*.Test*.cs</ExcludeByFile>
-  <!-- Or exclude by assembly: -->
-  <!-- <ExcludeByAttribute>*.Tests.*</ExcludeByAttribute> -->
-</PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio" />
-    <PackageReference Include="Moq" />
-    <PackageReference Include="coverlet.collector" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\MiddleMan.Zero\MiddleMan.Zero.csproj" />
     <ProjectReference Include="..\..\src\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />

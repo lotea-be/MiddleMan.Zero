@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../MiddleMan.Zero.Abstractions/MiddleMan.Zero.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,6 +1,3 @@
-using MiddleMan.Zero.Abstractions;
-using Xunit;
-
 namespace MiddleMan.Zero.Tests
 {
     public class HandlerContextTests
@@ -16,8 +13,10 @@ namespace MiddleMan.Zero.Tests
             context.Log(regularMessage);
 
             // Assert
-            Assert.True(context.IsRequestValid);
-            Assert.True(context.IsSuccessful);
+            context.ShouldSatisfyAllConditions(
+                () => context.IsRequestValid.ShouldBeTrue(),
+                () => context.IsSuccessful.ShouldBeTrue()
+            );
         }
 
         [Fact]
@@ -31,8 +30,10 @@ namespace MiddleMan.Zero.Tests
             context.Log(invalidMessage);
 
             // Assert
-            Assert.False(context.IsRequestValid);
-            Assert.False(context.IsSuccessful);
+            context.ShouldSatisfyAllConditions(
+                () => context.IsRequestValid.ShouldBeFalse(),
+                () => context.IsSuccessful.ShouldBeFalse()
+            );
         }
 
         [Fact]
@@ -48,8 +49,10 @@ namespace MiddleMan.Zero.Tests
             context.Log(invalidMessage);
 
             // Assert
-            Assert.False(context.IsRequestValid);
-            Assert.False(context.IsSuccessful);
+            context.ShouldSatisfyAllConditions(
+                () => context.IsRequestValid.ShouldBeFalse(),
+                () => context.IsSuccessful.ShouldBeFalse()
+            );
         }
     }
 }
