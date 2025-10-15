@@ -22,7 +22,7 @@ public class MiddleManTests
         var request = new DummyRequest() { MyInput = "Foo"};
         var expectedResult = new Result<DummyResponse>(
             new() { MyOutput = "Hello Foo!" },
-            Abstractions.ResultStatus.Succesful, []);
+            Abstractions.ResultStatus.Successful, []);
 
         var requestHandler = new DummyHandlerWithResponse();
 
@@ -99,7 +99,7 @@ public class MiddleManTests
         {
             if (string.IsNullOrEmpty(request.MyInput))
             {
-                context.LogMessage(new InvalidRequestMessage("MyInput is null or empty.", "dummy_myinput_null"));
+                context.Log(new InvalidRequestMessage("MyInput is null or empty.", "dummy_myinput_null"));
             }
 
             return ValueTask.CompletedTask;

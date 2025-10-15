@@ -21,27 +21,7 @@ public class HandlerContext
     /// <summary>
     /// Gets a value indicating whether the operation was successful.
     /// </summary>
-    public bool IsSuccesful { get; private set; } = true;
-
-    /// <summary>
-    /// Logs a message to the handler context.
-    /// </summary>
-    /// <param name="message"></param>
-    /// <exception cref="ArgumentNullException"></exception>
-    public void LogMessage(MessageBase message)
-    {
-        if (message == null)
-        {
-            throw new ArgumentNullException(nameof(message));
-        }
-
-        if (IsRequestValid && message is InvalidRequestMessage)
-        {
-            IsRequestValid = false;
-        }
-
-        _messages.Add(message);
-    }
+    public bool IsSuccessful { get; private set; } = true;
 
     /// <summary>
     /// Gets all messages of the specified type from the context.
@@ -58,4 +38,39 @@ public class HandlerContext
     /// <returns>An enumerable collection of all messages.</returns>
     internal IEnumerable<MessageBase> GetAllMessages()
         => _messages;
+
+    /// <summary>
+    /// Logs a debug message to the context.
+    /// </summary>
+    /// <param name="message">the debug message to log.</param>
+    public void Log(DebugMessage message)
+    {
+        LogMessage(message);
+    }
+
+    /// <summary>
+    /// Logs an invalid request message to the context and marks the request as invalid.
+    /// </summary>
+    /// <param name="message">the invalid request message to log.</param>
+    public void Log(InvalidRequestMessage message)
+    {
+        IsRequestValid = false;
+        IsSuccessful = false;
+        LogMessage(message);
+    }
+
+    /// <summary>
+    /// Logs a failure message to the context and marks the operation as unsuccessful.
+    /// </summary>
+    /// <param name="message">the failure message to log.</param>
+    public void Log(FailureMessage message)
+    {
+        IsSuccessful = false;
+        LogMessage(message);
+    }
+
+    private void LogMessage(MessageBase message)
+    {
+        _messages.Add(message);
+    }
 }

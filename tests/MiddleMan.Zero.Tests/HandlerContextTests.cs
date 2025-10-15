@@ -10,13 +10,14 @@ namespace MiddleMan.Zero.Tests
         {
             // Arrange
             var context = new HandlerContext();
-            var regularMessage = new TestMessage();
+            var regularMessage = new DebugMessage();
 
             // Act
-            context.LogMessage(regularMessage);
+            context.Log(regularMessage);
 
             // Assert
             Assert.True(context.IsRequestValid);
+            Assert.True(context.IsSuccessful);
         }
 
         [Fact]
@@ -27,10 +28,11 @@ namespace MiddleMan.Zero.Tests
             var invalidMessage = new InvalidRequestMessage("Invalid request");
 
             // Act
-            context.LogMessage(invalidMessage);
+            context.Log(invalidMessage);
 
             // Assert
             Assert.False(context.IsRequestValid);
+            Assert.False(context.IsSuccessful);
         }
 
         [Fact]
@@ -38,52 +40,16 @@ namespace MiddleMan.Zero.Tests
         {
             // Arrange
             var context = new HandlerContext();
-            var regularMessage = new TestMessage();
+            var regularMessage = new DebugMessage();
             var invalidMessage = new InvalidRequestMessage("Invalid request");
 
             // Act
-            context.LogMessage(regularMessage);
-            context.LogMessage(invalidMessage);
+            context.Log(regularMessage);
+            context.Log(invalidMessage);
 
             // Assert
             Assert.False(context.IsRequestValid);
-        }
-
-        [Fact]
-        public async Task HandlerBase_SkipsProcessing_WhenRequestIsInvalid()
-        {
-            // Arrange
-            var handler = new TestHandlerWithInvalidation();
-            var request = new TestRequest();
-
-            // Act
-            await handler.HandleAsync(request);
-
-            // Assert
-            Assert.False(handler.HandlerExecuted);
-        }
-
-        private class TestMessage : MessageBase { }
-
-        private class TestRequest { }
-
-        private class TestHandlerWithInvalidation : HandlerBase<TestRequest>
-        {
-            public bool HandlerExecuted { get; private set; }
-
-            protected override ValueTask ValidateAsync(TestRequest request, HandlerContext context)
-            {
-                // Add an invalid request message
-                context.LogMessage(new InvalidRequestMessage("Test validation failure"));
-                return ValueTask.CompletedTask;
-            }
-
-            protected override ValueTask HandleAsync(TestRequest request, HandlerContext context)
-            {
-                // This should not be called if validation fails
-                HandlerExecuted = true;
-                return ValueTask.CompletedTask;
-            }
+            Assert.False(context.IsSuccessful);
         }
     }
 }
