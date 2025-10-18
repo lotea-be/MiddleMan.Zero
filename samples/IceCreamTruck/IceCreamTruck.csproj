@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MiddleMan.Zero\MiddleMan.Zero.csproj" />
+    <ProjectReference Include="..\..\src\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Requests/" />
+  </ItemGroup>
+
+</Project>

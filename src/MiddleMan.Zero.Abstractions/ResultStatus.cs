@@ -20,5 +20,9 @@ public enum ResultStatus
     /// <summary>
     /// The operation was invalid.
     /// </summary>
-    Invalid = 3
+    Invalid = 3,
+    /// <summary>
+    /// The requested resource was not found.
+    /// </summary>
+    NotFound = 4
 }

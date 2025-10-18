@@ -1,3 +1,4 @@
+
 namespace MiddleMan.Zero;
 
 /// <summary>
@@ -22,6 +23,11 @@ public class HandlerContext
     /// Gets a value indicating whether the operation was successful.
     /// </summary>
     public bool IsSuccessful { get; private set; } = true;
+
+    /// <summary>
+    /// Gets a value indicating whether the operation was not found.
+    /// </summary>
+    public bool IsNotFound { get; private set; } = false;
 
     /// <summary>
     /// Gets all messages of the specified type from the context.
@@ -67,6 +73,17 @@ public class HandlerContext
     {
         IsSuccessful = false;
         LogMessage(message);
+    }
+
+    /// <summary>
+    /// Logs a not found message to the context and marks the operation as unsuccessful.
+    /// </summary>
+    /// <param name="notFoundMessage">The message to log.</param>
+    public void Log(NotFoundMessage notFoundMessage)
+    {
+        IsSuccessful = false;
+        IsNotFound = true;
+        LogMessage(notFoundMessage);
     }
 
     private void LogMessage(MessageBase message)
