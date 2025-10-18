@@ -80,6 +80,72 @@ public class MiddleManTests
         );
     }
 
+    [Fact]
+    public async Task MiddleMan_ReturnsFailure_WhenHandlerLogsFailureMessage()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithFailure();
+        var expectedMessage = "An error occurred during processing.";
+
+        // Act
+        var result = await requestHandler.HandleAsync(request);
+
+        // Assert
+        var message = result.Messages[0];
+
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Failure),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => message.ShouldBeOfType<FailureMessage>(),
+            () => message.Message.ShouldBe(expectedMessage)
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_WithResponse_ReturnsFailure_WhenHandlerLogsFailureMessage()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithResponseFailure();
+        var expectedMessage = "Failed to retrieve response.";
+
+        // Act
+        var result = await requestHandler.HandleAsync(request);
+
+        // Assert
+        var message = result.Messages[0];
+
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Failure),
+            () => result.Response.ShouldBeNull(),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => message.ShouldBeOfType<FailureMessage>(),
+            () => message.Message.ShouldBe(expectedMessage)
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_WithResponse_ReturnsNotFound_WhenResourceNotFound()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "NonExistent" };
+        var requestHandler = new DummyHandlerWithNotFound();
+
+        // Act
+        var result = await requestHandler.HandleAsync(request);
+
+        // Assert
+        var message = result.Messages[0];
+
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.NotFound),
+            () => result.Response.ShouldBeNull(),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => message.ShouldBeOfType<NotFoundMessage>()
+        );
+    }
+
     public class DummyRequest { public required string MyInput { get; set; } }
     public class DummyResponse { public required string MyOutput { get; set; } }
 
@@ -109,10 +175,55 @@ public class MiddleManTests
             return ValueTask.CompletedTask;
         }
 
-        protected override ValueTask<DummyResponse> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override ValueTask<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate handling logic and return a response
-            return new ValueTask<DummyResponse>(new DummyResponse() { MyOutput = $"Hello {request.MyInput}!" });
+            return new ValueTask<DummyResponse?>(new DummyResponse() { MyOutput = $"Hello {request.MyInput}!" });
+        }
+    }
+
+    public class DummyHandlerWithFailure : HandlerBase<DummyRequest>
+    {
+        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        protected override ValueTask HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            // Simulate a failure during handling
+            context.Log(new FailureMessage { Message = "An error occurred during processing." });
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    public class DummyHandlerWithResponseFailure : HandlerBase<DummyRequest, DummyResponse>
+    {
+        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        protected override ValueTask<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            // Simulate a failure during handling
+            context.Log(new FailureMessage { Message = "Failed to retrieve response." });
+            return new ValueTask<DummyResponse?>((DummyResponse?)null);
+        }
+    }
+
+    public class DummyHandlerWithNotFound : HandlerBase<DummyRequest, DummyResponse>
+    {
+        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        protected override ValueTask<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            // Simulate resource not found
+            context.Log(new NotFoundMessage { Message = "Resource not found." });
+            return new ValueTask<DummyResponse?>((DummyResponse?)null);
         }
     }
 }

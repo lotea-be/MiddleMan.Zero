@@ -60,7 +60,7 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// <returns>A ValueTask that represents the asynchronous handling operation.</returns>
     protected abstract ValueTask HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
-        /// <summary>
+    /// <summary>
     /// Creates a result based on the current state of the handler context.
     /// </summary>
     /// <param name="context">The handler context containing messages and state.</param>
@@ -74,21 +74,24 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
         }
 
         // Check for Failure
-        if (!context.IsSuccessful)
+        if (context.IsSuccessful)
         {
-            return new(ResultStatus.Failure, context.Get<FailureMessage>());
+            return new(ResultStatus.Successful, context.GetAllMessages());
         }
 
-        return new(ResultStatus.Successful, context.GetAllMessages());
+        // Check for NotFound
+        return context.IsNotFound
+            ? new(ResultStatus.NotFound, context.Get<NotFoundMessage>())
+            : new(ResultStatus.Failure, context.Get<FailureMessage>());
     }
 }
 
 /// <inheritdoc/>
-public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest, TResponse>
+public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest, TResponse?>
     where TResponse : class
 {
     /// <inheritdoc/>
-    public async ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
+    public async ValueTask<ResultBase<TResponse?>> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
     {
         var context = new HandlerContext();
 
@@ -132,7 +135,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <param name="context">The handler context for logging messages.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A ValueTask containing the response.</returns>
-    protected abstract ValueTask<TResponse> HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
+    protected abstract ValueTask<TResponse?> HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a result with response based on the current state of the handler context.
@@ -140,7 +143,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <param name="response">The response to include in the result.</param>
     /// <param name="context">The handler context containing messages and state.</param>
     /// <returns>A <see cref="Result{TResponse}"/> with the appropriate status, messages, and response.</returns>
-    private static Result<TResponse> CreateResult(HandlerContext context, TResponse? response = null)
+    private static Result<TResponse?> CreateResult(HandlerContext context, TResponse? response = null)
     {
         // Check for invalid
         if (!context.IsRequestValid)
@@ -149,16 +152,18 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
         }
 
         // Check for Failure
-        if (!context.IsSuccessful)
+        if (context.IsSuccessful)
         {
-            return new(response, ResultStatus.Failure, context.Get<FailureMessage>());
+            if (response == null)
+            {
+                throw new ArgumentNullException(nameof(response), "Response is null.");
+            }
+
+            return new(response, ResultStatus.Successful, context.GetAllMessages());
         }
 
-        if (response == null)
-        {
-            throw new ArgumentNullException(nameof(response), "Response is null.");
-        }
-
-        return new(response, ResultStatus.Successful, context.GetAllMessages());
+        return context.IsNotFound
+            ? new(null, ResultStatus.NotFound, context.Get<NotFoundMessage>())
+            : new(response, ResultStatus.Failure, context.Get<FailureMessage>());
     }
 }
