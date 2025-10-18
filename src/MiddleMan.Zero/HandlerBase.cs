@@ -154,12 +154,9 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
         // Check for Failure
         if (context.IsSuccessful)
         {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response), "Response is null.");
-            }
-
-            return new(response, ResultStatus.Successful, context.GetAllMessages());
+            return response == null
+                ? throw new ArgumentNullException(nameof(response), "Response is null.")
+                : new(response, ResultStatus.Successful, context.GetAllMessages());
         }
 
         return context.IsNotFound
