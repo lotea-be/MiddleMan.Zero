@@ -1,5 +1,4 @@
 using IceCreamTruck.Contracts;
-using IceCreamTruck.Repositories;
 
 using MiddleMan.Zero;
 
@@ -8,14 +7,14 @@ namespace IceCreamTruck.Handlers;
 /// <summary>
 /// Handles retrieval of ice cream orders by ID.
 /// </summary>
-public class GetOrderHandler(OrderRepository orderRepository) : HandlerBase<GetOrderRequest, Order>
+public class GetOrderHandler(IOrderRepository orderRepository) : HandlerBase<GetOrderRequest, Order>
 {
     protected override async ValueTask<Order?> HandleAsync(
         GetOrderRequest message,
         HandlerContext context,
         CancellationToken cancellationToken = default)
     {
-        var order = await orderRepository.GetById(message.OrderId);
+        var order = await orderRepository.GetAsync(message.OrderId);
 
         if (order == null)
         {

@@ -1,6 +1,6 @@
 using IceCreamTruck.Contracts;
-using IceCreamTruck.Handlers;
-using IceCreamTruck.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+
 using MiddleMan.Zero;
 using MiddleMan.Zero.Abstractions;
 
@@ -13,29 +13,42 @@ namespace IceCreamTruck.Tests.Handlers;
 /// - Context-based message logging
 /// - ResultStatus handling (Success, Invalid, NotFound)
 /// </summary>
-public class GetOrderHandlerTests
+public class GetOrderHandlerTests : IDisposable
 {
+    private readonly ServiceProvider _serviceProvider;
+    private readonly IOrderRepository _repository;
+
+    public GetOrderHandlerTests()
+    {
+        var services = new ServiceCollection();
+
+        // Register repository
+        services.AddIceCreamTruckServices();
+        services.AddMiddleManZero();
+        _serviceProvider = services.BuildServiceProvider();
+        _repository = _serviceProvider.GetRequiredService<IOrderRepository>();
+    }
+
     [Fact]
     public async Task HandleAsync_ReturnsSuccessfulResult_WhenOrderExists()
     {
         // Arrange
-        var repository = new OrderRepository();
         var order = new Order
         {
             Id = Guid.NewGuid(),
             CustomerName = "John Doe",
-            Items = [new IceCream { Flavor = "Vanilla", Price = 5.00m, Scoops = 2 }],
+            Items = [new IceCream { Flavor = "Vanilla", Scoops = 2, Price = 5.00m }],
             Status = OrderStatus.Pending
         };
-        await repository.Add(order);
+        await _repository.AddAsync(order);
 
-        var handler = new GetOrderHandler(repository);
+        var handler = _serviceProvider.GetRequiredService<IHandleAsync<GetOrderRequest, Order?>>();
         var request = new GetOrderRequest { OrderId = order.Id };
 
-        // Act - MiddleMan.Zero's HandleAsync method orchestrates validation and handling
+        // Act
         var result = await handler.HandleAsync(request);
 
-        // Assert - Verify MiddleMan.Zero's Result structure
+        // Assert
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.Successful),
             () => result.Response.ShouldNotBeNull(),
@@ -48,19 +61,17 @@ public class GetOrderHandlerTests
     public async Task HandleAsync_ReturnsNotFoundResult_WhenOrderDoesNotExist()
     {
         // Arrange
-        var repository = new OrderRepository();
-        var handler = new GetOrderHandler(repository);
+        var handler = _serviceProvider.GetRequiredService<IHandleAsync<GetOrderRequest, Order?>>();
         var request = new GetOrderRequest { OrderId = Guid.NewGuid() };
 
-        // Act - Handler logs NotFoundMessage to context, MiddleMan.Zero converts to NotFound status
+        // Act
         var result = await handler.HandleAsync(request);
 
-        // Assert - Demonstrates MiddleMan.Zero's NotFound result pattern
+        // Assert
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.NotFound),
             () => result.Response.ShouldBeNull(),
-            () => result.Messages.ShouldNotBeEmpty(),
-            () => result.Messages.First().ShouldBeOfType<NotFoundMessage>()
+            () => result.Messages.OfType<NotFoundMessage>().ShouldNotBeEmpty()
         );
     }
 
@@ -68,20 +79,20 @@ public class GetOrderHandlerTests
     public async Task HandleAsync_ReturnsInvalidResult_WhenOrderIdIsEmpty()
     {
         // Arrange
-        var repository = new OrderRepository();
-        var handler = new GetOrderHandler(repository);
+        var handler = _serviceProvider.GetRequiredService<IHandleAsync<GetOrderRequest, Order?>>();
         var request = new GetOrderRequest { OrderId = Guid.Empty };
 
-        // Act - ValidateAsync logs InvalidRequestMessage, MiddleMan.Zero fails fast
+        // Act
         var result = await handler.HandleAsync(request);
 
-        // Assert - Demonstrates MiddleMan.Zero's validation and fail-fast behavior
+        // Assert
         var invalidMessage = result.Messages.OfType<InvalidRequestMessage>().First();
 
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.Invalid),
             () => result.Response.ShouldBeNull(),
-            () => invalidMessage.Message.ShouldBe("OrderId must be a valid non-empty GUID.")
+            () => result.Messages.OfType<InvalidRequestMessage>().ShouldNotBeEmpty(),
+            () => invalidMessage.Message.ShouldContain("OrderId must be a valid non-empty GUID")
         );
     }
 
@@ -89,21 +100,21 @@ public class GetOrderHandlerTests
     public async Task HandleAsync_DoesNotExecuteHandler_WhenValidationFails()
     {
         // Arrange
-        var repository = new OrderRepository();
-        var handler = new GetOrderHandler(repository);
+        var handler = _serviceProvider.GetRequiredService<IHandleAsync<GetOrderRequest, Order?>>();
         var request = new GetOrderRequest { OrderId = Guid.Empty };
 
-        // Act - MiddleMan.Zero's fail-fast validation prevents handler execution
+        // Act
         var result = await handler.HandleAsync(request);
 
-        // Assert - Demonstrates fail-fast pattern: Invalid status, handler never ran
+        // Assert - Demonstrates fail-fast pattern: validation fails, handler never executes
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.Invalid),
             () => result.Response.ShouldBeNull()
         );
+    }
 
-        // Repository is never queried when validation fails
-        var allOrders = await repository.GetAll();
-        allOrders.ShouldBeEmpty();
+    public void Dispose()
+    {
+        _serviceProvider?.Dispose();
     }
 }

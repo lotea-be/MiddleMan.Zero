@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="../../src/MiddleMan.Zero.DependencyInjection/MiddleMan.Zero.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\samples\IceCreamTruck\IceCreamTruck.csproj" />
   </ItemGroup>
 
