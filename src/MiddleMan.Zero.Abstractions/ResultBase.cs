@@ -25,11 +25,14 @@ public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageB
 /// <param name="response">The response data.</param>
 /// <param name="resultStatus">The status of the operation result.</param>
 /// <param name="messages">Collection of messages associated with the operation.</param>
+/// <exception cref="ArgumentNullException">Thrown when response is null and resultStatus is Successful.</exception>
 public abstract class ResultBase<TResponse>(TResponse? response, ResultStatus resultStatus, IEnumerable<MessageBase> messages)
     : ResultBase(resultStatus, messages)
 {
     /// <summary>
     /// Gets the response data associated with the result.
     /// </summary>
-    public TResponse? Response { get; } = response;
+    public TResponse Response { get; } = resultStatus == ResultStatus.Successful && response is null
+        ? throw new ArgumentNullException(nameof(response), "Response cannot be null when ResultStatus is Successful.")
+        : response!;
 }
