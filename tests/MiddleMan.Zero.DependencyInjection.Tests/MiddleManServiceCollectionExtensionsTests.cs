@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+
 using MiddleMan.Zero.Abstractions;
 
 namespace MiddleMan.Zero.DependencyInjection.Tests;

@@ -1,10 +1,10 @@
 namespace MiddleMan.Zero;
 
-using MiddleMan.Zero.Abstractions;
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+
+using MiddleMan.Zero.Abstractions;
 
 /// <inheritdoc/>
 public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>

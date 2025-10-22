@@ -1,4 +1,5 @@
 using IceCreamTruck.Contracts;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using MiddleMan.Zero;
