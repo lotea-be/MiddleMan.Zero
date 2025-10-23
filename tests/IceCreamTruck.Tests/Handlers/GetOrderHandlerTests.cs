@@ -24,7 +24,7 @@ public class GetOrderHandlerTests : IDisposable
         var services = new ServiceCollection();
 
         // Register repository
-        services.AddIceCreamTruckServices();
+        services.AddIceCreamTruck();
         services.AddMiddleManZero();
         _serviceProvider = services.BuildServiceProvider();
         _repository = _serviceProvider.GetRequiredService<IOrderRepository>();

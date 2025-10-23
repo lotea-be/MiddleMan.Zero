@@ -10,7 +10,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.8.0" />
-
     <!-- Test Package Versions -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
@@ -18,7 +17,7 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="xunit" Version="2.6.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.4" />
-    <PackageVersion Include="Moq" Version="4.20.70" />
+    <PackageVersion Include="FakeItEasy" Version="8.3.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
   </ItemGroup>
 </Project>
