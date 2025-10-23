@@ -11,4 +11,9 @@
     <ProjectReference Include="..\..\src\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="MiddleMan.Zero.AspNetCore.Mvc" />
+    <Using Include="MiddleMan.Zero.Abstractions" />
+  </ItemGroup>
+
 </Project>
