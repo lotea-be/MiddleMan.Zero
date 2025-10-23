@@ -7,12 +7,11 @@ namespace IceCreamTruck.Handlers;
 /// <summary>
 /// Handles creation of new ice cream orders.
 /// </summary>
-public class CreateOrderHandler : HandlerBase<CreateOrderRequest>
+public class CreateOrderHandler(IOrderRepository repository) : HandlerBase<CreateOrderRequest, Guid>
 {
-    // In-memory storage for demo purposes
-    private static readonly List<Order> Orders = [];
+    private readonly IOrderRepository _repository = repository;
 
-    protected override ValueTask HandleAsync(
+    protected override async ValueTask<Guid> HandleAsync(
         CreateOrderRequest message,
         HandlerContext context,
         CancellationToken cancellationToken = default)
@@ -24,9 +23,9 @@ public class CreateOrderHandler : HandlerBase<CreateOrderRequest>
             Status = OrderStatus.Pending
         };
 
-        Orders.Add(order);
+        await _repository.AddAsync(order);
 
-        return ValueTask.CompletedTask;
+        return order.Id;
     }
 
     protected override ValueTask ValidateAsync(CreateOrderRequest request, HandlerContext context, CancellationToken cancellationToken = default)

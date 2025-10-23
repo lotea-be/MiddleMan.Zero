@@ -1,3 +1,5 @@
+using FakeItEasy;
+
 using IceCreamTruck.Contracts;
 using IceCreamTruck.Handlers;
 
@@ -19,7 +21,8 @@ public class CreateOrderHandlerTests
     public async Task HandleAsync_ReturnsSuccessfulResult_WithValidRequest()
     {
         // Arrange
-        var handler = new CreateOrderHandler();
+        var orderRepository = A.Fake<IOrderRepository>();
+        var handler = new CreateOrderHandler(orderRepository);
         var request = new CreateOrderRequest
         {
             CustomerName = "Jane Smith",
@@ -39,7 +42,8 @@ public class CreateOrderHandlerTests
     public async Task HandleAsync_ReturnsInvalidResult_WhenCustomerNameIsEmpty()
     {
         // Arrange
-        var handler = new CreateOrderHandler();
+        var orderRepository = A.Fake<IOrderRepository>();
+        var handler = new CreateOrderHandler(orderRepository);
         var request = new CreateOrderRequest
         {
             CustomerName = "",
@@ -62,7 +66,8 @@ public class CreateOrderHandlerTests
     public async Task HandleAsync_ReturnsInvalidResult_WhenItemsAreEmpty()
     {
         // Arrange
-        var handler = new CreateOrderHandler();
+        var orderRepository = A.Fake<IOrderRepository>();
+        var handler = new CreateOrderHandler(orderRepository);
         var request = new CreateOrderRequest
         {
             CustomerName = "John",
@@ -85,7 +90,8 @@ public class CreateOrderHandlerTests
     public async Task HandleAsync_ReturnsInvalidResult_WithMultipleValidationErrors()
     {
         // Arrange
-        var handler = new CreateOrderHandler();
+        var orderRepository = A.Fake<IOrderRepository>();
+        var handler = new CreateOrderHandler(orderRepository);
         var request = new CreateOrderRequest
         {
             CustomerName = "   ",  // Whitespace only

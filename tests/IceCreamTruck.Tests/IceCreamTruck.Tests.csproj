@@ -5,4 +5,8 @@
     <ProjectReference Include="../../src/MiddleMan.Zero.DependencyInjection/MiddleMan.Zero.DependencyInjection.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FakeItEasy" />
+  </ItemGroup>
+
 </Project>

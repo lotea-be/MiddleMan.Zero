@@ -25,7 +25,7 @@ public class OrdersController(
     [HttpPost]
     [ProducesResponseType(typeof(Order), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request, [FromServices] IHandleAsync<CreateOrderRequest> handler)
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request, [FromServices] IHandleAsync<CreateOrderRequest, Guid> handler)
     {
         logger.LogInformation("Creating order for customer: {CustomerName}", request.CustomerName);
 

@@ -88,7 +88,6 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
 
 /// <inheritdoc/>
 public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest, TResponse?>
-    where TResponse : class
 {
     /// <inheritdoc/>
     public async ValueTask<ResultBase<TResponse?>> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
@@ -143,12 +142,12 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <param name="response">The response to include in the result.</param>
     /// <param name="context">The handler context containing messages and state.</param>
     /// <returns>A <see cref="Result{TResponse}"/> with the appropriate status, messages, and response.</returns>
-    private static Result<TResponse?> CreateResult(HandlerContext context, TResponse? response = null)
+    private static Result<TResponse?> CreateResult(HandlerContext context, TResponse? response = default)
     {
         // Check for invalid
         if (!context.IsRequestValid)
         {
-            return new(null, ResultStatus.Invalid, context.Get<InvalidRequestMessage>());
+            return new(default, ResultStatus.Invalid, context.Get<InvalidRequestMessage>());
         }
 
         // Check for Failure
@@ -160,7 +159,7 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
         }
 
         return context.IsNotFound
-            ? new(null, ResultStatus.NotFound, context.Get<NotFoundMessage>())
+            ? new(default, ResultStatus.NotFound, context.Get<NotFoundMessage>())
             : new(response, ResultStatus.Failure, context.Get<FailureMessage>());
     }
 }
