@@ -10,4 +10,7 @@
     <ProjectReference Include="..\MiddleMan.Zero\MiddleMan.Zero.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="MiddleMan.Zero.Abstractions" />
+  </ItemGroup>
 </Project>

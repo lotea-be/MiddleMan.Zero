@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace MiddleMan.Zero.AspNetCore.Mvc.Tests;
 
 public class ResultExtensionsTests
