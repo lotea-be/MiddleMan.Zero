@@ -7,7 +7,9 @@
     <!-- ASP.NET Core Package Versions -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.8.0" />
 
     <!-- Test Package Versions -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
