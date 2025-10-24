@@ -45,7 +45,7 @@ public class OrdersController(
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetOrder(Guid id, [FromServices] IHandleAsync<GetOrderRequest> handler)
+    public async Task<IActionResult> GetOrder(Guid id, [FromServices] IHandleAsync<GetOrderRequest, Order> handler)
     {
         logger.LogInformation("Retrieving order: {OrderId}", id);
 

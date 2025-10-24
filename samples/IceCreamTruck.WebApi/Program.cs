@@ -1,11 +1,9 @@
 using IceCreamTruck;
-using MiddleMan.Zero.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers()
-    .AddMiddleManZeroResults();
+builder.Services.AddControllers();
 
 builder.Services.AddIceCreamTruck();
 
@@ -31,7 +29,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
+
+// Make Program class accessible to WebApplicationFactory in tests
+public partial class Program { }
