@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="MiddleMan.Zero.Abstractions" />
+  </ItemGroup>
+</Project>

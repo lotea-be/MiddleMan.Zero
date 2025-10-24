@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MiddleMan.Zero.AspNetCore.Mvc\MiddleMan.Zero.AspNetCore.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\MiddleMan.Zero\MiddleMan.Zero.csproj" />
+    <ProjectReference Include="..\..\src\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="MiddleMan.Zero.AspNetCore.Mvc" />
+    <Using Include="MiddleMan.Zero.Abstractions" />
+  </ItemGroup>
+
+</Project>

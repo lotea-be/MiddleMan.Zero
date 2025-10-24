@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../samples/IceCreamTruck/IceCreamTruck.csproj" />
+    <ProjectReference Include="../../src/MiddleMan.Zero.DependencyInjection/MiddleMan.Zero.DependencyInjection.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FakeItEasy" />
+  </ItemGroup>
+
+</Project>
