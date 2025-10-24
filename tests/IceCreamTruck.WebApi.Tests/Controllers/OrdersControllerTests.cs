@@ -21,7 +21,6 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
     public async Task CreateOrder_ReturnsOk_WhenHandlerReturnsSuccessful()
     {
         // Arrange
-        var orderId = Guid.NewGuid();
         var request = new CreateOrderRequest
         {
             CustomerName = "John Doe",
@@ -40,7 +39,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         );
 
         var responseId = await response.Content.ReadFromJsonAsync<Guid>();
-        responseId.ShouldBe(orderId);
+        responseId.ShouldNotBe(Guid.Empty);
     }
 
     [Fact]
@@ -70,8 +69,6 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
     public async Task GetOrder_ReturnsOkWithOrder_WhenHandlerReturnsSuccessful()
     {
         // Arrange
-        var orderId = Guid.NewGuid();
-
         var order = new Order
         {
             CustomerName = "Jane Smith",
@@ -81,7 +78,8 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
 
         using var client = _factory.CreateClient();
 
-        await client.PostAsJsonAsync("/api/orders", order);
+        var createResponse = await client.PostAsJsonAsync("/api/orders", order);
+        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>();
 
         // Act
         var response = await client.GetAsync($"/api/orders/{orderId}");
@@ -129,28 +127,5 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
-
-    [Fact]
-    public async Task GetOrder_UsesCorrectRoute()
-    {
-        // Arrange
-        var orderId = Guid.NewGuid();
-        var order = new Order
-        {
-            Id = orderId,
-            CustomerName = "Jane Smith",
-            Items = [new IceCream { Flavor = "Chocolate", Price = 6.50m, Scoops = 3 }],
-            Status = OrderStatus.Pending
-        };
-
-        using var client = _factory.CreateClient();
-
-        // Act
-        var response = await client.GetAsync($"/api/orders/{orderId}");
-
-        // Assert - Verifies routing works correctly with the GUID parameter
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-
     #endregion
 }
