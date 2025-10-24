@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -29,4 +29,4 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal --settings coverlet.runsettings
+      run: dotnet test --no-build --configuration Release --verbosity normal --settings coverlet.runsettings /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Threshold=95 /p:ThresholdType=line,branch,method /p:ThresholdStat=total
