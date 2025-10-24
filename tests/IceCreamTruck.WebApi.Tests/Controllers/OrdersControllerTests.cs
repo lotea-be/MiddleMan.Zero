@@ -1,3 +1,5 @@
+using System.Net;
+
 using IceCreamTruck.Contracts;
 
 using Microsoft.AspNetCore.Mvc.Testing;
