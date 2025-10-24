@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiddleMan.Zero.AspNetCore.M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCreamTruck.WebApi", "samples\IceCreamTruck.WebApi\IceCreamTruck.WebApi.csproj", "{9CDB0B69-FB2F-44BC-BBE9-7AA27653DBE1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCreamTruck.WebApi.Tests", "tests\IceCreamTruck.WebApi.Tests\IceCreamTruck.WebApi.Tests.csproj", "{260E085F-AEBB-4A40-8FA4-FCF532AA10B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{9CDB0B69-FB2F-44BC-BBE9-7AA27653DBE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CDB0B69-FB2F-44BC-BBE9-7AA27653DBE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CDB0B69-FB2F-44BC-BBE9-7AA27653DBE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{260E085F-AEBB-4A40-8FA4-FCF532AA10B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{260E085F-AEBB-4A40-8FA4-FCF532AA10B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{260E085F-AEBB-4A40-8FA4-FCF532AA10B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{260E085F-AEBB-4A40-8FA4-FCF532AA10B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,5 +96,6 @@ Global
 		{D012A224-41DC-4919-ADE5-3DE061782DFC} = {108ADD63-4CF9-49CD-9998-6377342C09B4}
 		{F2B7E92F-202C-49ED-8C45-917D3831673A} = {8C6F7001-5423-4B6B-8AED-91A5E5D44F4D}
 		{9CDB0B69-FB2F-44BC-BBE9-7AA27653DBE1} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{260E085F-AEBB-4A40-8FA4-FCF532AA10B3} = {8C6F7001-5423-4B6B-8AED-91A5E5D44F4D}
 	EndGlobalSection
 EndGlobal
