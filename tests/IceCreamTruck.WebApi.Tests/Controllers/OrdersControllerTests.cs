@@ -32,7 +32,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         using var client = _factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/orders", request);
+        var response = await client.PostAsJsonAsync("/api/orders", request, TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldSatisfyAllConditions(
@@ -40,7 +40,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
             () => response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json")
         );
 
-        var responseId = await response.Content.ReadFromJsonAsync<Guid>();
+        var responseId = await response.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
         responseId.ShouldNotBe(Guid.Empty);
     }
 
@@ -57,7 +57,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         using var client = _factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/orders", request);
+        var response = await client.PostAsJsonAsync("/api/orders", request, TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -80,11 +80,11 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
 
         using var client = _factory.CreateClient();
 
-        var createResponse = await client.PostAsJsonAsync("/api/orders", order);
-        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>();
+        var createResponse = await client.PostAsJsonAsync("/api/orders", order, TestContext.Current.CancellationToken);
+        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
 
         // Act
-        var response = await client.GetAsync($"/api/orders/{orderId}");
+        var response = await client.GetAsync($"/api/orders/{orderId}", TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldSatisfyAllConditions(
@@ -92,7 +92,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
             () => response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json")
         );
 
-        var responseOrder = await response.Content.ReadFromJsonAsync<Order>();
+        var responseOrder = await response.Content.ReadFromJsonAsync<Order>(TestContext.Current.CancellationToken);
         responseOrder.ShouldSatisfyAllConditions(
             () => responseOrder.ShouldNotBeNull(),
             () => responseOrder!.Id.ShouldBe(orderId),
@@ -109,7 +109,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         using var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync($"/api/orders/{orderId}");
+        var response = await client.GetAsync($"/api/orders/{orderId}", TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -124,7 +124,7 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         using var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync($"/api/orders/{orderId}");
+        var response = await client.GetAsync($"/api/orders/{orderId}", TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);

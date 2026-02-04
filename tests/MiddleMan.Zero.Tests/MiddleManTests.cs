@@ -12,7 +12,7 @@ public class MiddleManTests
         var middleMan = new DummyHandler();
 
         // Act
-        await middleMan.HandleAsync(request);
+        await middleMan.HandleAsync(request, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class MiddleManTests
         var requestHandler = new DummyHandlerWithResponse();
 
         // Act
-        var result = await requestHandler.HandleAsync(request);
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
         result.ShouldSatisfyAllConditions(
@@ -44,7 +44,7 @@ public class MiddleManTests
         var expectedLogMessage = new InvalidRequestMessage("Request is null.", "middleman_request_null");
 
         // Act
-        var result = await requestHandler.HandleAsync(null!);
+        var result = await requestHandler.HandleAsync(null!, TestContext.Current.CancellationToken);
 
         // Assert
         var message = result.Messages[0];
@@ -66,7 +66,7 @@ public class MiddleManTests
         var expectedLogMessage = new InvalidRequestMessage("Request is null.", "middleman_request_null");
 
         // Act
-        var result = await requestHandler.HandleAsync(null!);
+        var result = await requestHandler.HandleAsync(null!, TestContext.Current.CancellationToken  );
 
         // Assert
         var message = result.Messages[0];
@@ -89,7 +89,7 @@ public class MiddleManTests
         var expectedMessage = "An error occurred during processing.";
 
         // Act
-        var result = await requestHandler.HandleAsync(request);
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
         var message = result.Messages[0];
@@ -111,7 +111,7 @@ public class MiddleManTests
         var expectedMessage = "Failed to retrieve response.";
 
         // Act
-        var result = await requestHandler.HandleAsync(request);
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken    );
 
         // Assert
         var message = result.Messages[0];
@@ -133,7 +133,7 @@ public class MiddleManTests
         var requestHandler = new DummyHandlerWithNotFound();
 
         // Act
-        var result = await requestHandler.HandleAsync(request);
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
         var message = result.Messages[0];

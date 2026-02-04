@@ -30,7 +30,7 @@ public class CreateOrderHandlerTests
         };
 
         // Act - MiddleMan.Zero orchestrates validation and handling
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert - Demonstrates successful Result for handler without response type
         result.ShouldSatisfyAllConditions(
@@ -51,7 +51,7 @@ public class CreateOrderHandlerTests
         };
 
         // Act - Validation logs InvalidRequestMessage
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert - MiddleMan.Zero converts to Invalid status
         var invalidMessage = result.Messages.OfType<InvalidRequestMessage>().First();
@@ -75,7 +75,7 @@ public class CreateOrderHandlerTests
         };
 
         // Act
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert - Demonstrates validation message content
         var invalidMessage = result.Messages.OfType<InvalidRequestMessage>().First();
@@ -99,7 +99,7 @@ public class CreateOrderHandlerTests
         };
 
         // Act - Multiple validation rules can fail
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert - Demonstrates HandlerContext can collect multiple validation messages
         var invalidMessages = result.Messages.OfType<InvalidRequestMessage>().ToList();
