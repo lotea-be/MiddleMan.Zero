@@ -41,13 +41,13 @@ public class GetOrderHandlerTests : IDisposable
             Items = [new IceCream { Flavor = "Vanilla", Scoops = 2, Price = 5.00m }],
             Status = OrderStatus.Pending
         };
-        await _repository.AddAsync(order);
+        await _repository.AddAsync(order, TestContext.Current.CancellationToken);
 
         var handler = _serviceProvider.GetRequiredService<IHandleAsync<GetOrderRequest, Order?>>();
         var request = new GetOrderRequest { OrderId = order.Id };
 
         // Act
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
         result.ShouldSatisfyAllConditions(
@@ -66,7 +66,7 @@ public class GetOrderHandlerTests : IDisposable
         var request = new GetOrderRequest { OrderId = Guid.NewGuid() };
 
         // Act
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
         result.ShouldSatisfyAllConditions(
@@ -84,7 +84,7 @@ public class GetOrderHandlerTests : IDisposable
         var request = new GetOrderRequest { OrderId = Guid.Empty };
 
         // Act
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
         var invalidMessage = result.Messages.OfType<InvalidRequestMessage>().First();
@@ -105,7 +105,7 @@ public class GetOrderHandlerTests : IDisposable
         var request = new GetOrderRequest { OrderId = Guid.Empty };
 
         // Act
-        var result = await handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request, TestContext.Current.CancellationToken);
 
         // Assert - Demonstrates fail-fast pattern: validation fails, handler never executes
         result.ShouldSatisfyAllConditions(

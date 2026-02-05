@@ -1,0 +1,59 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug IceCreamTruck.WebApi (net8.0)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api-net8.0",
+            "program": "${workspaceFolder}/samples/IceCreamTruck.WebApi/bin/Debug/net8.0/IceCreamTruck.WebApi.dll",
+            "args": ["--framework", "net8.0"],
+            "cwd": "${workspaceFolder}/samples/IceCreamTruck.WebApi",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug IceCreamTruck.WebApi (net9.0)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api-net9.0",
+            "program": "${workspaceFolder}/samples/IceCreamTruck.WebApi/bin/Debug/net9.0/IceCreamTruck.WebApi.dll",
+            "args": ["--framework", "net9.0"],
+            "cwd": "${workspaceFolder}/samples/IceCreamTruck.WebApi",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug IceCreamTruck.WebApi (net10.0)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api-net10.0",
+            "program": "${workspaceFolder}/samples/IceCreamTruck.WebApi/bin/Debug/net10.0/IceCreamTruck.WebApi.dll",
+            "args": ["--framework", "net10.0"],
+            "cwd": "${workspaceFolder}/samples/IceCreamTruck.WebApi",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        }
+    ]
+}
