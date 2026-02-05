@@ -1,5 +1,11 @@
 # MiddleMan.Zero
 
+[![CI](https://github.com/lotea-be/MiddleMan.Zero/actions/workflows/ci.yml/badge.svg)](https://github.com/lotea-be/MiddleMan.Zero/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.svg)](https://www.nuget.org/packages/MiddleMan.Zero/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.svg)](https://www.nuget.org/packages/MiddleMan.Zero/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-512BD4)](https://dotnet.microsoft.com/)
+
 A lightweight, zero-ceremony implementation of the mediator pattern for .NET applications.
 
 ## Overview
@@ -19,12 +25,12 @@ MiddleMan.Zero provides a simple yet powerful framework for implementing request
 
 ### Core Libraries
 
-| Package | Description | Documentation |
-|---------|-------------|---------------|
-| **MiddleMan.Zero.Abstractions** | Core interfaces and base types | [README](src/MiddleMan.Zero.Abstractions/README.md) |
-| **MiddleMan.Zero** | Core implementation with handler base classes | [README](src/MiddleMan.Zero/README.md) |
-| **MiddleMan.Zero.DependencyInjection** | Automatic handler registration for DI containers | [README](src/MiddleMan.Zero.DependencyInjection/README.md) |
-| **MiddleMan.Zero.AspNetCore.Mvc** | ASP.NET Core MVC integration | [README](src/MiddleMan.Zero.AspNetCore.Mvc/README.md) |
+| Package | Version | Downloads | Documentation |
+|---------|---------|-----------|---------------|
+| **MiddleMan.Zero.Abstractions** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.Abstractions.svg)](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.Abstractions.svg)](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/) | [README](src/MiddleMan.Zero.Abstractions/README.md) |
+| **MiddleMan.Zero** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.svg)](https://www.nuget.org/packages/MiddleMan.Zero/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.svg)](https://www.nuget.org/packages/MiddleMan.Zero/) | [README](src/MiddleMan.Zero/README.md) |
+| **MiddleMan.Zero.DependencyInjection** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.DependencyInjection.svg)](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.DependencyInjection.svg)](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/) | [README](src/MiddleMan.Zero.DependencyInjection/README.md) |
+| **MiddleMan.Zero.AspNetCore.Mvc** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/) | [README](src/MiddleMan.Zero.AspNetCore.Mvc/README.md) |
 
 ## Quick Start
 
@@ -189,9 +195,38 @@ dotnet test
 dotnet pack
 ```
 
+## Why MiddleMan.Zero?
+
+- **🚀 Zero Boilerplate**: Get started with minimal configuration
+- **✅ Built-in Validation**: Clean separation of validation and business logic
+- **🎯 Type-Safe**: Fully typed request/response patterns
+- **🔌 Easy Integration**: Works seamlessly with ASP.NET Core
+- **📦 Modular**: Use only what you need
+- **🧪 Well-Tested**: Comprehensive test coverage
+- **📚 Well-Documented**: Clear documentation and examples
+
+## Use Cases
+
+- **Clean Architecture**: Implement CQRS patterns without complexity
+- **API Development**: Build RESTful APIs with consistent response handling
+- **Business Logic**: Separate validation, processing, and error handling
+- **Microservices**: Keep request/response workflows organized and maintainable
+
+## Community & Support
+
+- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/lotea-be/MiddleMan.Zero/issues)
+- **Discussions**: Ask questions on [GitHub Discussions](https://github.com/lotea-be/MiddleMan.Zero/discussions)
+- **Releases**: Check out [Release Notes](https://github.com/lotea-be/MiddleMan.Zero/releases) for version updates
+
 ## Contributing
 
 Contributions are welcome! Please ensure all tests pass before submitting a pull request.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to your fork
+5. Submit a pull request
 
 ## License
 

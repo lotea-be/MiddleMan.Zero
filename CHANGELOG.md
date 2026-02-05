@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
 ## [1.0.0] - 2026-02-05
+
+### 🎉 Initial Release
+
+This is the first stable release of MiddleMan.Zero, a lightweight, zero-ceremony implementation of the mediator pattern for .NET applications.
 
 ### Added
 
@@ -55,5 +57,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Async/await support with `Task`
 - XML documentation for all public APIs
 - Comprehensive test coverage
+- Published to NuGet.org and GitHub Packages
+
+### Package Links
+- [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/1.0.0)
+- [MiddleMan.Zero.Abstractions](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/1.0.0)
+- [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.0.0)
+- [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.0.0)
 
 [1.0.0]: https://github.com/lotea-be/MiddleMan.Zero/releases/tag/v1.0.0
