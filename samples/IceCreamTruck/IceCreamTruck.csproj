@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\MiddleMan.Zero\MiddleMan.Zero.csproj" />
     <ProjectReference Include="..\..\src\MiddleMan.Zero.DependencyInjection\MiddleMan.Zero.DependencyInjection.csproj" />

@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\IceCreamTruck\IceCreamTruck.csproj" />
     <ProjectReference Include="..\..\src\MiddleMan.Zero.AspNetCore.Mvc\MiddleMan.Zero.AspNetCore.Mvc.csproj" />
