@@ -43,7 +43,7 @@ using MiddleMan.Zero.Abstractions;
 
 public class MyHandler : IHandleAsync<MyRequest, MyResponse>
 {
-    public async ValueTask<ResultBase<MyResponse>> HandleAsync(
+    public async Task<ResultBase<MyResponse>> HandleAsync(
         MyRequest request, 
         CancellationToken cancellationToken = default)
     {

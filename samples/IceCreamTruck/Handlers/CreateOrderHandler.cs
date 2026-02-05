@@ -11,7 +11,7 @@ public class CreateOrderHandler(IOrderRepository repository) : HandlerBase<Creat
 {
     private readonly IOrderRepository _repository = repository;
 
-    protected override async ValueTask<Guid> HandleAsync(
+    protected override async Task<Guid> HandleAsync(
         CreateOrderRequest message,
         HandlerContext context,
         CancellationToken cancellationToken = default)
@@ -28,7 +28,7 @@ public class CreateOrderHandler(IOrderRepository repository) : HandlerBase<Creat
         return order.Id;
     }
 
-    protected override ValueTask ValidateAsync(CreateOrderRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+    protected override Task ValidateAsync(CreateOrderRequest request, HandlerContext context, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(request.CustomerName))
         {
@@ -40,7 +40,7 @@ public class CreateOrderHandler(IOrderRepository repository) : HandlerBase<Creat
             context.Log(new InvalidRequestMessage("Order must contain at least one ice cream."));
         }
 
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 
 }

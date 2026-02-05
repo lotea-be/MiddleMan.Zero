@@ -9,7 +9,7 @@ namespace IceCreamTruck.Handlers;
 /// </summary>
 public class GetOrderHandler(IOrderRepository orderRepository) : HandlerBase<GetOrderRequest, Order>
 {
-    protected override async ValueTask<Order?> HandleAsync(
+    protected override async Task<Order?> HandleAsync(
         GetOrderRequest message,
         HandlerContext context,
         CancellationToken cancellationToken = default)
@@ -25,13 +25,13 @@ public class GetOrderHandler(IOrderRepository orderRepository) : HandlerBase<Get
         return order;
     }
 
-    protected override ValueTask ValidateAsync(GetOrderRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+    protected override Task ValidateAsync(GetOrderRequest request, HandlerContext context, CancellationToken cancellationToken = default)
     {
         if (request.OrderId == Guid.Empty)
         {
             context.Log(new InvalidRequestMessage("OrderId must be a valid non-empty GUID."));
         }
 
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 }

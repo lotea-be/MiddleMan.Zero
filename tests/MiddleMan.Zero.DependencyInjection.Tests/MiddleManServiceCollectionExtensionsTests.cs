@@ -51,19 +51,19 @@ public class MiddleManServiceCollectionExtensionsTests
 
     public class TestHandler : HandlerBase<TestRequest>
     {
-        protected override ValueTask HandleAsync(TestRequest request, HandlerContext context, CancellationToken cancellationToken = default)
-            => ValueTask.CompletedTask;
+        protected override Task HandleAsync(TestRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
 
-        protected override ValueTask ValidateAsync(TestRequest request, HandlerContext context, CancellationToken cancellationToken = default)
-            => ValueTask.CompletedTask;
+        protected override Task ValidateAsync(TestRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 
     public class TestHandlerWithResponse : HandlerBase<TestRequestWithResponse, string>
     {
-        protected override ValueTask<string?> HandleAsync(TestRequestWithResponse request, HandlerContext context, CancellationToken cancellationToken = default)
-            => new("Test");
+        protected override Task<string?> HandleAsync(TestRequestWithResponse request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.FromResult<string?>("Test");
 
-        protected override ValueTask ValidateAsync(TestRequestWithResponse request, HandlerContext context, CancellationToken cancellationToken = default)
-            => ValueTask.CompletedTask;
+        protected override Task ValidateAsync(TestRequestWithResponse request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 }

@@ -10,7 +10,7 @@ using MiddleMan.Zero.Abstractions;
 public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
 {
     /// <inheritdoc/>
-    public async ValueTask<ResultBase> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResultBase> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
     {
         var context = new HandlerContext();
 
@@ -39,7 +39,7 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// Validates the request before processing.
     /// Derived classes should add validation errors to the Context if validation fails.
     /// </summary>
-    /// <returns>A ValueTask that represents the asynchronous validation operation.</returns>
+    /// <returns>A Task that represents the asynchronous validation operation.</returns>
     /// <summary>
     /// Validates the request before processing.
     /// Derived classes should implement validation logic and add validation errors to the Context if validation fails.
@@ -47,8 +47,8 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// <param name="request">The request to validate.</param>
     /// <param name="context">The handler context for logging messages.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A ValueTask that represents the asynchronous validation operation.</returns>
-    protected abstract ValueTask ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
+    /// <returns>A Task that represents the asynchronous validation operation.</returns>
+    protected abstract Task ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Handles the request after validation is complete.
@@ -57,8 +57,8 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// <param name="request">The request to handle.</param>
     /// <param name="context">The handler context for logging messages.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A ValueTask that represents the asynchronous handling operation.</returns>
-    protected abstract ValueTask HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
+    /// <returns>A Task that represents the asynchronous handling operation.</returns>
+    protected abstract Task HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a result based on the current state of the handler context.
@@ -90,7 +90,7 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
 public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest, TResponse?>
 {
     /// <inheritdoc/>
-    public async ValueTask<ResultBase<TResponse?>> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResultBase<TResponse?>> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
     {
         var context = new HandlerContext();
 
@@ -123,8 +123,8 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <param name="request">The request to validate.</param>
     /// <param name="context">The handler context for logging messages.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A ValueTask that represents the asynchronous validation operation.</returns>
-    protected abstract ValueTask ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
+    /// <returns>A Task that represents the asynchronous validation operation.</returns>
+    protected abstract Task ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Handles the request after validation is complete and returns a response.
@@ -133,8 +133,8 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <param name="request">The request to handle.</param>
     /// <param name="context">The handler context for logging messages.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A ValueTask containing the response.</returns>
-    protected abstract ValueTask<TResponse?> HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
+    /// <returns>A Task containing the response.</returns>
+    protected abstract Task<TResponse?> HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a result with response based on the current state of the handler context.

@@ -39,7 +39,7 @@ MiddleMan.Zero provides a lightweight, zero-ceremony implementation of the media
 ```csharp
 public class GetOrderHandler : HandlerBase<GetOrderRequest, Order>
 {
-    protected override async ValueTask ValidateAsync(
+    protected override async Task ValidateAsync(
         GetOrderRequest request, 
         HandlerContext context, 
         CancellationToken cancellationToken)
@@ -50,7 +50,7 @@ public class GetOrderHandler : HandlerBase<GetOrderRequest, Order>
         }
     }
 
-    protected override async ValueTask<Order?> HandleAsync(
+    protected override async Task<Order?> HandleAsync(
         GetOrderRequest request, 
         HandlerContext context, 
         CancellationToken cancellationToken)

@@ -69,7 +69,7 @@ public class GetOrderHandler : HandlerBase<GetOrderRequest, Order>
         _repository = repository;
     }
 
-    protected override async ValueTask ValidateAsync(
+    protected override async Task ValidateAsync(
         GetOrderRequest request, 
         HandlerContext context, 
         CancellationToken cancellationToken)
@@ -80,7 +80,7 @@ public class GetOrderHandler : HandlerBase<GetOrderRequest, Order>
         }
     }
 
-    protected override async ValueTask<Order?> HandleAsync(
+    protected override async Task<Order?> HandleAsync(
         GetOrderRequest request, 
         HandlerContext context, 
         CancellationToken cancellationToken)
@@ -198,6 +198,7 @@ Contributions are welcome! Please ensure all tests pass before submitting a pull
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 Copyright (c) 2025-2026 Lotea SRL
+
 ## Project Structure
 
 ```

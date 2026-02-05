@@ -13,8 +13,8 @@ public interface IHandleAsync<TRequest>
     /// </summary>
     /// <param name="request">The request to handle.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{ResultBase}"/> containing the result of the operation.</returns>
-    ValueTask<ResultBase> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
+    /// <returns>A <see cref="Task{ResultBase}"/> containing the result of the operation.</returns>
+    Task<ResultBase> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -32,6 +32,6 @@ public interface IHandleAsync<TRequest, TResponse>
     /// </summary>
     /// <param name="request">The request to handle.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask"/> containing the result of the operation response of type <see cref="ResultBase{TResponse}"/>.</returns>
-    ValueTask<ResultBase<TResponse>> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
+    /// <returns>A <see cref="Task"/> containing the result of the operation response of type <see cref="ResultBase{TResponse}"/>.</returns>
+    Task<ResultBase<TResponse>> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 }

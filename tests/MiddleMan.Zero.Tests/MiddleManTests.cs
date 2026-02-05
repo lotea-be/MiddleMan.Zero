@@ -151,79 +151,79 @@ public class MiddleManTests
 
     public class DummyHandler : HandlerBase<DummyRequest>
     {
-        protected override ValueTask HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate handling logic
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 
     public class DummyHandlerWithResponse : HandlerBase<DummyRequest, DummyResponse>
     {
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(request.MyInput))
             {
                 context.Log(new InvalidRequestMessage("MyInput is null or empty.", "dummy_myinput_null"));
             }
 
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        protected override ValueTask<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate handling logic and return a response
-            return new ValueTask<DummyResponse?>(new DummyResponse() { MyOutput = $"Hello {request.MyInput}!" });
+            return Task.FromResult<DummyResponse?>(new DummyResponse() { MyOutput = $"Hello {request.MyInput}!" });
         }
     }
 
     public class DummyHandlerWithFailure : HandlerBase<DummyRequest>
     {
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        protected override ValueTask HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate a failure during handling
             context.Log(new FailureMessage { Message = "An error occurred during processing." });
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 
     public class DummyHandlerWithResponseFailure : HandlerBase<DummyRequest, DummyResponse>
     {
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        protected override ValueTask<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate a failure during handling
             context.Log(new FailureMessage { Message = "Failed to retrieve response." });
-            return new ValueTask<DummyResponse?>((DummyResponse?)null);
+            return Task.FromResult<DummyResponse?>(null);
         }
     }
 
     public class DummyHandlerWithNotFound : HandlerBase<DummyRequest, DummyResponse>
     {
-        protected override ValueTask ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        protected override ValueTask<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        protected override Task<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
         {
             // Simulate resource not found
             context.Log(new NotFoundMessage { Message = "Resource not found." });
-            return new ValueTask<DummyResponse?>((DummyResponse?)null);
+            return Task.FromResult<DummyResponse?>(null);
         }
     }
 }
