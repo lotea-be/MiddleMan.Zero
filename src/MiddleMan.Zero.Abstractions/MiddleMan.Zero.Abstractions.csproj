@@ -1,3 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <Description>Core abstractions and interfaces for the MiddleMan.Zero mediator pattern library. Includes base interfaces for handlers, messages, and result types.</Description>
+  </PropertyGroup>
+
 </Project>

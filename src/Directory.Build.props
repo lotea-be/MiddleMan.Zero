@@ -9,23 +9,38 @@
         <Version>0.1.0</Version>
         <PackageVersion>$(Version)</PackageVersion>
 
-        <!-- Optional: Additional NuGet package metadata -->
+        <!-- Package metadata -->
         <Authors>braekstuv</Authors>
-        <Company>braekstuv</Company>
-        <Copyright>Copyright © $(Authors) $([System.DateTime]::Now.Year)</Copyright>
+        <Company>Lotea SRL</Company>
+        <Copyright>Copyright © Lotea SRL 2025-$([System.DateTime]::Now.Year)</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/braekstuv/MiddleMan.Zero</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/braekstuv/MiddleMan.Zero</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/lotea-be/MiddleMan.Zero</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/lotea-be/MiddleMan.Zero</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>mediator;cqrs;messaging;handler</PackageTags>
         <Description>A lightweight mediator pattern implementation for .NET</Description>
+        <PackageReleaseNotes>See https://github.com/lotea-be/MiddleMan.Zero/blob/main/CHANGELOG.md</PackageReleaseNotes>
+        <PackageIcon>icon.png</PackageIcon>
+
+        <!-- SourceLink Support -->
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <!-- Deterministic Builds -->
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="../../icon.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>

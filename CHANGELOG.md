@@ -52,9 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 - Multi-target support: .NET 8.0, .NET 9.0, .NET 10.0
 - Zero external dependencies (core packages)
-- Async/await support with `ValueTask`
+- Async/await support with `Task`
 - XML documentation for all public APIs
 - Comprehensive test coverage
 
-[Unreleased]: https://github.com/braekstuv/MiddleMan.Zero/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/braekstuv/MiddleMan.Zero/releases/tag/v0.1.0
+[0.1.0]: https://github.com/lotea-be/MiddleMan.Zero/releases/tag/v0.1.0

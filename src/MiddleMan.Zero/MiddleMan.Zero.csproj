@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <Description>Core implementation of the MiddleMan.Zero mediator pattern with handler base classes, validation pipeline, and built-in message types.</Description>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
   </ItemGroup>
