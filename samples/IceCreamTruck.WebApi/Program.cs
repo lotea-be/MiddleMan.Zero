@@ -32,6 +32,10 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
+app.MapGet("/flavors", IceCreamTruck.WebApi.Actions.FlavorEndpoints.GetAsync)
+    .WithName("GetFlavors")
+    .WithTags("Flavors");
+
 app.Run();
 
 // Make Program class accessible to WebApplicationFactory in tests

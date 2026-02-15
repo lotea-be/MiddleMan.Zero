@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-15
+
+### Added
+
+#### MiddleMan.Zero.AspNetCore.Http (New Package)
+- New package for ASP.NET Core Minimal API integration
+- `ToResult()` extension method for `ResultBase` → `IResult` conversion
+- `ToResult<TResponse>()` extension method for `ResultBase<TResponse>` → `IResult` conversion
+- HTTP status code mapping matching the MVC package:
+  - Successful → 200 OK
+  - NotFound → 404 Not Found
+  - Invalid → 400 Bad Request
+  - Failure → 500 Internal Server Error
+- README with usage examples and comparison with the MVC package
+
+### Changed
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Replaced `Microsoft.AspNetCore.Mvc.Core` and `Microsoft.Extensions.DependencyInjection.Abstractions` package references with `Microsoft.AspNetCore.App` framework reference
+- Removed unnecessary project reference to `MiddleMan.Zero` (now only depends on `MiddleMan.Zero.Abstractions`)
+
+### Package Links
+- [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/1.1.0)
+- [MiddleMan.Zero.Abstractions](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/1.1.0)
+- [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.1.0)
+- [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.1.0)
+- [MiddleMan.Zero.AspNetCore.Http](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/1.1.0)
+
 ## [1.0.0] - 2026-02-05
 
 ### 🎉 Initial Release
@@ -65,4 +93,5 @@ This is the first stable release of MiddleMan.Zero, a lightweight, zero-ceremony
 - [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.0.0)
 - [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.0.0)
 
+[1.1.0]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/lotea-be/MiddleMan.Zero/releases/tag/v1.0.0
