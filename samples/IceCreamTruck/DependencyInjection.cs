@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddMiddleManZero();
         services.AddSingleton<IOrderRepository, OrderRepository>();
+        services.AddSingleton<IFlavorRepository, FlavorRepository>();
         return services;
     }
 }

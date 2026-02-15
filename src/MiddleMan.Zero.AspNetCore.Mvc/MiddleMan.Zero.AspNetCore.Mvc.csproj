@@ -5,13 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
-    <ProjectReference Include="..\MiddleMan.Zero\MiddleMan.Zero.csproj" />
   </ItemGroup>
 
   <ItemGroup>

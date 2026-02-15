@@ -92,7 +92,8 @@ The following packages will be published:
 1. **MiddleMan.Zero.Abstractions** - Core interfaces and base types
 2. **MiddleMan.Zero** - Core implementation
 3. **MiddleMan.Zero.DependencyInjection** - DI extensions
-4. **MiddleMan.Zero.AspNetCore.Mvc** - ASP.NET Core integration
+4. **MiddleMan.Zero.AspNetCore.Mvc** - ASP.NET Core MVC integration
+5. **MiddleMan.Zero.AspNetCore.Http** - ASP.NET Core Minimal API integration
 
 Each package includes:
 - Multi-targeting: net8.0, net9.0, net10.0
@@ -107,7 +108,7 @@ Each package includes:
 After publishing, verify your packages:
 
 1. Visit https://www.nuget.org/packages/MiddleMan.Zero
-2. Check that all 4 packages are published
+2. Check that all 5 packages are published
 3. Verify the version number
 4. Confirm the icon and README display correctly
 
