@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-18
+
+### Changed
+
+#### MiddleMan.Zero.AspNetCore.Http
+- Replaced MiddleMan.Zero.Abstractions package by MiddleMan.Zero, so users have to install only one dependency
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Replaced MiddleMan.Zero.Abstractions package by MiddleMan.Zero, so users have to install only one dependency
+
 ## [1.1.0] - 2026-02-15
 
 ### Added

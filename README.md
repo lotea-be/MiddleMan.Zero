@@ -19,7 +19,7 @@ MiddleMan.Zero provides a simple yet powerful framework for implementing request
 - **Structured Error Handling**: Type-safe result patterns with status codes
 - **Message Logging**: Track debug messages, failures, and validation errors
 - **Dependency Injection**: Automatic handler discovery and registration
-- **ASP.NET Core Integration**: Seamless integration with MVC controllers
+- **ASP.NET Core Integration**: Seamless integration with MVC Controllers and Minimal APIs
 
 ## Packages
 
@@ -31,33 +31,40 @@ MiddleMan.Zero provides a simple yet powerful framework for implementing request
 | **MiddleMan.Zero** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.svg)](https://www.nuget.org/packages/MiddleMan.Zero/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.svg)](https://www.nuget.org/packages/MiddleMan.Zero/) | [README](src/MiddleMan.Zero/README.md) |
 | **MiddleMan.Zero.DependencyInjection** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.DependencyInjection.svg)](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.DependencyInjection.svg)](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/) | [README](src/MiddleMan.Zero.DependencyInjection/README.md) |
 | **MiddleMan.Zero.AspNetCore.Mvc** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/) | [README](src/MiddleMan.Zero.AspNetCore.Mvc/README.md) |
+| **MiddleMan.Zero.AspNetCore.Http** | [![NuGet](https://img.shields.io/nuget/v/MiddleMan.Zero.AspNetCore.Http.svg)](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/) | [![Downloads](https://img.shields.io/nuget/dt/MiddleMan.Zero.AspNetCore.Http.svg)](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/) | [README](src/MiddleMan.Zero.AspNetCore.Http/README.md) |
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-# Install core packages
+# In your class libraries or Console Apps
 dotnet add package MiddleMan.Zero
+
+# Dependency injection helpers
 dotnet add package MiddleMan.Zero.DependencyInjection
 
-# For ASP.NET Core projects
-dotnet add package MiddleMan.Zero.AspNetCore.Mvc
+# ASP.NET Core integration (choose based on your API style)
+dotnet add package MiddleMan.Zero.AspNetCore.Mvc  # For MVC Controllers
+dotnet add package MiddleMan.Zero.AspNetCore.Http # For Minimal APIs
 ```
 
 ### 1. Define Your Request and Response
 
 ```csharp
-public class GetOrderRequest
+namespace MyApp.Contracts;
+
+public sealed class GetOrderRequest
 {
-    public int OrderId { get; set; }
+    public required Guid OrderId { get; init; }
 }
 
 public class Order
 {
-    public int Id { get; set; }
-    public string CustomerName { get; set; }
-    public decimal Total { get; set; }
+    public Guid Id { get; init; }
+    public required string CustomerName { get; init; }
+    public decimal TotalPrice { get; init; }
+    public DateTime OrderedAt { get; init; }
 }
 ```
 
@@ -66,36 +73,34 @@ public class Order
 ```csharp
 using MiddleMan.Zero;
 
-public class GetOrderHandler : HandlerBase<GetOrderRequest, Order>
+namespace MyApp.Handlers;
+
+public class GetOrderHandler(IOrderRepository repository) 
+    : HandlerBase<GetOrderRequest, Order>
 {
-    private readonly IOrderRepository _repository;
-
-    public GetOrderHandler(IOrderRepository repository)
-    {
-        _repository = repository;
-    }
-
-    protected override async Task ValidateAsync(
+    protected override Task ValidateAsync(
         GetOrderRequest request, 
         HandlerContext context, 
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        if (request.OrderId <= 0)
+        if (request.OrderId == Guid.Empty)
         {
-            context.AddInvalidRequestMessage("Order ID must be greater than 0");
+            context.Log(new InvalidRequestMessage("Order ID must be a valid GUID."));
         }
+
+        return Task.CompletedTask;
     }
 
     protected override async Task<Order?> HandleAsync(
         GetOrderRequest request, 
         HandlerContext context, 
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        var order = await _repository.GetOrderAsync(request.OrderId, cancellationToken);
+        var order = await repository.GetAsync(request.OrderId);
         
         if (order == null)
         {
-            context.NotFound($"Order {request.OrderId} not found");
+            context.Log(new NotFoundMessage());
             return null;
         }
         
@@ -111,11 +116,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Automatically discovers and registers all handlers
+// Automatically discovers and registers all handlers in the calling assembly
 builder.Services.AddMiddleManZero();
 ```
 
-### 4. Use in Controllers
+### 4. Use in Your API
+
+#### MVC Controllers
 
 ```csharp
 using Microsoft.AspNetCore.Mvc;
@@ -124,25 +131,47 @@ using MiddleMan.Zero.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OrdersController : ControllerBase
+public class OrdersController(ILogger<OrdersController> logger) : ControllerBase
 {
-    private readonly IHandleAsync<GetOrderRequest, Order> _handler;
-
-    public OrdersController(IHandleAsync<GetOrderRequest, Order> handler)
-    {
-        _handler = handler;
-    }
-
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetOrder(int id)
+    [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetOrder(
+        Guid id, 
+        [FromServices] IHandleAsync<GetOrderRequest, Order> handler)
     {
+        logger.LogInformation("Retrieving order: {OrderId}", id);
+
         var request = new GetOrderRequest { OrderId = id };
-        var result = await _handler.HandleAsync(request);
+        var result = await handler.HandleAsync(request);
         
         // Automatically converts Result to appropriate HTTP response
         return result.ToActionResult();
     }
 }
+```
+
+#### Minimal APIs
+
+```csharp
+using MiddleMan.Zero.Abstractions;
+using MiddleMan.Zero.AspNetCore.Http;
+using MyApp.Contracts;
+
+var app = builder.Build();
+
+app.MapGet("/api/orders/{id}", async (
+    Guid id, 
+    IHandleAsync<GetOrderRequest, Order> handler) =>
+{
+    var request = new GetOrderRequest { OrderId = id };
+    var result = await handler.HandleAsync(request);
+    
+    // Automatically converts Result to appropriate IResult
+    return result.ToResult();
+});
+
+app.Run();
 ```
 
 ## Samples
@@ -156,10 +185,11 @@ Explore complete working examples:
 
 ### Handler Execution Flow
 
-1. **Validation**: Request is validated via `ValidateAsync`
-2. **Fast-Fail**: Execution stops if validation fails
-3. **Processing**: Business logic executes in `HandleAsync`
-4. **Result Creation**: Automatic result generation based on context state
+1. **Null Check**: Request is validated for null
+2. **Validation**: Request is validated via `ValidateAsync()`
+3. **Fast-Fail**: Execution stops if validation fails
+4. **Processing**: Business logic executes in `HandleAsync()`
+5. **Result Creation**: Automatic result generation based on context state
 
 ### Result Status Mapping
 
@@ -174,10 +204,20 @@ Explore complete working examples:
 
 The `HandlerContext` provides methods for logging messages during handler execution:
 
-- `AddInvalidRequestMessage()`: Log validation errors
-- `NotFound()`: Mark resource as not found
-- `Failure()`: Log operation failures
-- `Debug()`: Log diagnostic information
+```csharp
+// Log validation errors (marks request as invalid)
+context.Log(new InvalidRequestMessage("Order ID must be valid."));
+
+// Mark resource as not found
+context.Log(new NotFoundMessage());
+context.Log(new NotFoundMessage("Order not found."));
+
+// Log operation failures
+context.Log(new FailureMessage("Failed to process order."));
+
+// Log diagnostic information
+context.Log(new DebugMessage("Processing order..."));
+```
 
 ## Building from Source
 
@@ -215,7 +255,6 @@ dotnet pack
 ## Community & Support
 
 - **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/lotea-be/MiddleMan.Zero/issues)
-- **Discussions**: Ask questions on [GitHub Discussions](https://github.com/lotea-be/MiddleMan.Zero/discussions)
 - **Releases**: Check out [Release Notes](https://github.com/lotea-be/MiddleMan.Zero/releases) for version updates
 
 ## Contributing
@@ -239,17 +278,19 @@ Copyright (c) 2025-2026 Lotea SRL
 ```
 MiddleMan.Zero/
 ├── src/
-│   ├── MiddleMan.Zero.Abstractions/      # Core interfaces
-│   ├── MiddleMan.Zero/                   # Core implementation
-│   ├── MiddleMan.Zero.DependencyInjection/  # DI extensions
-│   └── MiddleMan.Zero.AspNetCore.Mvc/    # ASP.NET Core integration
+│   ├── MiddleMan.Zero.Abstractions/      # Core interfaces and base types
+│   ├── MiddleMan.Zero/                   # Core implementation with HandlerBase
+│   ├── MiddleMan.Zero.DependencyInjection/  # DI extensions for handler registration
+│   ├── MiddleMan.Zero.AspNetCore.Mvc/    # MVC Controller integration
+│   └── MiddleMan.Zero.AspNetCore.Http/   # Minimal API integration
 ├── samples/
-│   ├── IceCreamTruck/                    # Sample library
-│   └── IceCreamTruck.WebApi/             # Sample API
+│   ├── IceCreamTruck/                    # Sample library with handlers
+│   └── IceCreamTruck.WebApi/             # Sample API (MVC + Minimal APIs)
 └── tests/
     ├── MiddleMan.Zero.Tests/
     ├── MiddleMan.Zero.DependencyInjection.Tests/
     ├── MiddleMan.Zero.AspNetCore.Mvc.Tests/
+    ├── MiddleMan.Zero.AspNetCore.Http.Tests/
     ├── IceCreamTruck.Tests/
     └── IceCreamTruck.WebApi.Tests/
 ```
