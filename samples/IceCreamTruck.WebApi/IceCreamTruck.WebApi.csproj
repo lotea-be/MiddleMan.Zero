@@ -6,9 +6,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/MiddleMan.Zero.AspNetCore.Http/MiddleMan.Zero.AspNetCore.Http.csproj" />
-    <ProjectReference Include="..\IceCreamTruck\IceCreamTruck.csproj" />
-    <ProjectReference Include="..\..\src\MiddleMan.Zero.AspNetCore.Mvc\MiddleMan.Zero.AspNetCore.Mvc.csproj" />
-    <ProjectReference Include="..\..\src\MiddleMan.Zero.DependencyInjection\MiddleMan.Zero.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/MiddleMan.Zero.AspNetCore.Mvc/MiddleMan.Zero.AspNetCore.Mvc.csproj" />
+    <ProjectReference Include="../../src/MiddleMan.Zero.DependencyInjection/MiddleMan.Zero.DependencyInjection.csproj" />
+    <ProjectReference Include="../IceCreamTruck/IceCreamTruck.csproj" />
   </ItemGroup>
 
   <ItemGroup>
