@@ -255,7 +255,6 @@ dotnet pack
 ## Community & Support
 
 - **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/lotea-be/MiddleMan.Zero/issues)
-- **Discussions**: Ask questions on [GitHub Discussions](https://github.com/lotea-be/MiddleMan.Zero/discussions)
 - **Releases**: Check out [Release Notes](https://github.com/lotea-be/MiddleMan.Zero/releases) for version updates
 
 ## Contributing
