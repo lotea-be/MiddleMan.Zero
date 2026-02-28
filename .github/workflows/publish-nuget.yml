@@ -43,12 +43,33 @@ jobs:
     name: Pack NuGet Packages
     runs-on: ubuntu-latest
     needs: test
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Extract version info
+      id: version
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          TAG=${GITHUB_REF#refs/tags/v}
+        elif [[ -n "${{ github.event.inputs.version }}" ]]; then
+          TAG="${{ github.event.inputs.version }}"
+        else
+          TAG="1.0.0-dev"
+        fi
+        echo "version=$TAG" >> $GITHUB_OUTPUT
+        if [[ "$TAG" == *"-"* ]]; then
+          echo "is_prerelease=true" >> $GITHUB_OUTPUT
+        else
+          echo "is_prerelease=false" >> $GITHUB_OUTPUT
+        fi
+        echo "Detected version: $TAG (prerelease: $([[ "$TAG" == *"-"* ]] && echo true || echo false))"
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -64,7 +85,7 @@ jobs:
         dotnet build --configuration Release --no-restore
 
     - name: Pack
-      run: dotnet pack --configuration Release --no-build --output ./artifacts
+      run: dotnet pack --configuration Release --no-build /p:Version=${{ steps.version.outputs.version }} --output ./artifacts
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -134,7 +155,7 @@ jobs:
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [publish-nuget, publish-github]
+    needs: [pack, publish-nuget, publish-github]
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
@@ -152,6 +173,6 @@ jobs:
         files: ./artifacts/*.nupkg
         generate_release_notes: true
         draft: false
-        prerelease: false
+        prerelease: ${{ needs.pack.outputs.is_prerelease == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
