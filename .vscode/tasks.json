@@ -55,6 +55,46 @@
 			],
 			"problemMatcher": "$msCompile",
 			"group": "build"
+		},
+		{
+			"label": "upgrade-dependencies-net8.0",
+			"type": "shell",
+			"command": "dotnet outdated --upgrade --target-framework net8.0",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "upgrade-dependencies-net9.0",
+			"type": "shell",
+			"command": "dotnet outdated --upgrade --exclude Swashbuckle.AspNetCore --target-framework net9.0",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "upgrade-dependencies-net10.0",
+			"type": "shell",
+			"command": "dotnet outdated --upgrade --target-framework net10.0",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "upgrade-dependencies",
+			"dependsOn": [
+				"dotnet outdated -U -i",
+				"upgrade-dependencies-net9.0",
+				"upgrade-dependencies-net10.0"
+			],
+			"dependsOrder": "sequence",
+			"problemMatcher": []
 		}
 	]
 }
