@@ -11,6 +11,7 @@ ASP.NET Core MVC integration for MiddleMan.Zero, providing automatic conversion 
   - `Successful` → 200 OK
   - `NotFound` → 404 Not Found
   - `Invalid` → 400 Bad Request
+  - `Forbidden` → 403 Forbidden
   - `Failure` → 500 Internal Server Error
 
 ## Installation
@@ -116,6 +117,7 @@ ActionResult<Order> actionResult = result.ToTypedActionResult();
 | `Successful` (with data) | 200 OK | Response object |
 | `NotFound` | 404 Not Found | `{ messages: [...] }` |
 | `Invalid` | 400 Bad Request | `{ messages: [...] }` |
+| `Forbidden` | 403 Forbidden | Empty |
 | `Failure` | 500 Internal Server Error | `{ messages: [...] }` |
 | `Undefined` | 500 Internal Server Error | `{ messages: [...] }` |
 
@@ -140,6 +142,12 @@ var result = new Result<Order>(null, ResultStatus.NotFound, messages);
 var messages = new[] { new InvalidRequestMessage("Invalid order ID") };
 var result = new Result<Order>(null, ResultStatus.Invalid, messages);
 // Returns: 400 Bad Request with { messages: [...] }
+```
+
+### Forbidden Response
+```csharp
+var result = new Result(ResultStatus.Forbidden, []);
+// Returns: 403 Forbidden
 ```
 
 ## License

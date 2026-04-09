@@ -198,6 +198,7 @@ Explore complete working examples:
 | `Successful` | 200 OK | Operation completed successfully |
 | `NotFound` | 404 Not Found | Resource doesn't exist |
 | `Invalid` | 400 Bad Request | Validation failed |
+| `Forbidden` | 403 Forbidden | Caller lacks required permissions |
 | `Failure` | 500 Internal Server Error | Operation failed |
 
 ### Handler Context
@@ -211,6 +212,9 @@ context.Log(new InvalidRequestMessage("Order ID must be valid."));
 // Mark resource as not found
 context.Log(new NotFoundMessage());
 context.Log(new NotFoundMessage("Order not found."));
+
+// Deny access when the caller lacks permissions
+context.Log(new ForbiddenMessage());
 
 // Log operation failures
 context.Log(new FailureMessage("Failed to process order."));
