@@ -83,6 +83,22 @@ public class ResultExtensionsTests
     }
 
     [Fact]
+    public void ToActionResult_ReturnsForbidResult_WhenResultIsForbidden()
+    {
+        // Arrange
+        var result = new Result(ResultStatus.Forbidden, []);
+
+        // Act
+        var actionResult = result.ToActionResult();
+
+        // Assert
+        actionResult.ShouldSatisfyAllConditions(
+            () => actionResult.ShouldNotBeNull(),
+            () => actionResult.ShouldBeOfType<ForbidResult>()
+        );
+    }
+
+    [Fact]
     public void ToActionResult_ReturnsObjectResultWith500_WhenResultIsUndefined()
     {
         // Arrange
@@ -199,6 +215,22 @@ public class ResultExtensionsTests
         objectResult.StatusCode.ShouldBe(500);
     }
 
+    [Fact]
+    public void ToActionResult_Generic_ReturnsForbidResult_WhenResultIsForbidden()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
+
+        // Act
+        var actionResult = result.ToActionResult();
+
+        // Assert
+        actionResult.ShouldSatisfyAllConditions(
+            () => actionResult.ShouldNotBeNull(),
+            () => actionResult.ShouldBeOfType<ForbidResult>()
+        );
+    }
+
     #endregion
 
     #region ToTypedActionResult (ActionResult<TResponse>)
@@ -271,6 +303,20 @@ public class ResultExtensionsTests
 
         var objectResult = (ObjectResult)actionResult.Result!;
         objectResult.StatusCode.ShouldBe(500);
+    }
+
+    [Fact]
+    public void ToTypedActionResult_ReturnsForbidResult_WhenResultIsForbidden()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
+
+        // Act
+        var actionResult = result.ToTypedActionResult();
+
+        // Assert
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<ForbidResult>();
     }
 
     #endregion

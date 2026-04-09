@@ -53,4 +53,29 @@ public class OrdersController(
         var result = await handler.HandleAsync(request);
         return result.ToActionResult();
     }
+
+    /// <summary>
+    /// Cancels an existing order. Requires admin privileges.
+    /// </summary>
+    /// <param name="id">The order ID.</param>
+    /// <param name="isAdminUser">Whether the caller has admin privileges.</param>
+    /// <param name="handler">The request handler.</param>
+    /// <returns>No content on success.</returns>
+    /// <response code="204">Order cancelled successfully.</response>
+    /// <response code="400">Invalid request data.</response>
+    /// <response code="403">Caller does not have admin privileges.</response>
+    /// <response code="404">Order not found.</response>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CancelOrder(Guid id, [FromHeader(Name = "X-Admin-User")] bool isAdminUser, [FromServices] IHandleAsync<CancelOrderRequest> handler)
+    {
+        logger.LogInformation("Cancelling order: {OrderId}", id);
+
+        var request = new CancelOrderRequest { OrderId = id, IsAdminUser = isAdminUser };
+        var result = await handler.HandleAsync(request);
+        return result.ToActionResult();
+    }
 }

@@ -22,9 +22,10 @@ public static class ResultExtensions
             ResultStatus.Failure => Results.Problem(
                 detail: string.Join<MessageBase>("; ", result.Messages),
                 statusCode: 500),
+            ResultStatus.Forbidden => Results.Forbid(),
             _ => Results.Problem(
                 detail: string.Join<MessageBase>("; ", result.Messages),
-                statusCode: 500)
+                statusCode: 500),
         };
     }
 
@@ -44,6 +45,7 @@ public static class ResultExtensions
             ResultStatus.Failure => Results.Problem(
                 detail: string.Join<MessageBase>("; ", result.Messages),
                 statusCode: 500),
+            ResultStatus.Forbidden => Results.Forbid(),
             _ => Results.Problem(
                 detail: string.Join<MessageBase>("; ", result.Messages),
                 statusCode: 500)

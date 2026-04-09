@@ -67,6 +67,12 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// <returns>A <see cref="Result"/> with the appropriate status and messages.</returns>
     private static Result CreateResult(HandlerContext context)
     {
+        // Check for forbidden
+        if (context.IsForbidden)
+        {
+            return new(ResultStatus.Forbidden, context.Get<ForbiddenMessage>());
+        }
+        
         // Check for invalid
         if (!context.IsRequestValid)
         {

@@ -23,6 +23,7 @@ public static class ResultExtensions
             {
                 StatusCode = 500
             },
+            ResultStatus.Forbidden => new ForbidResult(),
             _ => new ObjectResult(new { messages = result.Messages })
             {
                 StatusCode = 500
@@ -47,6 +48,7 @@ public static class ResultExtensions
             {
                 StatusCode = 500
             },
+            ResultStatus.Forbidden => new ForbidResult(),
             _ => new ObjectResult(new { messages = result.Messages })
             {
                 StatusCode = 500
@@ -72,6 +74,7 @@ public static class ResultExtensions
             {
                 StatusCode = 500
             },
+            ResultStatus.Forbidden => new ForbidResult(),
             _ => new ObjectResult(new { messages = result.Messages })
             {
                 StatusCode = 500
