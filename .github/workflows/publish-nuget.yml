@@ -49,18 +49,19 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-build --framework ${{ steps.framework.outputs.tfm }} --verbosity normal --settings coverlet.runsettings
 
-    - name: Code Coverage Summary
-      uses: irongut/CodeCoverageSummary@v1.3.0
-      with:
-        filename: tests/**/coverage.opencover.xml
-        badge: true
-        fail_below_min: true
-        format: markdown
-        hide_branch_rate: false
-        hide_complexity: true
-        indicators: true
-        output: both
-        thresholds: '95 0'
+    - name: Install ReportGenerator
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+
+    - name: Generate Coverage Report and Check Threshold
+      run: |
+        reportgenerator -reports:'tests/**/coverage.opencover.xml' -targetdir:'coverage-report' -reporttypes:'TextSummary' "-classfilters:-Microsoft.AspNetCore.OpenApi.Generated*;-System.Runtime.CompilerServices*"
+        coverage=$(grep -oP 'Line coverage: \K[0-9.]+' coverage-report/Summary.txt | head -1)
+        echo "Line coverage: ${coverage}%"
+        if (( $(echo "$coverage < 95" | bc -l) )); then
+          echo "Error: Line coverage ${coverage}% is below the required 95%"
+          exit 1
+        fi
+        echo "Coverage check passed: ${coverage}% >= 95%"
 
   pack:
     name: Pack NuGet Packages
