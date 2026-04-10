@@ -16,28 +16,38 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Setup .NET
+    - name: Setup .NET ${{ matrix.dotnet-version }}
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: |
-          8.0.x
-          9.0.x
-          10.0.x
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Set target framework
+      id: framework
+      run: |
+        case "${{ matrix.dotnet-version }}" in
+          "8.0.x") echo "tfm=net8.0" >> $GITHUB_OUTPUT ;;
+          "9.0.x") echo "tfm=net9.0" >> $GITHUB_OUTPUT ;;
+          "10.0.x") echo "tfm=net10.0" >> $GITHUB_OUTPUT ;;
+        esac
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore --framework ${{ steps.framework.outputs.tfm }}
 
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal --settings coverlet.runsettings
+      run: dotnet test --configuration Release --no-build --framework ${{ steps.framework.outputs.tfm }} --verbosity normal --settings coverlet.runsettings
 
     - name: Code Coverage Summary
       uses: irongut/CodeCoverageSummary@v1.3.0
