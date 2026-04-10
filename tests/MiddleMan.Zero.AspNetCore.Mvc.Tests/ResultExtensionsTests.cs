@@ -231,6 +231,25 @@ public class ResultExtensionsTests
         );
     }
 
+    [Fact]
+    public void ToActionResult_Generic_ReturnsObjectResultWith500_WhenResultIsUndefined()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Undefined, []);
+
+        // Act
+        var actionResult = result.ToActionResult();
+
+        // Assert
+        actionResult.ShouldSatisfyAllConditions(
+            () => actionResult.ShouldNotBeNull(),
+            () => actionResult.ShouldBeOfType<ObjectResult>()
+        );
+
+        var objectResult = (ObjectResult)actionResult;
+        objectResult.StatusCode.ShouldBe(500);
+    }
+
     #endregion
 
     #region ToTypedActionResult (ActionResult<TResponse>)
@@ -317,6 +336,23 @@ public class ResultExtensionsTests
         // Assert
         actionResult.ShouldNotBeNull();
         actionResult.Result.ShouldBeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public void ToTypedActionResult_ReturnsObjectResultWith500_WhenResultIsUndefined()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Undefined, []);
+
+        // Act
+        var actionResult = result.ToTypedActionResult();
+
+        // Assert
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<ObjectResult>();
+
+        var objectResult = (ObjectResult)actionResult.Result!;
+        objectResult.StatusCode.ShouldBe(500);
     }
 
     #endregion

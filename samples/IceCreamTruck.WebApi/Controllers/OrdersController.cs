@@ -78,4 +78,30 @@ public class OrdersController(
         var result = await handler.HandleAsync(request);
         return result.ToActionResult();
     }
+
+    /// <summary>
+    /// Retrieves an order by ID with admin-level access. Requires admin privileges.
+    /// Demonstrates Forbidden status on a generic handler (HandlerBase&lt;TRequest, TResponse&gt;).
+    /// </summary>
+    /// <param name="id">The order ID.</param>
+    /// <param name="isAdminUser">Whether the caller has admin privileges.</param>
+    /// <param name="handler">The request handler.</param>
+    /// <returns>The order details.</returns>
+    /// <response code="200">Order found.</response>
+    /// <response code="400">Invalid request data.</response>
+    /// <response code="403">Caller does not have admin privileges.</response>
+    /// <response code="404">Order not found.</response>
+    [HttpGet("{id}/admin")]
+    [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAdminOrder(Guid id, [FromHeader(Name = "X-Admin-User")] bool isAdminUser, [FromServices] IHandleAsync<GetAdminOrderRequest, Order> handler)
+    {
+        logger.LogInformation("Admin retrieving order: {OrderId}", id);
+
+        var request = new GetAdminOrderRequest { OrderId = id, IsAdminUser = isAdminUser };
+        var result = await handler.HandleAsync(request);
+        return result.ToActionResult();
+    }
 }

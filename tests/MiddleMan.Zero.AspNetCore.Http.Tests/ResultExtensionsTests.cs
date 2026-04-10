@@ -1,331 +1,119 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace MiddleMan.Zero.AspNetCore.Http.Tests;
 
 public class ResultExtensionsTests
 {
-    #region ToActionResult (non-generic Result)
+    #region ToResult (non-generic ResultBase)
 
     [Fact]
-    public void ToActionResult_ReturnsOkResult_WhenResultIsSuccessful()
+    public void ToResult_ReturnsOk_WhenResultIsSuccessful()
     {
         // Arrange
         var result = new Result(ResultStatus.Successful, []);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<OkResult>()
-        );
+        iResult.ShouldBeOfType<Ok>();
     }
 
     [Fact]
-    public void ToActionResult_ReturnsNotFoundObjectResult_WhenResultIsNotFound()
+    public void ToResult_ReturnsNotFoundWithStatusCode404_WhenResultIsNotFound()
     {
         // Arrange
         var messages = new MessageBase[] { new NotFoundMessage() };
         var result = new Result(ResultStatus.NotFound, messages);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<NotFoundObjectResult>()
-        );
-
-        var notFoundResult = (NotFoundObjectResult)actionResult;
-        notFoundResult.StatusCode.ShouldBe(404);
+        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
+        statusResult!.StatusCode.ShouldBe(404);
     }
 
     [Fact]
-    public void ToActionResult_ReturnsBadRequestObjectResult_WhenResultIsInvalid()
+    public void ToResult_ReturnsBadRequestWithStatusCode400_WhenResultIsInvalid()
     {
         // Arrange
         var messages = new MessageBase[] { new InvalidRequestMessage("Invalid input") };
         var result = new Result(ResultStatus.Invalid, messages);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<BadRequestObjectResult>()
-        );
-
-        var badRequestResult = (BadRequestObjectResult)actionResult;
-        badRequestResult.StatusCode.ShouldBe(400);
+        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
+        statusResult!.StatusCode.ShouldBe(400);
     }
 
     [Fact]
-    public void ToActionResult_ReturnsObjectResultWith500_WhenResultIsFailure()
+    public void ToResult_ReturnsProblemWithStatusCode500_WhenResultIsFailure()
     {
         // Arrange
         var messages = new MessageBase[] { new FailureMessage() };
         var result = new Result(ResultStatus.Failure, messages);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
+        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
+        problemResult.StatusCode.ShouldBe(500);
     }
 
     [Fact]
-    public void ToActionResult_ReturnsForbidResult_WhenResultIsForbidden()
+    public void ToResult_ReturnsForbid_WhenResultIsForbidden()
     {
         // Arrange
         var result = new Result(ResultStatus.Forbidden, []);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ForbidResult>()
-        );
+        iResult.ShouldBeOfType<ForbidHttpResult>();
     }
 
     [Fact]
-    public void ToActionResult_ReturnsObjectResultWith500_WhenResultIsUndefined()
+    public void ToResult_ReturnsProblemWithStatusCode500_WhenResultIsUndefined()
     {
         // Arrange
         var result = new Result(ResultStatus.Undefined, []);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
+        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
+        problemResult.StatusCode.ShouldBe(500);
     }
 
-    #endregion
-
-    #region ToActionResult (generic Result<TResponse>)
-
     [Fact]
-    public void ToActionResult_Generic_ReturnsOkObjectResult_WhenResultIsSuccessfulWithResponse()
+    public void ToResult_IncludesMessagesInNotFound_WhenResultHasMessages()
     {
         // Arrange
-        var response = new TestResponse { Id = 1, Name = "Test" };
-        var result = new Result<TestResponse>(response, ResultStatus.Successful, []);
+        var message = new NotFoundMessage();
+        var messages = new MessageBase[] { message };
+        var result = new Result(ResultStatus.NotFound, messages);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<OkObjectResult>()
-        );
-
-        var okResult = (OkObjectResult)actionResult;
-        okResult.ShouldSatisfyAllConditions(
-            () => okResult.StatusCode.ShouldBe(200),
-            () => okResult.Value.ShouldBe(response)
-        );
+        var valueResult = iResult.ShouldBeAssignableTo<IValueHttpResult>();
+        var messagesProperty = valueResult!.Value!.GetType().GetProperty("messages");
+        messagesProperty.ShouldNotBeNull();
+        var messagesValue = messagesProperty.GetValue(valueResult.Value) as MessageBase[];
+        messagesValue.ShouldNotBeNull();
+        messagesValue.Length.ShouldBe(1);
     }
 
     [Fact]
-    public void Constructor_ThrowsArgumentNullException_WhenSuccessfulResultHasNullResponse()
-    {
-        // Act & Assert
-        var exception = Should.Throw<ArgumentNullException>(() =>
-            new Result<TestResponse>(null, ResultStatus.Successful, []));
-
-        exception.ParamName.ShouldBe("response");
-        exception.Message.ShouldContain("Response cannot be null when ResultStatus is Successful");
-    }
-
-    [Fact]
-    public void ToActionResult_Generic_ReturnsNotFoundObjectResult_WhenResultIsNotFound()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new NotFoundMessage() };
-        var result = new Result<TestResponse>(null, ResultStatus.NotFound, messages);
-
-        // Act
-        var actionResult = result.ToActionResult();
-
-        // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<NotFoundObjectResult>()
-        );
-
-        var notFoundResult = (NotFoundObjectResult)actionResult;
-        notFoundResult.StatusCode.ShouldBe(404);
-    }
-
-    [Fact]
-    public void ToActionResult_Generic_ReturnsBadRequestObjectResult_WhenResultIsInvalid()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid") };
-        var result = new Result<TestResponse>(null, ResultStatus.Invalid, messages);
-
-        // Act
-        var actionResult = result.ToActionResult();
-
-        // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<BadRequestObjectResult>()
-        );
-
-        var badRequestResult = (BadRequestObjectResult)actionResult;
-        badRequestResult.StatusCode.ShouldBe(400);
-    }
-
-    [Fact]
-    [Fact]
-    public void ToActionResult_Generic_ReturnsObjectResultWith500_WhenResultIsFailure()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new FailureMessage() };
-        var result = new Result<TestResponse>(null, ResultStatus.Failure, messages);
-
-        // Act
-        var actionResult = result.ToActionResult();
-
-        // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
-    }
-
-    [Fact]
-    public void ToActionResult_Generic_ReturnsForbidResult_WhenResultIsForbidden()
-    {
-        // Arrange
-        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
-
-        // Act
-        var actionResult = result.ToActionResult();
-
-        // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ForbidResult>()
-        );
-    }
-
-    #endregion
-
-    #region ToTypedActionResult (ActionResult<TResponse>)
-
-    [Fact]
-    public void ToTypedActionResult_ReturnsResponse_WhenResultIsSuccessfulWithResponse()
-    {
-        // Arrange
-        var response = new TestResponse { Id = 1, Name = "Test" };
-        var result = new Result<TestResponse>(response, ResultStatus.Successful, []);
-
-        // Act
-        var actionResult = result.ToTypedActionResult();
-
-        // Assert
-        actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeNull();
-        actionResult.Value.ShouldBe(response);
-    }
-
-    [Fact]
-    public void ToTypedActionResult_ReturnsNotFoundObjectResult_WhenResultIsNotFound()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new NotFoundMessage() };
-        var result = new Result<TestResponse>(null, ResultStatus.NotFound, messages);
-
-        // Act
-        var actionResult = result.ToTypedActionResult();
-
-        // Assert
-        actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<NotFoundObjectResult>();
-
-        var notFoundResult = (NotFoundObjectResult)actionResult.Result!;
-        notFoundResult.StatusCode.ShouldBe(404);
-    }
-
-    [Fact]
-    public void ToTypedActionResult_ReturnsBadRequestObjectResult_WhenResultIsInvalid()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid") };
-        var result = new Result<TestResponse>(null, ResultStatus.Invalid, messages);
-
-        // Act
-        var actionResult = result.ToTypedActionResult();
-
-        // Assert
-        actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<BadRequestObjectResult>();
-
-        var badRequestResult = (BadRequestObjectResult)actionResult.Result!;
-        badRequestResult.StatusCode.ShouldBe(400);
-    }
-
-    [Fact]
-    public void ToTypedActionResult_ReturnsObjectResultWith500_WhenResultIsFailure()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new FailureMessage() };
-        var result = new Result<TestResponse>(null, ResultStatus.Failure, messages);
-
-        // Act
-        var actionResult = result.ToTypedActionResult();
-
-        // Assert
-        actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<ObjectResult>();
-
-        var objectResult = (ObjectResult)actionResult.Result!;
-        objectResult.StatusCode.ShouldBe(500);
-    }
-
-    [Fact]
-    public void ToTypedActionResult_ReturnsForbidResult_WhenResultIsForbidden()
-    {
-        // Arrange
-        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
-
-        // Act
-        var actionResult = result.ToTypedActionResult();
-
-        // Assert
-        actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<ForbidResult>();
-    }
-
-    #endregion
-
-    #region Messages in Response
-
-    [Fact]
-    public void ToActionResult_IncludesMessages_WhenResultHasMessages()
+    public void ToResult_IncludesMessagesInBadRequest_WhenResultHasMessages()
     {
         // Arrange
         var message1 = new InvalidRequestMessage("Error 1");
@@ -334,47 +122,106 @@ public class ResultExtensionsTests
         var result = new Result(ResultStatus.Invalid, messages);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        var badRequestResult = (BadRequestObjectResult)actionResult;
-        var value = badRequestResult.Value;
-
-        value.ShouldNotBeNull();
-
-        // Use reflection to check the anonymous type
-        var messagesProperty = value.GetType().GetProperty("messages");
+        var valueResult = iResult.ShouldBeAssignableTo<IValueHttpResult>();
+        var messagesProperty = valueResult!.Value!.GetType().GetProperty("messages");
         messagesProperty.ShouldNotBeNull();
-
-        var messagesValue = messagesProperty.GetValue(value) as MessageBase[];
+        var messagesValue = messagesProperty.GetValue(valueResult.Value) as MessageBase[];
         messagesValue.ShouldNotBeNull();
         messagesValue.Length.ShouldBe(2);
     }
 
+    #endregion
+
+    #region ToResult<TResponse> (generic ResultBase<TResponse>)
+
     [Fact]
-    public void ToActionResult_Generic_IncludesMessages_WhenResultHasMessages()
+    public void ToResult_Generic_ReturnsOkWithResponse_WhenResultIsSuccessful()
     {
         // Arrange
-        var message1 = new NotFoundMessage();
-        var messages = new MessageBase[] { message1 };
+        var response = new TestResponse { Id = 1, Name = "Test" };
+        var result = new Result<TestResponse>(response, ResultStatus.Successful, []);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var okResult = iResult.ShouldBeOfType<Ok<TestResponse>>();
+        okResult.Value.ShouldBe(response);
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsNotFoundWithStatusCode404_WhenResultIsNotFound()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new NotFoundMessage() };
         var result = new Result<TestResponse>(null, ResultStatus.NotFound, messages);
 
         // Act
-        var actionResult = result.ToActionResult();
+        var iResult = result.ToResult();
 
         // Assert
-        var notFoundResult = (NotFoundObjectResult)actionResult;
-        var value = notFoundResult.Value;
+        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
+        statusResult!.StatusCode.ShouldBe(404);
+    }
 
-        value.ShouldNotBeNull();
+    [Fact]
+    public void ToResult_Generic_ReturnsBadRequestWithStatusCode400_WhenResultIsInvalid()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid") };
+        var result = new Result<TestResponse>(null, ResultStatus.Invalid, messages);
 
-        // Use reflection to check the anonymous type
-        var messagesProperty = value.GetType().GetProperty("messages");
-        messagesProperty.ShouldNotBeNull();
+        // Act
+        var iResult = result.ToResult();
 
-        var messagesValue = messagesProperty.GetValue(value) as MessageBase[];
-        messagesValue.ShouldNotBeNull();
-        messagesValue.Length.ShouldBe(1);
+        // Assert
+        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
+        statusResult!.StatusCode.ShouldBe(400);
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsProblemWithStatusCode500_WhenResultIsFailure()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new FailureMessage() };
+        var result = new Result<TestResponse>(null, ResultStatus.Failure, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
+        problemResult.StatusCode.ShouldBe(500);
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsForbid_WhenResultIsForbidden()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        iResult.ShouldBeOfType<ForbidHttpResult>();
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsProblemWithStatusCode500_WhenResultIsUndefined()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Undefined, []);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
+        problemResult.StatusCode.ShouldBe(500);
     }
 
     #endregion

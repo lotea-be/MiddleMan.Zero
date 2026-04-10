@@ -39,6 +39,19 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal --settings coverlet.runsettings
 
+    - name: Code Coverage Summary
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: tests/**/coverage.opencover.xml
+        badge: true
+        fail_below_min: true
+        format: markdown
+        hide_branch_rate: false
+        hide_complexity: true
+        indicators: true
+        output: both
+        thresholds: '95 0'
+
   pack:
     name: Pack NuGet Packages
     runs-on: ubuntu-latest
