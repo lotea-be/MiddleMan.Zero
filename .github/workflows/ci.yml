@@ -26,11 +26,34 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    - name: Set target framework
+      id: framework
+      run: |
+        case "${{ matrix.dotnet-version }}" in
+          "8.0.x") echo "tfm=net8.0" >> $GITHUB_OUTPUT ;;
+          "9.0.x") echo "tfm=net9.0" >> $GITHUB_OUTPUT ;;
+          "10.0.x") echo "tfm=net10.0" >> $GITHUB_OUTPUT ;;
+        esac
+
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release --framework ${{ steps.framework.outputs.tfm }}
 
     - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal --settings coverlet.runsettings
+      run: dotnet test --no-build --configuration Release --framework ${{ steps.framework.outputs.tfm }} --verbosity normal --settings coverlet.runsettings
+
+    - name: Install ReportGenerator
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+
+    - name: Generate Coverage Report and Check Threshold
+      run: |
+        reportgenerator -reports:'tests/**/coverage.opencover.xml' -targetdir:'coverage-report' -reporttypes:'TextSummary' "-classfilters:-Microsoft.AspNetCore.OpenApi.Generated*;-System.Runtime.CompilerServices*"
+        coverage=$(grep -oP 'Line coverage: \K[0-9.]+' coverage-report/Summary.txt | head -1)
+        echo "Line coverage: ${coverage}%"
+        if (( $(echo "$coverage < 95" | bc -l) )); then
+          echo "Error: Line coverage ${coverage}% is below the required 95%"
+          exit 1
+        fi
+        echo "Coverage check passed: ${coverage}% >= 95%"
 
   auto-tag:
     name: Auto-create version tag

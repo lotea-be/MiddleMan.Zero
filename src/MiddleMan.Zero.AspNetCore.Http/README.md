@@ -9,6 +9,7 @@ ASP.NET Core Minimal API integration for MiddleMan.Zero, providing automatic con
   - `Successful` → 200 OK
   - `NotFound` → 404 Not Found
   - `Invalid` → 400 Bad Request
+  - `Forbidden` → 403 Forbidden
   - `Failure` → 500 Internal Server Error
 
 ## Installation
@@ -83,6 +84,7 @@ IResult httpResult = result.ToResult();
 | `Successful` (with data) | 200 OK | Response object |
 | `NotFound` | 404 Not Found | `{ messages: [...] }` |
 | `Invalid` | 400 Bad Request | `{ messages: [...] }` |
+| `Forbidden` | 403 Forbidden | Empty |
 | `Failure` | 500 Internal Server Error | Problem details |
 | `Undefined` | 500 Internal Server Error | Problem details |
 
@@ -107,6 +109,12 @@ var result = new Result<Flavor>(null, ResultStatus.NotFound, messages);
 var messages = new[] { new InvalidRequestMessage("Flavor name is required.") };
 var result = new Result(ResultStatus.Invalid, messages);
 // Returns: 400 Bad Request with { messages: [...] }
+```
+
+### Forbidden Response
+```csharp
+var result = new Result(ResultStatus.Forbidden, []);
+// Returns: 403 Forbidden
 ```
 
 ## Comparison with MiddleMan.Zero.AspNetCore.Mvc

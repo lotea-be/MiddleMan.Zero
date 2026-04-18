@@ -17,7 +17,7 @@ MiddleMan.Zero provides a lightweight, zero-ceremony implementation of the media
 
 - **`HandlerContext`**: Manages handler execution state and message logging
   - Tracks request validation status
-  - Logs debug, failure, invalid request, and not found messages
+  - Logs debug, failure, forbidden, invalid request, and not found messages
   - Provides access to all logged messages
 
 ### Result Types
@@ -29,6 +29,7 @@ MiddleMan.Zero provides a lightweight, zero-ceremony implementation of the media
 
 - **`DebugMessage`**: For diagnostic information
 - **`FailureMessage`**: For operation failures
+- **`ForbiddenMessage`**: For access-denied scenarios (produces `ResultStatus.Forbidden`)
 - **`InvalidRequestMessage`**: For validation errors
 - **`NotFoundMessage`**: For resource not found scenarios
 

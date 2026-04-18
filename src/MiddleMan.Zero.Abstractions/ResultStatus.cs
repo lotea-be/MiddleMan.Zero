@@ -24,5 +24,9 @@ public enum ResultStatus
     /// <summary>
     /// The requested resource was not found.
     /// </summary>
-    NotFound = 4
+    NotFound = 4,
+    /// <summary>
+    /// The operation was forbidden due to insufficient permissions.
+    /// </summary>
+    Forbidden = 5
 }

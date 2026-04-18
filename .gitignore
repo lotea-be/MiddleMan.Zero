@@ -413,3 +413,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Coverlet's default output directory for opencover and lcov reports
+coverage-report/
+
+# Test artifacts from test runs
+test-artifacts/

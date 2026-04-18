@@ -146,6 +146,43 @@ public class MiddleManTests
         );
     }
 
+    [Fact]
+    public async Task MiddleMan_ReturnsForbidden_WhenHandlerLogsForbiddenMessage()
+    {
+        // Arrange - non-generic (void) handler path
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithForbidden();
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Forbidden),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => result.Messages[0].ShouldBeOfType<ForbiddenMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_WithResponse_ReturnsForbidden_WhenHandlerLogsForbiddenMessage()
+    {
+        // Arrange - generic handler path (exercises the fixed CreateResult overload)
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithResponseForbidden();
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Forbidden),
+            () => result.Response.ShouldBeNull(),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => result.Messages[0].ShouldBeOfType<ForbiddenMessage>()
+        );
+    }
+
     public class DummyRequest { public required string MyInput { get; set; } }
     public class DummyResponse { public required string MyOutput { get; set; } }
 
@@ -223,6 +260,30 @@ public class MiddleManTests
         {
             // Simulate resource not found
             context.Log(new NotFoundMessage { Message = "Resource not found." });
+            return Task.FromResult<DummyResponse?>(null);
+        }
+    }
+
+    public class DummyHandlerWithForbidden : HandlerBase<DummyRequest>
+    {
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        protected override Task HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            context.Log(new ForbiddenMessage());
+            return Task.CompletedTask;
+        }
+    }
+
+    public class DummyHandlerWithResponseForbidden : HandlerBase<DummyRequest, DummyResponse>
+    {
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        protected override Task<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            context.Log(new ForbiddenMessage());
             return Task.FromResult<DummyResponse?>(null);
         }
     }
