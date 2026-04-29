@@ -16,4 +16,17 @@ internal class OrderRepository : IOrderRepository
     {
         return Task.FromResult(_orders.FirstOrDefault(o => o.Id == orderId));
     }
+
+    public Task<bool> CancelAsync(Guid orderId, CancellationToken cancellationToken = default)
+    {
+        var order = _orders.FirstOrDefault(o => o.Id == orderId);
+
+        if (order == null)
+        {
+            return Task.FromResult(false);
+        }
+
+        order.Status = OrderStatus.Cancelled;
+        return Task.FromResult(true);
+    }
 }

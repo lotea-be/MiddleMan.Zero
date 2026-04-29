@@ -21,8 +21,20 @@ This package is referenced by various sample applications that demonstrate diffe
 
 ## Example Flow
 
-1. Customer creates an order with `CreateOrderMessage`
-2. `CreateOrderHandler` validates and processes the order
-3. Order can be retrieved later with `GetOrderMessage` and `GetOrderHandler`
+1. Customer creates an order with `CreateOrderRequest` → `CreateOrderHandler` validates and processes it
+2. Order can be retrieved later with `GetOrderRequest` → `GetOrderHandler`
+3. Admins can cancel an order with `CancelOrderRequest` → `CancelOrderHandler`
+   - Non-admin callers receive a **Forbidden** result
+   - Cancelling a non-existent order returns a **NotFound** result
 
 This simple domain allows us to focus on demonstrating MiddleMan.Zero features rather than complex business logic.
+
+## Handlers
+
+| Handler | Request | Response | Statuses demonstrated |
+|---------|---------|----------|-----------------------|
+| `CreateOrderHandler` | `CreateOrderRequest` | `Guid` | Successful, Invalid |
+| `GetOrderHandler` | `GetOrderRequest` | `Order` | Successful, Invalid, NotFound |
+| `AddFlavorHandler` | `AddFlavorRequest` | _(void)_ | Successful, Invalid |
+| `GetFlavorsHandler` | `GetFlavorsRequest` | `Flavor[]` | Successful |
+| `CancelOrderHandler` | `CancelOrderRequest` | _(void)_ | Successful, Invalid, NotFound, **Forbidden** |

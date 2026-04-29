@@ -2,8 +2,6 @@ using System.Net;
 
 using IceCreamTruck.Contracts;
 
-using Microsoft.AspNetCore.Mvc.Testing;
-
 namespace IceCreamTruck.WebApi.Tests.Controllers;
 
 /// <summary>
@@ -13,9 +11,9 @@ namespace IceCreamTruck.WebApi.Tests.Controllers;
 /// - Dependency injection with mocked handlers
 /// - HTTP status code responses and JSON serialization
 /// </summary>
-public class OrdersControllerTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class OrdersControllerTests(AuthenticatedWebApplicationFactory factory) : IClassFixture<AuthenticatedWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory = factory;
+    private readonly AuthenticatedWebApplicationFactory _factory = factory;
 
     #region CreateOrder Tests
 
@@ -129,5 +127,189 @@ public class OrdersControllerTests(WebApplicationFactory<Program> factory) : ICl
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
+    #endregion
+
+    #region CancelOrder Tests
+
+    [Fact]
+    public async Task CancelOrder_ReturnsForbid_WhenCallerIsNotAdmin()
+    {
+        // Arrange
+        var createRequest = new CreateOrderRequest
+        {
+            CustomerName = "John Doe",
+            Items = [new IceCream { Flavor = "Vanilla", Price = 5.00m, Scoops = 1 }]
+        };
+
+        using var client = _factory.CreateClient();
+        var createResponse = await client.PostAsJsonAsync("/api/orders", createRequest, TestContext.Current.CancellationToken);
+        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
+
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/orders/{orderId}");
+        request.Headers.Add("X-Admin-User", "false");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task CancelOrder_ReturnsOk_WhenAdminCancelsExistingOrder()
+    {
+        // Arrange
+        var createRequest = new CreateOrderRequest
+        {
+            CustomerName = "Jane Smith",
+            Items = [new IceCream { Flavor = "Chocolate", Price = 6.50m, Scoops = 2 }]
+        };
+
+        using var client = _factory.CreateClient();
+        var createResponse = await client.PostAsJsonAsync("/api/orders", createRequest, TestContext.Current.CancellationToken);
+        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
+
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/orders/{orderId}");
+        request.Headers.Add("X-Admin-User", "true");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert - ToActionResult on a void handler returns 200 OK on success
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task CancelOrder_ReturnsNotFound_WhenAdminCancelsNonExistentOrder()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+
+        using var client = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/orders/{orderId}");
+        request.Headers.Add("X-Admin-User", "true");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CancelOrder_ReturnsBadRequest_WhenOrderIdIsEmpty()
+    {
+        // Arrange
+        var orderId = Guid.Empty;
+
+        using var client = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/orders/{orderId}");
+        request.Headers.Add("X-Admin-User", "true");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    #endregion
+
+    #region GetAdminOrder Tests
+    // These tests exercise the Forbidden status on a GENERIC handler
+    // (HandlerBase<TRequest, TResponse>), which was previously missing the Forbidden check.
+
+    [Fact]
+    public async Task GetAdminOrder_ReturnsForbid_WhenCallerIsNotAdmin()
+    {
+        // Arrange
+        var createRequest = new CreateOrderRequest
+        {
+            CustomerName = "John Doe",
+            Items = [new IceCream { Flavor = "Vanilla", Price = 5.00m, Scoops = 1 }]
+        };
+
+        using var client = _factory.CreateClient();
+        var createResponse = await client.PostAsJsonAsync("/api/orders", createRequest, TestContext.Current.CancellationToken);
+        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/orders/{orderId}/admin");
+        request.Headers.Add("X-Admin-User", "false");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert - generic handler must return 403, not 500 (regression guard)
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAdminOrder_ReturnsOkWithOrder_WhenAdminRetrievesExistingOrder()
+    {
+        // Arrange
+        var createRequest = new CreateOrderRequest
+        {
+            CustomerName = "Jane Smith",
+            Items = [new IceCream { Flavor = "Chocolate", Price = 6.50m, Scoops = 2 }]
+        };
+
+        using var client = _factory.CreateClient();
+        var createResponse = await client.PostAsJsonAsync("/api/orders", createRequest, TestContext.Current.CancellationToken);
+        var orderId = await createResponse.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/orders/{orderId}/admin");
+        request.Headers.Add("X-Admin-User", "true");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.ShouldSatisfyAllConditions(
+            () => response.StatusCode.ShouldBe(HttpStatusCode.OK),
+            () => response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json")
+        );
+
+        var responseOrder = await response.Content.ReadFromJsonAsync<Order>(TestContext.Current.CancellationToken);
+        responseOrder.ShouldSatisfyAllConditions(
+            () => responseOrder.ShouldNotBeNull(),
+            () => responseOrder!.Id.ShouldBe(orderId),
+            () => responseOrder!.CustomerName.ShouldBe("Jane Smith")
+        );
+    }
+
+    [Fact]
+    public async Task GetAdminOrder_ReturnsNotFound_WhenAdminRetrievesNonExistentOrder()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+
+        using var client = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/orders/{orderId}/admin");
+        request.Headers.Add("X-Admin-User", "true");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetAdminOrder_ReturnsBadRequest_WhenOrderIdIsEmpty()
+    {
+        // Arrange
+        var orderId = Guid.Empty;
+
+        using var client = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/orders/{orderId}/admin");
+        request.Headers.Add("X-Admin-User", "true");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
     #endregion
 }

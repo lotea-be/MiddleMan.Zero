@@ -67,6 +67,12 @@ public abstract class HandlerBase<TRequest>() : IHandleAsync<TRequest>
     /// <returns>A <see cref="Result"/> with the appropriate status and messages.</returns>
     private static Result CreateResult(HandlerContext context)
     {
+        // Check for forbidden
+        if (context.IsForbidden)
+        {
+            return new(ResultStatus.Forbidden, context.Get<ForbiddenMessage>());
+        }
+
         // Check for invalid
         if (!context.IsRequestValid)
         {
@@ -144,6 +150,12 @@ public abstract class HandlerBase<TRequest, TResponse>() : IHandleAsync<TRequest
     /// <returns>A <see cref="Result{TResponse}"/> with the appropriate status, messages, and response.</returns>
     private static Result<TResponse?> CreateResult(HandlerContext context, TResponse? response = default)
     {
+        // Check for forbidden
+        if (context.IsForbidden)
+        {
+            return new(default, ResultStatus.Forbidden, context.Get<ForbiddenMessage>());
+        }
+
         // Check for invalid
         if (!context.IsRequestValid)
         {

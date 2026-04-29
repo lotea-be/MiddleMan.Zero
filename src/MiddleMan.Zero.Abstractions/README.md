@@ -33,6 +33,7 @@ This package contains the fundamental building blocks for implementing the media
   - `Failure`: Operation failed
   - `Invalid`: Operation had invalid input
   - `NotFound`: Requested resource not found
+  - `Forbidden`: Caller lacks the required permissions
 
 ## Usage
 

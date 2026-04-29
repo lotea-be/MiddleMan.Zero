@@ -5,6 +5,90 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-18
+
+### Added
+
+#### MiddleMan.Zero.Abstractions
+- Added `Forbidden` status to `ResultStatus` enum for permission-related errors
+
+#### MiddleMan.Zero
+- Added `ForbiddenMessage` class for representing forbidden operations
+- Added `ToForbidden()` extension methods for creating forbidden results
+
+#### MiddleMan.Zero.AspNetCore.Http
+- Added support for `Forbidden` status mapping to HTTP 403 Forbidden
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Added support for `Forbidden` status mapping to HTTP 403 Forbidden
+
+### Changed
+
+#### MiddleMan.Zero
+- Updated dependencies
+
+#### MiddleMan.Zero.Abstractions
+- Updated dependencies
+
+#### MiddleMan.Zero.DependencyInjection
+- Updated dependencies
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Updated dependencies
+
+#### MiddleMan.Zero.AspNetCore.Http
+- Updated dependencies
+
+### Package Links
+- [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/1.2.0)
+- [MiddleMan.Zero.Abstractions](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/1.2.0)
+- [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.2.0)
+- [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.2.0)
+- [MiddleMan.Zero.AspNetCore.Http](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/1.2.0)
+
+## [1.1.2] - 2026-03-01
+
+### Changed
+
+#### MiddleMan.Zero
+- Updated dependencies
+
+#### MiddleMan.Zero.Abstractions
+- Updated dependencies
+
+#### MiddleMan.Zero.DependencyInjection
+- Updated dependencies
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Updated dependencies
+
+#### MiddleMan.Zero.AspNetCore.Http
+- Updated dependencies
+
+### Package Links
+- [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/1.1.2)
+- [MiddleMan.Zero.Abstractions](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/1.1.2)
+- [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.1.2)
+- [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.1.2)
+- [MiddleMan.Zero.AspNetCore.Http](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/1.1.2)
+
+## [1.1.1] - 2026-02-18
+
+### Changed
+
+#### MiddleMan.Zero.AspNetCore.Http
+- Replaced MiddleMan.Zero.Abstractions package by MiddleMan.Zero, so users have to install only one dependency
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Replaced MiddleMan.Zero.Abstractions package by MiddleMan.Zero, so users have to install only one dependency
+
+### Package Links
+- [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/1.1.1)
+- [MiddleMan.Zero.Abstractions](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/1.1.1)
+- [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.1.1)
+- [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.1.1)
+- [MiddleMan.Zero.AspNetCore.Http](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/1.1.1)
+
 ## [1.1.0] - 2026-02-15
 
 ### Added
@@ -93,5 +177,8 @@ This is the first stable release of MiddleMan.Zero, a lightweight, zero-ceremony
 - [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.0.0)
 - [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.0.0)
 
+[1.2.0]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.1.2...v1.2.0
+[1.1.2]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/lotea-be/MiddleMan.Zero/releases/tag/v1.0.0

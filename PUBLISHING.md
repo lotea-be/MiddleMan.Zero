@@ -20,7 +20,7 @@ This guide explains how to publish MiddleMan.Zero packages to NuGet.org.
 
 ### Automated Publishing (Recommended)
 
-The repository includes a GitHub Actions workflow that automatically publishes packages when you create a version tag.
+The repository includes GitHub Actions workflows that automatically create version tags and publish packages when you push version changes to main.
 
 #### Step 1: Update Version Number
 
@@ -34,23 +34,23 @@ Edit `src/Directory.Build.props`:
 
 Add your changes to the changelog following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-#### Step 3: Commit and Tag
+#### Step 3: Commit and Push
 
 ```bash
 git add .
 git commit -m "Release v0.2.0"
-git tag v0.2.0
 git push origin main
-git push origin v0.2.0
 ```
 
-The GitHub Actions workflow will:
-- Build all projects
-- Run all tests
-- Create NuGet packages
-- Publish to NuGet.org
-- Publish to GitHub Packages
-- Create a GitHub Release with the packages attached
+**That's it!** The automation will:
+1. **CI Workflow** detects the version change and automatically creates tag `v0.2.0`
+2. **Publish Workflow** is triggered by the new tag and:
+   - Builds all projects
+   - Runs all tests
+   - Creates NuGet packages
+   - Publishes to NuGet.org
+   - Publishes to GitHub Packages
+   - Creates a GitHub Release with the packages attached
 
 ### Manual Publishing
 
@@ -155,11 +155,9 @@ If you get a version conflict error:
 
 - [ ] Update version in `src/Directory.Build.props`
 - [ ] Update `CHANGELOG.md` with changes
-- [ ] Run all tests: `dotnet test --configuration Release`
-- [ ] Build packages: `dotnet pack --configuration Release`
-- [ ] Verify package contents
-- [ ] Commit changes
-- [ ] Create and push git tag
-- [ ] Wait for GitHub Actions to complete
+- [ ] Run all tests locally: `dotnet test --configuration Release`
+- [ ] Commit and push changes to main
+- [ ] Wait for CI workflow to auto-create tag
+- [ ] Wait for Publish workflow to complete
 - [ ] Verify packages on NuGet.org
 - [ ] Update GitHub Release notes if needed

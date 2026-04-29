@@ -1,4 +1,5 @@
 using IceCreamTruck;
+using IceCreamTruck.WebApi.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,9 +33,7 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
-app.MapGet("/flavors", IceCreamTruck.WebApi.Actions.FlavorEndpoints.GetAsync)
-    .WithName("GetFlavors")
-    .WithTags("Flavors");
+app.MapFlavorEndpoints();
 
 app.Run();
 

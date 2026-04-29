@@ -30,6 +30,11 @@ public class HandlerContext
     public bool IsNotFound { get; private set; } = false;
 
     /// <summary>
+    /// Gets a value indicating whether the operation was forbidden due to insufficient permissions.
+    /// </summary>
+    public bool IsForbidden { get; private set; } = false;
+
+    /// <summary>
     /// Gets all messages of the specified type from the context.
     /// </summary>
     /// <typeparam name="TMessage">The type of messages to retrieve.</typeparam>
@@ -84,6 +89,17 @@ public class HandlerContext
         IsSuccessful = false;
         IsNotFound = true;
         LogMessage(notFoundMessage);
+    }
+
+    /// <summary>
+    /// Logs a forbidden message to the context and marks the operation as forbidden.
+    /// </summary>
+    /// <param name="forbiddenMessage">The message to log.</param>
+    public void Log(ForbiddenMessage forbiddenMessage)
+    {
+        IsSuccessful = false;
+        IsForbidden = true;
+        LogMessage(forbiddenMessage);
     }
 
     private void LogMessage(MessageBase message)

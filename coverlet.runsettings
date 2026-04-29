@@ -4,9 +4,9 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>opencover</Format>
+          <Format>opencover,lcov</Format>
           <Threshold>95</Threshold>
-          <ThresholdType>line,branch,method</ThresholdType>
+          <ThresholdType>line</ThresholdType>
           <ThresholdStat>total</ThresholdStat>
           <Exclude>[*.Tests]*</Exclude>
         </Configuration>

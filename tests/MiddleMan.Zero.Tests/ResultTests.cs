@@ -35,6 +35,19 @@ public class ResultTests
         );
     }
 
+    [Fact]
+    public void Result_CanBeCreated_WithForbiddenStatus()
+    {
+        // Act
+        var result = new Result(ResultStatus.Forbidden, []);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Forbidden),
+            () => result.Messages.ShouldBeEmpty()
+        );
+    }
+
     #endregion
 
     #region Generic Result<TResponse>
@@ -117,6 +130,19 @@ public class ResultTests
             () => result.ResultStatus.ShouldBe(ResultStatus.Failure),
             () => result.Response.ShouldBeNull(),
             () => result.Messages.Length.ShouldBe(1)
+        );
+    }
+
+    [Fact]
+    public void GenericResult_CanBeCreated_WithForbiddenStatusAndNullResponse()
+    {
+        // Act
+        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Forbidden),
+            () => result.Response.ShouldBeNull()
         );
     }
 
