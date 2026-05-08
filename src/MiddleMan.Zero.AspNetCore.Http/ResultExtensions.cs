@@ -1,5 +1,7 @@
-﻿using MiddleMan.Zero.Abstractions;
+using MiddleMan.Zero.Abstractions;
+
 using Microsoft.AspNetCore.Http;
+
 namespace MiddleMan.Zero.AspNetCore.Http;
 
 /// <summary>
@@ -20,11 +22,11 @@ public static class ResultExtensions
             ResultStatus.NotFound => Results.NotFound(new { messages = result.Messages }),
             ResultStatus.Invalid => Results.BadRequest(new { messages = result.Messages }),
             ResultStatus.Failure => Results.Problem(
-                detail: string.Join<MessageBase>("; ", result.Messages),
+                detail: JoinMessages(result.Messages),
                 statusCode: 500),
             ResultStatus.Forbidden => Results.Forbid(),
             _ => Results.Problem(
-                detail: string.Join<MessageBase>("; ", result.Messages),
+                detail: JoinMessages(result.Messages),
                 statusCode: 500),
         };
     }
@@ -43,12 +45,15 @@ public static class ResultExtensions
             ResultStatus.NotFound => Results.NotFound(new { messages = result.Messages }),
             ResultStatus.Invalid => Results.BadRequest(new { messages = result.Messages }),
             ResultStatus.Failure => Results.Problem(
-                detail: string.Join<MessageBase>("; ", result.Messages),
+                detail: JoinMessages(result.Messages),
                 statusCode: 500),
             ResultStatus.Forbidden => Results.Forbid(),
             _ => Results.Problem(
-                detail: string.Join<MessageBase>("; ", result.Messages),
+                detail: JoinMessages(result.Messages),
                 statusCode: 500)
         };
     }
+
+    private static string JoinMessages(IEnumerable<MessageBase> messages)
+        => string.Join("; ", messages.Select(m => m.Message));
 }

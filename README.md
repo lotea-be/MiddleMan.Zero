@@ -203,11 +203,13 @@ Explore complete working examples:
 
 ### Handler Context
 
-The `HandlerContext` provides methods for logging messages during handler execution:
+The `HandlerContext` provides methods for logging messages during handler execution. Every message
+type ships with three constructors: parameterless, `(string message)`, and `(string message, string code)`.
 
 ```csharp
 // Log validation errors (marks request as invalid)
 context.Log(new InvalidRequestMessage("Order ID must be valid."));
+context.Log(new InvalidRequestMessage("Order ID must be valid.", "order_id_invalid"));
 
 // Mark resource as not found
 context.Log(new NotFoundMessage());
@@ -215,6 +217,7 @@ context.Log(new NotFoundMessage("Order not found."));
 
 // Deny access when the caller lacks permissions
 context.Log(new ForbiddenMessage());
+context.Log(new ForbiddenMessage("Admin role required."));
 
 // Log operation failures
 context.Log(new FailureMessage("Failed to process order."));

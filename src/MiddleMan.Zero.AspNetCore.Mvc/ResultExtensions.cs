@@ -63,7 +63,6 @@ public static class ResultExtensions
     /// <param name="result">The result to convert.</param>
     /// <returns>An ActionResult&lt;TResponse&gt; representing the result status, response, and messages.</returns>
     public static ActionResult<TResponse> ToTypedActionResult<TResponse>(this ResultBase<TResponse> result)
-        where TResponse : class
     {
         return result.ResultStatus switch
         {

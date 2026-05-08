@@ -5,6 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-05-08
+
+This release tightens up the public API after a full audit. Most changes are non-breaking;
+the breaking ones are listed first with migration steps.
+
+### Breaking changes
+
+#### MiddleMan.Zero.Abstractions
+- **`MessageBase` properties are now `init`-only.** `Id`, `CorrelationId`, `CreatedAt`, `Message`,
+  and `Code` can no longer be reassigned after construction.
+  - **Migration:** if you mutated these post-construction (rare), set them via object initializer
+    or one of the new `(string message)` / `(string message, string code)` constructors.
+- **`ResultBase<TResponse>.Response` is now annotated as `TResponse?`.** It was already null in every
+  non-`Successful` path; the type system now reflects that. The constructor still throws
+  `ArgumentNullException` if `Response` is null when `ResultStatus` is `Successful`.
+  - **Migration:** consumers reading `result.Response` from a result of unknown status will get
+    nullable warnings under `Nullable=enable`. Either check `result.ResultStatus == Successful` first,
+    or apply the null-forgiving operator (`result.Response!`) when you have already verified status.
+- **`HandlerBase<TRequest, TResponse>` now implements `IHandleAsync<TRequest, TResponse>`** instead
+  of `IHandleAsync<TRequest, TResponse?>`. The runtime type was identical for unconstrained generics,
+  so DI registration and resolution are unchanged. Only nullability annotations differ.
+  - **Migration:** if you previously declared dependencies as `IHandleAsync<TRequest, TResponse?>`,
+    drop the `?` to match the cleaner annotation. The `?`-form continues to resolve at runtime.
+
+### Added
+
+#### MiddleMan.Zero
+- `DebugMessage`, `FailureMessage`, `ForbiddenMessage`, `NotFoundMessage`, and `InvalidRequestMessage`
+  all now expose three constructors: parameterless, `(string message)`, and `(string message, string code)`.
+  Previously only `InvalidRequestMessage` had constructors; everything else required object-initializer syntax.
+- `MessageBase.ToString()` now returns the `Message` property text (was: type name).
+
+#### MiddleMan.Zero.DependencyInjection
+- New `AddMiddleManZero(params Assembly[] assemblies)` overload for scoped scanning.
+- New `AddMiddleManZero(IEnumerable<Assembly> assemblies, ServiceLifetime lifetime)` overload.
+- `AddMiddleManZero` is now idempotent — calling it multiple times does not produce duplicate
+  registrations of the same `(serviceType, implementationType)` pair.
+- `AddMiddleManZero` is now resilient to `ReflectionTypeLoadException` from third-party assemblies
+  with unresolvable references; only loadable types are scanned.
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- `ToTypedActionResult<TResponse>` no longer requires `where TResponse : class`. Value-typed
+  responses (e.g., `Guid`) now work with the typed extension.
+
+### Fixed
+
+#### MiddleMan.Zero.AspNetCore.Http
+- `Failure` (HTTP 500) responses now serialize the actual message text in the ProblemDetails
+  `detail` field. Previously it joined `MessageBase.ToString()`, which produced type names
+  (e.g., `"MiddleMan.Zero.FailureMessage; …"`).
+
+#### MiddleMan.Zero
+- Removed a duplicated `<summary>` block on `HandlerBase<TRequest>.ValidateAsync` XML doc.
+- Removed a redundant `ArgumentNullException` check in `HandlerBase<TRequest, TResponse>.CreateResult`
+  — the same check is enforced by `ResultBase<TResponse>`'s constructor.
+
+#### Samples (IceCreamTruck)
+- `IOrderRepository` now correctly lives in the `IceCreamTruck.Repositories` namespace
+  (was: leaked into the global namespace).
+- `OrderRepository` and `FlavorRepository` are now thread-safe under concurrent integration tests.
+
+### Package Links
+- [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/2.0.0)
+- [MiddleMan.Zero.Abstractions](https://www.nuget.org/packages/MiddleMan.Zero.Abstractions/2.0.0)
+- [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/2.0.0)
+- [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/2.0.0)
+- [MiddleMan.Zero.AspNetCore.Http](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Http/2.0.0)
+
 ## [1.2.0] - 2026-04-18
 
 ### Added
@@ -177,6 +245,7 @@ This is the first stable release of MiddleMan.Zero, a lightweight, zero-ceremony
 - [MiddleMan.Zero.DependencyInjection](https://www.nuget.org/packages/MiddleMan.Zero.DependencyInjection/1.0.0)
 - [MiddleMan.Zero.AspNetCore.Mvc](https://www.nuget.org/packages/MiddleMan.Zero.AspNetCore.Mvc/1.0.0)
 
+[2.0.0]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/lotea-be/MiddleMan.Zero/compare/v1.1.0...v1.1.1
