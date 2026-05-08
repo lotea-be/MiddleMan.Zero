@@ -123,6 +123,33 @@
                 "reveal": "always",
                 "panel": "new"
             }
+        },
+        {
+            "label": "coverage-serve",
+            "type": "shell",
+            "command": "fuser -k 8080/tcp 2>/dev/null; sleep 0.3; python3 -m http.server 8080 --directory ${workspaceFolder}/coverage-report",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    { "regexp": "^$", "file": 1, "location": 2, "message": 3 }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^Serving HTTP",
+                    "endsPattern": "^Serving HTTP"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "coverage",
+            "dependsOn": ["coverage-report", "coverage-serve"],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": "test"
         }
 	]
 }
