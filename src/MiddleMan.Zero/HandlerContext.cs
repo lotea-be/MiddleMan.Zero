@@ -15,7 +15,8 @@ public class HandlerContext
 
     /// <summary>
     /// Gets a value indicating whether the request is valid.
-    /// Returns false if any messages of type <see cref="InvalidRequestMessage"/> are present in the context.
+    /// Set to <see langword="false"/> when an <see cref="InvalidRequestMessage"/> is logged via
+    /// <see cref="Log(InvalidRequestMessage)"/>; once flipped it is not reset.
     /// </summary>
     public bool IsRequestValid { get; private set; } = true;
 

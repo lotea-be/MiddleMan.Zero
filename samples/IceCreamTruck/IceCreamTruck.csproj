@@ -5,8 +5,4 @@
     <ProjectReference Include="../../src/MiddleMan.Zero.DependencyInjection/MiddleMan.Zero.DependencyInjection.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Requests/" />
-  </ItemGroup>
-
 </Project>

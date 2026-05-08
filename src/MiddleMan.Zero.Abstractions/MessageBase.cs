@@ -10,30 +10,63 @@ namespace MiddleMan.Zero.Abstractions;
 public abstract class MessageBase
 {
     /// <summary>
-    /// Gets or sets the unique identifier for this message.
-    /// Automatically initialized with a new GUID.
+    /// Initializes a new instance of the <see cref="MessageBase"/> class.
     /// </summary>
-    public Guid Id { get; set; } = Guid.NewGuid();
+    protected MessageBase()
+    {
+    }
 
     /// <summary>
-    /// Gets or sets the correlation identifier used to track related messages.
-    /// Automatically initialized with a new GUID.
+    /// Initializes a new instance of the <see cref="MessageBase"/> class with the specified message text.
     /// </summary>
-    public Guid CorrelationId { get; set; } = Guid.NewGuid();
+    /// <param name="message">The human-readable message description.</param>
+    protected MessageBase(string message)
+    {
+        Message = message;
+    }
 
     /// <summary>
-    /// Gets or sets the creation timestamp of this message.
+    /// Initializes a new instance of the <see cref="MessageBase"/> class with the specified message text and code.
+    /// </summary>
+    /// <param name="message">The human-readable message description.</param>
+    /// <param name="code">A code that categorizes or identifies the message.</param>
+    protected MessageBase(string message, string code)
+    {
+        Message = message;
+        Code = code;
+    }
+
+    /// <summary>
+    /// Gets the unique identifier for this message.
+    /// Automatically initialized with a new GUID.
+    /// </summary>
+    public Guid Id { get; init; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets the correlation identifier used to track related messages.
+    /// Automatically initialized with a new GUID.
+    /// </summary>
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets the creation timestamp of this message.
     /// Automatically set to the current UTC time when instantiated.
     /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Gets or sets a human-readable message description.
+    /// Gets the human-readable message description.
     /// </summary>
-    public string Message { get; set; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets a code that can be used to categorize or identify the message type.
+    /// Gets the code that can be used to categorize or identify the message type.
     /// </summary>
-    public string Code { get; set; } = string.Empty;
+    public string Code { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Returns the human-readable <see cref="Message"/> text for this instance.
+    /// </summary>
+    /// <returns>The value of <see cref="Message"/>.</returns>
+    public override string ToString() => Message;
 }

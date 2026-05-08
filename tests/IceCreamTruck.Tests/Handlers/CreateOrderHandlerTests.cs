@@ -2,6 +2,7 @@ using FakeItEasy;
 
 using IceCreamTruck.Contracts;
 using IceCreamTruck.Handlers;
+using IceCreamTruck.Repositories;
 
 using MiddleMan.Zero;
 using MiddleMan.Zero.Abstractions;

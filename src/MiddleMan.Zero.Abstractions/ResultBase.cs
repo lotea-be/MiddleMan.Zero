@@ -25,6 +25,13 @@ public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageB
 /// <param name="response">The response data.</param>
 /// <param name="resultStatus">The status of the operation result.</param>
 /// <param name="messages">Collection of messages associated with the operation.</param>
+/// <remarks>
+/// <see cref="Response"/> is annotated as nullable because it is only guaranteed to be non-null
+/// when <see cref="ResultBase.ResultStatus"/> is <see cref="ResultStatus.Successful"/>. For all
+/// other statuses (<see cref="ResultStatus.NotFound"/>, <see cref="ResultStatus.Invalid"/>,
+/// <see cref="ResultStatus.Failure"/>, <see cref="ResultStatus.Forbidden"/>) the response is the
+/// default value of <typeparamref name="TResponse"/> (null for reference types).
+/// </remarks>
 /// <exception cref="ArgumentNullException">Thrown when response is null and resultStatus is Successful.</exception>
 public abstract class ResultBase<TResponse>(TResponse? response, ResultStatus resultStatus, IEnumerable<MessageBase> messages)
     : ResultBase(resultStatus, messages)
@@ -32,7 +39,11 @@ public abstract class ResultBase<TResponse>(TResponse? response, ResultStatus re
     /// <summary>
     /// Gets the response data associated with the result.
     /// </summary>
-    public TResponse Response { get; } = resultStatus == ResultStatus.Successful && response is null
+    /// <remarks>
+    /// Only guaranteed to be non-null when <see cref="ResultBase.ResultStatus"/> is
+    /// <see cref="ResultStatus.Successful"/>.
+    /// </remarks>
+    public TResponse? Response { get; } = resultStatus == ResultStatus.Successful && response is null
         ? throw new ArgumentNullException(nameof(response), "Response cannot be null when ResultStatus is Successful.")
-        : response!;
+        : response;
 }

@@ -9,21 +9,32 @@ internal class FlavorRepository : IFlavorRepository
         new Flavor { Name = "Chocolate" },
         new Flavor { Name = "Strawberry" }
     ];
+    private readonly object _gate = new();
 
     public Task AddAsync(string flavorName, CancellationToken cancellationToken = default)
     {
-        _flavors.Add(new Flavor { Name = flavorName });
+        lock (_gate)
+        {
+            _flavors.Add(new Flavor { Name = flavorName });
+        }
+
         return Task.CompletedTask;
     }
 
     public Task<Flavor[]> GetAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_flavors.ToArray());
+        lock (_gate)
+        {
+            return Task.FromResult(_flavors.ToArray());
+        }
     }
 
     public Task<Flavor?> GetAsync(string flavor, CancellationToken cancellationToken = default)
     {
-        var existingFlavor = _flavors.FirstOrDefault(f => string.Equals(f.Name, flavor, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(existingFlavor);
+        lock (_gate)
+        {
+            var existingFlavor = _flavors.FirstOrDefault(f => string.Equals(f.Name, flavor, StringComparison.OrdinalIgnoreCase));
+            return Task.FromResult(existingFlavor);
+        }
     }
 }
