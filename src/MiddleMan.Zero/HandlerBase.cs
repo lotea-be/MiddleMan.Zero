@@ -73,6 +73,12 @@ public abstract class HandlerBase<TRequest> : IHandleAsync<TRequest>
             return new(ResultStatus.Invalid, context.Get<InvalidRequestMessage>());
         }
 
+        // Check for conflict
+        if (context.IsConflict)
+        {
+            return new(ResultStatus.Conflict, context.Get<ConflictMessage>());
+        }
+
         // Check for Failure
         if (context.IsSuccessful)
         {
@@ -154,6 +160,12 @@ public abstract class HandlerBase<TRequest, TResponse> : IHandleAsync<TRequest, 
         if (!context.IsRequestValid)
         {
             return new(default, ResultStatus.Invalid, context.Get<InvalidRequestMessage>());
+        }
+
+        // Check for conflict
+        if (context.IsConflict)
+        {
+            return new(default, ResultStatus.Conflict, context.Get<ConflictMessage>());
         }
 
         // Successful: response null-check is enforced by Result<TResponse> constructor.

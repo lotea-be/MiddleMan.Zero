@@ -54,5 +54,25 @@ namespace MiddleMan.Zero.Tests
                 () => context.IsSuccessful.ShouldBeFalse()
             );
         }
+
+        [Fact]
+        public void IsConflict_ReturnsTrue_AndOnlyFlipsConflictAndSuccessful_WhenConflictMessageLogged()
+        {
+            // Arrange
+            var context = new HandlerContext();
+            var conflictMessage = new ConflictMessage("Duplicate resource.");
+
+            // Act
+            context.Log(conflictMessage);
+
+            // Assert
+            context.ShouldSatisfyAllConditions(
+                () => context.IsConflict.ShouldBeTrue(),
+                () => context.IsSuccessful.ShouldBeFalse(),
+                () => context.IsRequestValid.ShouldBeTrue(),
+                () => context.IsNotFound.ShouldBeFalse(),
+                () => context.IsForbidden.ShouldBeFalse()
+            );
+        }
     }
 }

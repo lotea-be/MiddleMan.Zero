@@ -36,6 +36,11 @@ public class HandlerContext
     public bool IsForbidden { get; private set; } = false;
 
     /// <summary>
+    /// Gets a value indicating whether the operation conflicts with the current state of the resource.
+    /// </summary>
+    public bool IsConflict { get; private set; } = false;
+
+    /// <summary>
     /// Gets all messages of the specified type from the context.
     /// </summary>
     /// <typeparam name="TMessage">The type of messages to retrieve.</typeparam>
@@ -101,6 +106,17 @@ public class HandlerContext
         IsSuccessful = false;
         IsForbidden = true;
         LogMessage(forbiddenMessage);
+    }
+
+    /// <summary>
+    /// Logs a conflict message to the context and marks the operation as conflicting with current state.
+    /// </summary>
+    /// <param name="conflictMessage">The message to log.</param>
+    public void Log(ConflictMessage conflictMessage)
+    {
+        IsSuccessful = false;
+        IsConflict = true;
+        LogMessage(conflictMessage);
     }
 
     private void LogMessage(MessageBase message)

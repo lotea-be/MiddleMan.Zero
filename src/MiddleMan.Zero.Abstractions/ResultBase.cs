@@ -29,8 +29,9 @@ public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageB
 /// <see cref="Response"/> is annotated as nullable because it is only guaranteed to be non-null
 /// when <see cref="ResultBase.ResultStatus"/> is <see cref="ResultStatus.Successful"/>. For all
 /// other statuses (<see cref="ResultStatus.NotFound"/>, <see cref="ResultStatus.Invalid"/>,
-/// <see cref="ResultStatus.Failure"/>, <see cref="ResultStatus.Forbidden"/>) the response is the
-/// default value of <typeparamref name="TResponse"/> (null for reference types).
+/// <see cref="ResultStatus.Failure"/>, <see cref="ResultStatus.Forbidden"/>,
+/// <see cref="ResultStatus.Conflict"/>) the response is the default value of
+/// <typeparamref name="TResponse"/> (null for reference types).
 /// </remarks>
 /// <exception cref="ArgumentNullException">Thrown when response is null and resultStatus is Successful.</exception>
 public abstract class ResultBase<TResponse>(TResponse? response, ResultStatus resultStatus, IEnumerable<MessageBase> messages)

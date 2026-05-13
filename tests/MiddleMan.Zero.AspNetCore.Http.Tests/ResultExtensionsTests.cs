@@ -79,6 +79,21 @@ public class ResultExtensionsTests
     }
 
     [Fact]
+    public void ToResult_ReturnsConflictWithStatusCode409_WhenResultIsConflict()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new ConflictMessage("Already exists") };
+        var result = new Result(ResultStatus.Conflict, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
+        statusResult!.StatusCode.ShouldBe(409);
+    }
+
+    [Fact]
     public void ToResult_ReturnsProblemWithStatusCode500_WhenResultIsUndefined()
     {
         // Arrange
@@ -208,6 +223,21 @@ public class ResultExtensionsTests
 
         // Assert
         iResult.ShouldBeOfType<ForbidHttpResult>();
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsConflictWithStatusCode409_WhenResultIsConflict()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new ConflictMessage("Already exists") };
+        var result = new Result<TestResponse>(null, ResultStatus.Conflict, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
+        statusResult!.StatusCode.ShouldBe(409);
     }
 
     [Fact]

@@ -31,11 +31,25 @@ the breaking ones are listed first with migration steps.
 
 ### Added
 
+#### MiddleMan.Zero.Abstractions
+- Added `Conflict` status to `ResultStatus` enum for state-conflict errors (e.g., duplicate resource
+  creation, optimistic-concurrency violations).
+
 #### MiddleMan.Zero
 - `DebugMessage`, `FailureMessage`, `ForbiddenMessage`, `NotFoundMessage`, and `InvalidRequestMessage`
   all now expose three constructors: parameterless, `(string message)`, and `(string message, string code)`.
   Previously only `InvalidRequestMessage` had constructors; everything else required object-initializer syntax.
 - `MessageBase.ToString()` now returns the `Message` property text (was: type name).
+- Added `ConflictMessage` class for representing state-conflict errors. Logging it via
+  `HandlerContext.Log(ConflictMessage)` flips the new `IsConflict` flag and yields
+  `ResultStatus.Conflict`. Precedence in `HandlerBase.CreateResult`:
+  `Forbidden` > `Invalid` > `Conflict` > `Successful` > `NotFound` > `Failure`.
+
+#### MiddleMan.Zero.AspNetCore.Mvc
+- Added support for `Conflict` status mapping to HTTP 409 Conflict.
+
+#### MiddleMan.Zero.AspNetCore.Http
+- Added support for `Conflict` status mapping to HTTP 409 Conflict.
 
 #### MiddleMan.Zero.DependencyInjection
 - New `AddMiddleManZero(params Assembly[] assemblies)` overload for scoped scanning.

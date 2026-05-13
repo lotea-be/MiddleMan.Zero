@@ -28,5 +28,9 @@ public enum ResultStatus
     /// <summary>
     /// The operation was forbidden due to insufficient permissions.
     /// </summary>
-    Forbidden = 5
+    Forbidden = 5,
+    /// <summary>
+    /// The operation conflicts with the current state of the resource.
+    /// </summary>
+    Conflict = 6
 }
