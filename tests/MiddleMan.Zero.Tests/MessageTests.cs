@@ -32,11 +32,7 @@ public class MessageTests
     }
 
     [Theory]
-    [InlineData(typeof(DebugMessage))]
-    [InlineData(typeof(FailureMessage))]
-    [InlineData(typeof(ForbiddenMessage))]
-    [InlineData(typeof(NotFoundMessage))]
-    [InlineData(typeof(InvalidRequestMessage))]
+    [ClassData(typeof(MessageTypeData))]
     public void Message_StringCtor_SetsMessage(Type messageType)
     {
         var msg = (MessageBase)Activator.CreateInstance(messageType, "boom")!;
@@ -48,11 +44,7 @@ public class MessageTests
     }
 
     [Theory]
-    [InlineData(typeof(DebugMessage))]
-    [InlineData(typeof(FailureMessage))]
-    [InlineData(typeof(ForbiddenMessage))]
-    [InlineData(typeof(NotFoundMessage))]
-    [InlineData(typeof(InvalidRequestMessage))]
+    [ClassData(typeof(MessageTypeData))]
     public void Message_StringStringCtor_SetsMessageAndCode(Type messageType)
     {
         var msg = (MessageBase)Activator.CreateInstance(messageType, "boom", "code_42")!;
@@ -64,11 +56,7 @@ public class MessageTests
     }
 
     [Theory]
-    [InlineData(typeof(DebugMessage))]
-    [InlineData(typeof(FailureMessage))]
-    [InlineData(typeof(ForbiddenMessage))]
-    [InlineData(typeof(NotFoundMessage))]
-    [InlineData(typeof(InvalidRequestMessage))]
+    [ClassData(typeof(MessageTypeData))]
     public void Message_ParameterlessCtor_Works(Type messageType)
     {
         var msg = (MessageBase)Activator.CreateInstance(messageType)!;
@@ -77,5 +65,18 @@ public class MessageTests
             () => msg.Message.ShouldBe(string.Empty),
             () => msg.Code.ShouldBe(string.Empty)
         );
+    }
+
+    private sealed class MessageTypeData : TheoryData<Type>
+    {
+        public MessageTypeData()
+        {
+            Add(typeof(DebugMessage));
+            Add(typeof(FailureMessage));
+            Add(typeof(ForbiddenMessage));
+            Add(typeof(ConflictMessage));
+            Add(typeof(NotFoundMessage));
+            Add(typeof(InvalidRequestMessage));
+        }
     }
 }

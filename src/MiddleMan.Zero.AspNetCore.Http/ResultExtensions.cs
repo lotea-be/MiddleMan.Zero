@@ -25,6 +25,7 @@ public static class ResultExtensions
                 detail: JoinMessages(result.Messages),
                 statusCode: 500),
             ResultStatus.Forbidden => Results.Forbid(),
+            ResultStatus.Conflict => Results.Conflict(new { messages = result.Messages }),
             _ => Results.Problem(
                 detail: JoinMessages(result.Messages),
                 statusCode: 500),
@@ -48,6 +49,7 @@ public static class ResultExtensions
                 detail: JoinMessages(result.Messages),
                 statusCode: 500),
             ResultStatus.Forbidden => Results.Forbid(),
+            ResultStatus.Conflict => Results.Conflict(new { messages = result.Messages }),
             _ => Results.Problem(
                 detail: JoinMessages(result.Messages),
                 statusCode: 500)

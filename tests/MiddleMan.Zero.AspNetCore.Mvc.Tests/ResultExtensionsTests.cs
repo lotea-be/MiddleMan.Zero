@@ -99,6 +99,26 @@ public class ResultExtensionsTests
     }
 
     [Fact]
+    public void ToActionResult_ReturnsConflictObjectResult_WhenResultIsConflict()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new ConflictMessage("Already exists") };
+        var result = new Result(ResultStatus.Conflict, messages);
+
+        // Act
+        var actionResult = result.ToActionResult();
+
+        // Assert
+        actionResult.ShouldSatisfyAllConditions(
+            () => actionResult.ShouldNotBeNull(),
+            () => actionResult.ShouldBeOfType<ConflictObjectResult>()
+        );
+
+        var conflictResult = (ConflictObjectResult)actionResult;
+        conflictResult.StatusCode.ShouldBe(409);
+    }
+
+    [Fact]
     public void ToActionResult_ReturnsObjectResultWith500_WhenResultIsUndefined()
     {
         // Arrange
@@ -232,6 +252,26 @@ public class ResultExtensionsTests
     }
 
     [Fact]
+    public void ToActionResult_Generic_ReturnsConflictObjectResult_WhenResultIsConflict()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new ConflictMessage("Already exists") };
+        var result = new Result<TestResponse>(null, ResultStatus.Conflict, messages);
+
+        // Act
+        var actionResult = result.ToActionResult();
+
+        // Assert
+        actionResult.ShouldSatisfyAllConditions(
+            () => actionResult.ShouldNotBeNull(),
+            () => actionResult.ShouldBeOfType<ConflictObjectResult>()
+        );
+
+        var conflictResult = (ConflictObjectResult)actionResult;
+        conflictResult.StatusCode.ShouldBe(409);
+    }
+
+    [Fact]
     public void ToActionResult_Generic_ReturnsObjectResultWith500_WhenResultIsUndefined()
     {
         // Arrange
@@ -336,6 +376,24 @@ public class ResultExtensionsTests
         // Assert
         actionResult.ShouldNotBeNull();
         actionResult.Result.ShouldBeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public void ToTypedActionResult_ReturnsConflictObjectResult_WhenResultIsConflict()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new ConflictMessage("Already exists") };
+        var result = new Result<TestResponse>(null, ResultStatus.Conflict, messages);
+
+        // Act
+        var actionResult = result.ToTypedActionResult();
+
+        // Assert
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<ConflictObjectResult>();
+
+        var conflictResult = (ConflictObjectResult)actionResult.Result!;
+        conflictResult.StatusCode.ShouldBe(409);
     }
 
     [Fact]

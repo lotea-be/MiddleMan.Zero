@@ -183,6 +183,59 @@ public class MiddleManTests
         );
     }
 
+    [Fact]
+    public async Task MiddleMan_ReturnsConflict_WhenHandlerLogsConflictMessage()
+    {
+        // Arrange - non-generic (void) handler path
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithConflict();
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Conflict),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => result.Messages[0].ShouldBeOfType<ConflictMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_WithResponse_ReturnsConflict_WhenHandlerLogsConflictMessage()
+    {
+        // Arrange - generic handler path
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithResponseConflict();
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Conflict),
+            () => result.Response.ShouldBeNull(),
+            () => result.Messages.ShouldHaveSingleItem(),
+            () => result.Messages[0].ShouldBeOfType<ConflictMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_InvalidWinsOverConflict_WhenBothAreLogged()
+    {
+        // Arrange - validation fails before HandleAsync runs, so Conflict can't co-exist via the
+        // normal pipeline; assert precedence directly through a handler that logs both during validation.
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DummyHandlerWithInvalidAndConflict();
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert - Invalid precedence: HandleAsync never runs, but if both messages co-existed,
+        // CreateResult must still surface Invalid over Conflict.
+        result.ResultStatus.ShouldBe(ResultStatus.Invalid);
+    }
+
     public class DummyRequest { public required string MyInput { get; set; } }
     public class DummyResponse { public required string MyOutput { get; set; } }
 
@@ -286,5 +339,43 @@ public class MiddleManTests
             context.Log(new ForbiddenMessage());
             return Task.FromResult<DummyResponse?>(null);
         }
+    }
+
+    public class DummyHandlerWithConflict : HandlerBase<DummyRequest>
+    {
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        protected override Task HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            context.Log(new ConflictMessage("Resource state conflicts with request.", "dummy_conflict"));
+            return Task.CompletedTask;
+        }
+    }
+
+    public class DummyHandlerWithResponseConflict : HandlerBase<DummyRequest, DummyResponse>
+    {
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        protected override Task<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            context.Log(new ConflictMessage("Resource state conflicts with request.", "dummy_conflict"));
+            return Task.FromResult<DummyResponse?>(null);
+        }
+    }
+
+    public class DummyHandlerWithInvalidAndConflict : HandlerBase<DummyRequest>
+    {
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            // Log both to exercise the Invalid-over-Conflict precedence path in CreateResult.
+            context.Log(new ConflictMessage());
+            context.Log(new InvalidRequestMessage("Invalid."));
+            return Task.CompletedTask;
+        }
+
+        protected override Task HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 }
