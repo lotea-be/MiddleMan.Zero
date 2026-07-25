@@ -5,6 +5,11 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
+    <!-- Forward-pin transitive Microsoft.OpenApi off the chain flagged by GHSA-v5pm-xwqc-g5wc
+         (high); patched range is > 2.7.4. Only the net10 leg pulls the vulnerable 2.x (via
+         Microsoft.AspNetCore.OpenApi 10.x); net8/net9 resolve Microsoft.OpenApi 1.6.x, which is
+         outside the advisory range and uses a different API surface, so they stay unpinned. -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.6" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.15" />

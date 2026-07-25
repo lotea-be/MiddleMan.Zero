@@ -39,6 +39,16 @@ MiddleMan.Zero is a lightweight **mediator / CQRS handler** library (5 NuGet pac
 - **Error handling is message-driven, not exceptions.** Handlers never return errors — they `context.Log(...)` a typed message; the message *type* mutates `HandlerContext` flags. Adding a status/message type touches many files in lockstep (see Gotchas).
 - `BuildInParallel=false` is deliberate — targets must build sequentially. Do not re-enable.
 
+### Public-API discipline — keep contracts as strict as possible
+
+Every public, settable, or unsealed member is a versioned contract you cannot retract until the next **major**. These packages ship on NuGet; v2 already tightened the surface (init-only `MessageBase`), and `.Zero = minimal` is a promise. Default to the strictest form and widen only when a consumer genuinely needs it:
+
+- **`internal` by default; `public` is a deliberate act.** Do not widen visibility to satisfy a test — use `InternalsVisibleTo`. New public surface is enforced, not just reviewed: see the **PublicAPI analyzer** below.
+- **Immutable by default — `init`/`readonly`, not `set`.** Applies to contract, message, and result types. **Exception:** `HandlerContext` is a deliberately mutable state accumulator (`IsRequestValid`, `IsSuccessful`, `IsNotFound`, …); its setters are load-bearing, not an oversight.
+- **`sealed` by default.** Seal every type **not** designed as an extension point — concrete `Messages/` classes, `Result`, mappers. **Exception:** the `HandlerBase<…>` templates exist to be inherited (consumers override `ValidateAsync`/`HandleAsync`) and must stay open.
+- **Abstract only at the consumer seam.** The seam is already an abstraction — consumers depend on `IHandleAsync<>` and `ResultBase`. Do **not** interface-ify internals for their own sake (`IMessageBase`, `IHandlerContext`, …); that is surface and indirection a minimal library refuses. "Interface at the seam, concrete and sealed everywhere else."
+- **Enforcement (not just convention): the PublicAPI analyzer.** `Microsoft.CodeAnalysis.PublicApiAnalyzers` tracks each package's surface in `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`. Any new public member breaks the build (RS0016) until it is added to `PublicAPI.Unshipped.txt`, making every surface change an explicit, reviewable diff line. On release, move `Unshipped` entries into `Shipped`. `CA1852` seals internal types automatically.
+
 ## Testing
 
 - **xUnit v3** is the runner. Test projects auto-import `Xunit` and `Shouldly` as global usings (in `tests/Directory.Build.props`) — do **not** add `using Xunit;` / `using Shouldly;`.

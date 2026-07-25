@@ -4,12 +4,8 @@
     <!-- Allow pinning transitive dependencies (e.g. to force a security-patched version). -->
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-  <!-- Forward-pin transitive Microsoft.OpenApi off the chain flagged by
-       GHSA-v5pm-xwqc-g5wc (high); patched range is > 2.7.4. Only the net10 leg pulls the
-       vulnerable 2.x (via Microsoft.AspNetCore.OpenApi 10.x); the net8/net9 legs resolve
-       Microsoft.OpenApi 1.6.x, which is outside the advisory range and uses a different
-       API surface, so they must be left unpinned. -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.6" />
-  </ItemGroup>
+  <!-- Only ManagePackageVersionsCentrally + transitive pinning belong here — they apply
+       repo-wide. Package versions live in the src/, tests/, and samples/ child props.
+       The Microsoft.OpenApi security pin moved to samples/ and tests/ (the only projects
+       that pull it, via ASP.NET Core OpenAPI on the net10 leg). -->
 </Project>

@@ -32,6 +32,7 @@ Sample API (`samples/IceCreamTruck.WebApi`) can be run with `dotnet run --projec
 - Nullable annotations are enforced everywhere.
 - EditorConfig style violations surface as errors. The `.editorconfig` enforces things like `dotnet_separate_import_directive_groups = true` and `dotnet_sort_system_directives_first = true`.
 - Test projects whitelist `CS1591` via `tests/Directory.Build.props` — production projects do not.
+- **Public-API surface is tracked.** `Microsoft.CodeAnalysis.PublicApiAnalyzers` breaks the build (RS0016) on any new public member until it is declared in that package's `PublicAPI.Unshipped.txt`. Keep contracts strict — `internal`/`sealed`/`init` by default, `public`/open/settable only when a consumer needs it (the `HandlerBase` templates and the mutable `HandlerContext` are the deliberate exceptions). See the stack cheatsheet's "Public-API discipline" for the full rationale.
 
 ## Coverage threshold is a hard gate
 

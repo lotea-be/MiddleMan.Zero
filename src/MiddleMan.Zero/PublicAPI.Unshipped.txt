@@ -1,0 +1,53 @@
+#nullable enable
+abstract MiddleMan.Zero.HandlerBase<TRequest, TResponse>.HandleAsync(TRequest request, MiddleMan.Zero.HandlerContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResponse?>!
+abstract MiddleMan.Zero.HandlerBase<TRequest, TResponse>.ValidateAsync(TRequest request, MiddleMan.Zero.HandlerContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+abstract MiddleMan.Zero.HandlerBase<TRequest>.HandleAsync(TRequest request, MiddleMan.Zero.HandlerContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+abstract MiddleMan.Zero.HandlerBase<TRequest>.ValidateAsync(TRequest request, MiddleMan.Zero.HandlerContext! context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+MiddleMan.Zero.ConflictMessage
+MiddleMan.Zero.ConflictMessage.ConflictMessage() -> void
+MiddleMan.Zero.ConflictMessage.ConflictMessage(string! message) -> void
+MiddleMan.Zero.ConflictMessage.ConflictMessage(string! message, string! code) -> void
+MiddleMan.Zero.DebugMessage
+MiddleMan.Zero.DebugMessage.DebugMessage() -> void
+MiddleMan.Zero.DebugMessage.DebugMessage(string! message) -> void
+MiddleMan.Zero.DebugMessage.DebugMessage(string! message, string! code) -> void
+MiddleMan.Zero.FailureMessage
+MiddleMan.Zero.FailureMessage.FailureMessage() -> void
+MiddleMan.Zero.FailureMessage.FailureMessage(string! message) -> void
+MiddleMan.Zero.FailureMessage.FailureMessage(string! message, string! code) -> void
+MiddleMan.Zero.ForbiddenMessage
+MiddleMan.Zero.ForbiddenMessage.ForbiddenMessage() -> void
+MiddleMan.Zero.ForbiddenMessage.ForbiddenMessage(string! message) -> void
+MiddleMan.Zero.ForbiddenMessage.ForbiddenMessage(string! message, string! code) -> void
+MiddleMan.Zero.HandlerBase<TRequest, TResponse>
+MiddleMan.Zero.HandlerBase<TRequest, TResponse>.HandleAsync(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase<TResponse>!>!
+MiddleMan.Zero.HandlerBase<TRequest, TResponse>.HandlerBase() -> void
+MiddleMan.Zero.HandlerBase<TRequest>
+MiddleMan.Zero.HandlerBase<TRequest>.HandleAsync(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase!>!
+MiddleMan.Zero.HandlerBase<TRequest>.HandlerBase() -> void
+MiddleMan.Zero.HandlerContext
+MiddleMan.Zero.HandlerContext.HandlerContext() -> void
+MiddleMan.Zero.HandlerContext.IsConflict.get -> bool
+MiddleMan.Zero.HandlerContext.IsForbidden.get -> bool
+MiddleMan.Zero.HandlerContext.IsNotFound.get -> bool
+MiddleMan.Zero.HandlerContext.IsRequestValid.get -> bool
+MiddleMan.Zero.HandlerContext.IsSuccessful.get -> bool
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.ConflictMessage! conflictMessage) -> void
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.DebugMessage! message) -> void
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.FailureMessage! message) -> void
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.ForbiddenMessage! forbiddenMessage) -> void
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.InvalidRequestMessage! message) -> void
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.NotFoundMessage! notFoundMessage) -> void
+MiddleMan.Zero.HandlerContext.Messages.get -> System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>!
+MiddleMan.Zero.InvalidRequestMessage
+MiddleMan.Zero.InvalidRequestMessage.InvalidRequestMessage() -> void
+MiddleMan.Zero.InvalidRequestMessage.InvalidRequestMessage(string! message) -> void
+MiddleMan.Zero.InvalidRequestMessage.InvalidRequestMessage(string! message, string! code) -> void
+MiddleMan.Zero.NotFoundMessage
+MiddleMan.Zero.NotFoundMessage.NotFoundMessage() -> void
+MiddleMan.Zero.NotFoundMessage.NotFoundMessage(string! message) -> void
+MiddleMan.Zero.NotFoundMessage.NotFoundMessage(string! message, string! code) -> void
+MiddleMan.Zero.Result
+MiddleMan.Zero.Result.Result(MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void
+MiddleMan.Zero.Result<TResponse>
+MiddleMan.Zero.Result<TResponse>.Result(TResponse? response, MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void

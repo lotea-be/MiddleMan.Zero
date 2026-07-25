@@ -32,6 +32,20 @@
         <!-- Deterministic Builds -->
         <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
         <Deterministic>true</Deterministic>
+
+        <!-- Package Validation — the release-time API-compat gate (runs during `dotnet pack`).
+             * Baseline-free (active now): verifies the net8/net9/net10 targets in each package
+               expose a consistent surface — a member on one TFM but missing on another fails.
+             * Baseline diff (activated at v2 release): once PackageValidationBaselineVersion is
+               set, ApiCompat compares the packed package against that PUBLISHED version and FAILS
+               `dotnet pack` on any breaking API change — so a breaking change can never ship as a
+               minor/patch. This is the CD gate; it complements the PublicAPI source ledger.
+             Baseline is intentionally UNSET until 2.0.0 is on NuGet: v2 deliberately breaks vs
+             1.2.0, and the baseline package must already be published. After releasing 2.0.0
+             stable, uncomment the baseline below (set to 2.0.0); bump it only on a new major.
+             See PUBLISHING.md → "Public API surface & the CD compat gate". -->
+        <EnablePackageValidation>true</EnablePackageValidation>
+        <!-- <PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion> -->
     </PropertyGroup>
 
     <ItemGroup>
@@ -41,6 +55,13 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="All" />
+    </ItemGroup>
+
+    <!-- Public-API surface tracking (RS0016). Files live next to each package's .csproj. -->
+    <ItemGroup>
+        <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+        <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
     </ItemGroup>
 
 </Project>
