@@ -7,9 +7,11 @@
     <ProjectReference Include="../IceCreamTruck/IceCreamTruck.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- Built-in OpenAPI document generation + Scalar UI are .NET 9+ only.
+       .NET 8's Microsoft.AspNetCore.OpenApi has no AddOpenApi()/MapOpenApi(). -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
 </Project>
