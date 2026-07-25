@@ -6,7 +6,7 @@ A sample ASP.NET Core Web API that demonstrates the usage of **MiddleMan.Zero** 
 
 - RESTful API endpoints for ice cream orders and flavors
 - Automatic conversion of `Result<T>` to appropriate HTTP responses using `MiddleMan.Zero.AspNetCore.Mvc` and `MiddleMan.Zero.AspNetCore.Http`
-- Swagger/OpenAPI documentation
+- OpenAPI documentation with a Scalar API reference UI (.NET 9+)
 - Dependency injection integration
 
 ## Running the Application
@@ -19,7 +19,8 @@ dotnet run
 The API will be available at:
 - HTTP: http://localhost:5000
 - HTTPS: https://localhost:5001
-- Swagger UI: https://localhost:5001/swagger
+- Scalar API reference (.NET 9+, Development only): https://localhost:5001/scalar/v1
+- OpenAPI document (.NET 9+): https://localhost:5001/openapi/v1.json
 
 ## API Endpoints
 
@@ -110,4 +111,5 @@ IceCreamTruck.WebApi/
 - **IceCreamTruck**: Core business logic library
 - **MiddleMan.Zero.AspNetCore.Mvc**: MVC Controller integration
 - **MiddleMan.Zero.AspNetCore.Http**: Minimal API integration
-- **Swashbuckle.AspNetCore**: OpenAPI/Swagger documentation
+- **Microsoft.AspNetCore.OpenApi**: built-in OpenAPI document generation (.NET 9+)
+- **Scalar.AspNetCore**: interactive API reference UI (.NET 9+)

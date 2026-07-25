@@ -1,6 +1,10 @@
 using IceCreamTruck;
 using IceCreamTruck.WebApi.Endpoints;
 
+#if NET9_0_OR_GREATER
+using Scalar.AspNetCore;
+#endif
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -8,25 +12,21 @@ builder.Services.AddControllers();
 
 builder.Services.AddIceCreamTruck();
 
-// Add OpenAPI/Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new()
-    {
-        Title = "Ice Cream Truck API",
-        Version = "v1",
-        Description = "A sample API demonstrating MiddleMan.Zero with ASP.NET Core"
-    });
-});
+#if NET9_0_OR_GREATER
+// Add OpenAPI document generation (built into ASP.NET Core 9+)
+builder.Services.AddOpenApi();
+#endif
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+#if NET9_0_OR_GREATER
+    // Serve the OpenAPI document at /openapi/v1.json and the Scalar API reference UI at /scalar/v1
+    app.MapOpenApi();
+    app.MapScalarApiReference(options => options.WithTitle("Ice Cream Truck API"));
+#endif
 }
 
 app.UseHttpsRedirection();
