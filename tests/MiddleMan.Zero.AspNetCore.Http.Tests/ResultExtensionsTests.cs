@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace MiddleMan.Zero.AspNetCore.Http.Tests;
 
 public class ResultExtensionsTests
 {
-    #region ToResult (non-generic ResultBase)
+    private const string ProblemJsonContentType = "application/problem+json";
+
+    #region ToResult (non-generic ResultBase) -- success path
 
     [Fact]
     public void ToResult_ReturnsOk_WhenResultIsSuccessful()
@@ -20,53 +21,60 @@ public class ResultExtensionsTests
         iResult.ShouldBeOfType<Ok>();
     }
 
-    [Fact]
-    public void ToResult_ReturnsNotFoundWithStatusCode404_WhenResultIsNotFound()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new NotFoundMessage() };
-        var result = new Result(ResultStatus.NotFound, messages);
+    #endregion
 
-        // Act
-        var iResult = result.ToResult();
-
-        // Assert
-        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
-        statusResult!.StatusCode.ShouldBe(404);
-    }
+    #region ToResult (non-generic ResultBase) -- non-success envelope
 
     [Fact]
-    public void ToResult_ReturnsBadRequestWithStatusCode400_WhenResultIsInvalid()
+    public void ToResult_ReturnsJsonEnvelope400_WhenResultIsInvalid()
     {
         // Arrange
-        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid input") };
+        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid input", "validation_error") };
         var result = new Result(ResultStatus.Invalid, messages);
 
         // Act
         var iResult = result.ToResult();
 
         // Assert
-        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
-        statusResult!.StatusCode.ShouldBe(400);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(400);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Status.ShouldBe(400);
+        body.Type.ShouldNotBeNullOrEmpty();
+        body.Title.ShouldNotBeNullOrEmpty();
+        body.Detail.ShouldNotBeNullOrEmpty();
+        body.Messages.ShouldNotBeNull();
     }
 
     [Fact]
-    public void ToResult_ReturnsProblemWithStatusCode500_WhenResultIsFailure()
+    public void ToResult_ReturnsJsonEnvelope403_WhenResultIsForbidden()
     {
         // Arrange
-        var messages = new MessageBase[] { new FailureMessage() };
-        var result = new Result(ResultStatus.Failure, messages);
+        var messages = new MessageBase[] { new ForbiddenMessage("Access denied", "access_denied") };
+        var result = new Result(ResultStatus.Forbidden, messages);
 
         // Act
         var iResult = result.ToResult();
 
         // Assert
-        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
-        problemResult.StatusCode.ShouldBe(500);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(403);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Status.ShouldBe(403);
+        body.Type.ShouldNotBeNullOrEmpty();
+        body.Title.ShouldNotBeNullOrEmpty();
+        body.Detail.ShouldNotBeNullOrEmpty();
+        body.Messages.ShouldNotBeNull();
     }
 
     [Fact]
-    public void ToResult_ReturnsForbid_WhenResultIsForbidden()
+    public void ToResult_ReturnsJsonEnvelope403_WhenResultIsForbidden_NotForbidHttpResult()
     {
         // Arrange
         var result = new Result(ResultStatus.Forbidden, []);
@@ -74,27 +82,85 @@ public class ResultExtensionsTests
         // Act
         var iResult = result.ToResult();
 
-        // Assert
-        iResult.ShouldBeOfType<ForbidHttpResult>();
+        // Assert -- Forbidden must NOT produce ForbidHttpResult; it must produce the JSON envelope
+        iResult.ShouldNotBeOfType<ForbidHttpResult>();
+        iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
     }
 
     [Fact]
-    public void ToResult_ReturnsConflictWithStatusCode409_WhenResultIsConflict()
+    public void ToResult_ReturnsJsonEnvelope404_WhenResultIsNotFound()
     {
         // Arrange
-        var messages = new MessageBase[] { new ConflictMessage("Already exists") };
+        var messages = new MessageBase[] { new NotFoundMessage("Resource not found", "not_found") };
+        var result = new Result(ResultStatus.NotFound, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(404);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Status.ShouldBe(404);
+        body.Type.ShouldNotBeNullOrEmpty();
+        body.Title.ShouldNotBeNullOrEmpty();
+        body.Detail.ShouldNotBeNullOrEmpty();
+        body.Messages.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ToResult_ReturnsJsonEnvelope409_WhenResultIsConflict()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new ConflictMessage("Already exists", "already_exists") };
         var result = new Result(ResultStatus.Conflict, messages);
 
         // Act
         var iResult = result.ToResult();
 
         // Assert
-        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
-        statusResult!.StatusCode.ShouldBe(409);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(409);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Status.ShouldBe(409);
+        body.Type.ShouldNotBeNullOrEmpty();
+        body.Title.ShouldNotBeNullOrEmpty();
+        body.Detail.ShouldNotBeNullOrEmpty();
+        body.Messages.ShouldNotBeNull();
     }
 
     [Fact]
-    public void ToResult_ReturnsProblemWithStatusCode500_WhenResultIsUndefined()
+    public void ToResult_ReturnsJsonEnvelope500_WhenResultIsFailure()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new FailureMessage("An error occurred", "server_error") };
+        var result = new Result(ResultStatus.Failure, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(500);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Status.ShouldBe(500);
+        body.Type.ShouldNotBeNullOrEmpty();
+        body.Title.ShouldNotBeNullOrEmpty();
+        body.Detail.ShouldNotBeNullOrEmpty();
+        body.Messages.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ToResult_ReturnsJsonEnvelope500_WhenResultIsUndefined()
     {
         // Arrange
         var result = new Result(ResultStatus.Undefined, []);
@@ -103,54 +169,53 @@ public class ResultExtensionsTests
         var iResult = result.ToResult();
 
         // Assert
-        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
-        problemResult.StatusCode.ShouldBe(500);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(500);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
     }
 
     [Fact]
-    public void ToResult_IncludesMessagesInNotFound_WhenResultHasMessages()
+    public void ToResult_MessagesArePresentInEnvelope_WhenResultHasMessages()
     {
         // Arrange
-        var message = new NotFoundMessage();
-        var messages = new MessageBase[] { message };
-        var result = new Result(ResultStatus.NotFound, messages);
+        var message1 = new InvalidRequestMessage("Error 1", "err_1");
+        var message2 = new InvalidRequestMessage("Error 2", "err_2");
+        var result = new Result(ResultStatus.Invalid, [message1, message2]);
 
         // Act
         var iResult = result.ToResult();
 
         // Assert
-        var valueResult = iResult.ShouldBeAssignableTo<IValueHttpResult>();
-        var messagesProperty = valueResult!.Value!.GetType().GetProperty("messages");
-        messagesProperty.ShouldNotBeNull();
-        var messagesValue = messagesProperty.GetValue(valueResult.Value) as MessageBase[];
-        messagesValue.ShouldNotBeNull();
-        messagesValue.Length.ShouldBe(1);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Messages.Count.ShouldBe(2);
+        body.Messages[0].Message.ShouldBe("Error 1");
+        body.Messages[0].Code.ShouldBe("err_1");
+        body.Messages[1].Message.ShouldBe("Error 2");
+        body.Messages[1].Code.ShouldBe("err_2");
     }
 
     [Fact]
-    public void ToResult_IncludesMessagesInBadRequest_WhenResultHasMessages()
+    public void ToResult_DetailIsJoinedMessages_WhenResultHasMessages()
     {
         // Arrange
-        var message1 = new InvalidRequestMessage("Error 1");
-        var message2 = new InvalidRequestMessage("Error 2");
-        var messages = new MessageBase[] { message1, message2 };
-        var result = new Result(ResultStatus.Invalid, messages);
+        var message1 = new InvalidRequestMessage("Field A is required");
+        var message2 = new InvalidRequestMessage("Field B is too long");
+        var result = new Result(ResultStatus.Invalid, [message1, message2]);
 
         // Act
         var iResult = result.ToResult();
 
         // Assert
-        var valueResult = iResult.ShouldBeAssignableTo<IValueHttpResult>();
-        var messagesProperty = valueResult!.Value!.GetType().GetProperty("messages");
-        messagesProperty.ShouldNotBeNull();
-        var messagesValue = messagesProperty.GetValue(valueResult.Value) as MessageBase[];
-        messagesValue.ShouldNotBeNull();
-        messagesValue.Length.ShouldBe(2);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.Value!.Detail.ShouldContain("Field A is required");
+        jsonResult.Value.Detail.ShouldContain("Field B is too long");
     }
 
     #endregion
 
-    #region ToResult<TResponse> (generic ResultBase<TResponse>)
+    #region ToResult<TResponse> (generic ResultBase<TResponse>) -- success path
 
     [Fact]
     public void ToResult_Generic_ReturnsOkWithResponse_WhenResultIsSuccessful()
@@ -167,8 +232,62 @@ public class ResultExtensionsTests
         okResult.Value.ShouldBe(response);
     }
 
+    #endregion
+
+    #region ToResult<TResponse> (generic ResultBase<TResponse>) -- non-success envelope
+
     [Fact]
-    public void ToResult_Generic_ReturnsNotFoundWithStatusCode404_WhenResultIsNotFound()
+    public void ToResult_Generic_ReturnsJsonEnvelope400_WhenResultIsInvalid()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid", "validation_error") };
+        var result = new Result<TestResponse>(null, ResultStatus.Invalid, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(400);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+        jsonResult.Value!.Status.ShouldBe(400);
+        jsonResult.Value.Type.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Title.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Messages.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsJsonEnvelope403_WhenResultIsForbidden()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(403);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+        jsonResult.Value!.Status.ShouldBe(403);
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsJsonEnvelope403_WhenResultIsForbidden_NotForbidHttpResult()
+    {
+        // Arrange
+        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert -- Forbidden must NOT produce ForbidHttpResult; it must produce the JSON envelope
+        iResult.ShouldNotBeOfType<ForbidHttpResult>();
+        iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsJsonEnvelope404_WhenResultIsNotFound()
     {
         // Arrange
         var messages = new MessageBase[] { new NotFoundMessage() };
@@ -178,55 +297,17 @@ public class ResultExtensionsTests
         var iResult = result.ToResult();
 
         // Assert
-        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
-        statusResult!.StatusCode.ShouldBe(404);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(404);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+        jsonResult.Value!.Status.ShouldBe(404);
+        jsonResult.Value.Type.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Title.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Messages.ShouldNotBeNull();
     }
 
     [Fact]
-    public void ToResult_Generic_ReturnsBadRequestWithStatusCode400_WhenResultIsInvalid()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid") };
-        var result = new Result<TestResponse>(null, ResultStatus.Invalid, messages);
-
-        // Act
-        var iResult = result.ToResult();
-
-        // Assert
-        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
-        statusResult!.StatusCode.ShouldBe(400);
-    }
-
-    [Fact]
-    public void ToResult_Generic_ReturnsProblemWithStatusCode500_WhenResultIsFailure()
-    {
-        // Arrange
-        var messages = new MessageBase[] { new FailureMessage() };
-        var result = new Result<TestResponse>(null, ResultStatus.Failure, messages);
-
-        // Act
-        var iResult = result.ToResult();
-
-        // Assert
-        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
-        problemResult.StatusCode.ShouldBe(500);
-    }
-
-    [Fact]
-    public void ToResult_Generic_ReturnsForbid_WhenResultIsForbidden()
-    {
-        // Arrange
-        var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
-
-        // Act
-        var iResult = result.ToResult();
-
-        // Assert
-        iResult.ShouldBeOfType<ForbidHttpResult>();
-    }
-
-    [Fact]
-    public void ToResult_Generic_ReturnsConflictWithStatusCode409_WhenResultIsConflict()
+    public void ToResult_Generic_ReturnsJsonEnvelope409_WhenResultIsConflict()
     {
         // Arrange
         var messages = new MessageBase[] { new ConflictMessage("Already exists") };
@@ -236,12 +317,37 @@ public class ResultExtensionsTests
         var iResult = result.ToResult();
 
         // Assert
-        var statusResult = iResult.ShouldBeAssignableTo<IStatusCodeHttpResult>();
-        statusResult!.StatusCode.ShouldBe(409);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(409);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+        jsonResult.Value!.Status.ShouldBe(409);
+        jsonResult.Value.Type.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Title.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Messages.ShouldNotBeNull();
     }
 
     [Fact]
-    public void ToResult_Generic_ReturnsProblemWithStatusCode500_WhenResultIsUndefined()
+    public void ToResult_Generic_ReturnsJsonEnvelope500_WhenResultIsFailure()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new FailureMessage() };
+        var result = new Result<TestResponse>(null, ResultStatus.Failure, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(500);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+        jsonResult.Value!.Status.ShouldBe(500);
+        jsonResult.Value.Type.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Title.ShouldNotBeNullOrEmpty();
+        jsonResult.Value.Messages.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ToResult_Generic_ReturnsJsonEnvelope500_WhenResultIsUndefined()
     {
         // Arrange
         var result = new Result<TestResponse>(null, ResultStatus.Undefined, []);
@@ -250,8 +356,9 @@ public class ResultExtensionsTests
         var iResult = result.ToResult();
 
         // Assert
-        var problemResult = iResult.ShouldBeOfType<ProblemHttpResult>();
-        problemResult.StatusCode.ShouldBe(500);
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(500);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
     }
 
     #endregion

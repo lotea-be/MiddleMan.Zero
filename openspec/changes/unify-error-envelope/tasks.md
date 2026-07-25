@@ -19,12 +19,12 @@
 
 **Compute:** model=sonnet effort=medium — rewriting known extension-method arms and mirroring existing test patterns; no novel reasoning needed
 
-- [ ] 2.1 Rewrite the non-success arms of `ToResult` and `ToResult<T>` in `src/MiddleMan.Zero.AspNetCore.Http/ResultExtensions.cs` to call `ProblemResponse.FromResult(result)` and return `Results.Json(problemResponse, contentType: "application/problem+json", statusCode: <code>)` for each non-success `ResultStatus`; remove the `Results.Forbid()` call and the `JoinMessages` helper if it is now unused (D6, D7)
-- [ ] 2.2 Verify that the 200 success arm of `ToResult`/`ToResult<T>` is left unchanged
-- [ ] 2.3 Run `dotnet build -f net10.0` (then net9.0, net8.0) and confirm clean build with no CS1591 warnings
-- [ ] 2.4 Update `tests/MiddleMan.Zero.AspNetCore.Http.Tests/` — replace the `ForbidHttpResult` assertion with a `ProblemHttpResult` 403 assertion; add or update assertions for status codes 400, 403, 404, 409, 500 to check `Content-Type: application/problem+json` and JSON body fields (`type`, `title`, `status`, `detail`, `messages`); assert the 200 success path is unchanged; assert `Results.Forbid()` is no longer invoked (D6, D7)
-- [ ] 2.5 Unit/integration test: covers happy path (each non-success status returns correct `Content-Type` and body shape) + 1 error case (success path unchanged)
-- [ ] 2.6 Checkpoint: `dotnet test tests/MiddleMan.Zero.AspNetCore.Http.Tests --settings coverlet.runsettings` passes; 95% coverage gate holds; a manual `HttpClient` or curl call to a test Minimal API endpoint returns `Content-Type: application/problem+json`
+- [x] 2.1 Rewrite the non-success arms of `ToResult` and `ToResult<T>` in `src/MiddleMan.Zero.AspNetCore.Http/ResultExtensions.cs` to call `ProblemResponse.FromResult(result)` and return `Results.Json(problemResponse, contentType: "application/problem+json", statusCode: <code>)` for each non-success `ResultStatus`; remove the `Results.Forbid()` call and the `JoinMessages` helper if it is now unused (D6, D7)
+- [x] 2.2 Verify that the 200 success arm of `ToResult`/`ToResult<T>` is left unchanged
+- [x] 2.3 Run `dotnet build -f net10.0` (then net9.0, net8.0) and confirm clean build with no CS1591 warnings
+- [x] 2.4 Update `tests/MiddleMan.Zero.AspNetCore.Http.Tests/` — replace the `ForbidHttpResult` assertion with a `ProblemHttpResult` 403 assertion; add or update assertions for status codes 400, 403, 404, 409, 500 to check `Content-Type: application/problem+json` and JSON body fields (`type`, `title`, `status`, `detail`, `messages`); assert the 200 success path is unchanged; assert `Results.Forbid()` is no longer invoked (D6, D7)
+- [x] 2.5 Unit/integration test: covers happy path (each non-success status returns correct `Content-Type` and body shape) + 1 error case (success path unchanged)
+- [x] 2.6 Checkpoint: `dotnet test tests/MiddleMan.Zero.AspNetCore.Http.Tests --settings coverlet.runsettings` passes; 95% coverage gate holds; a manual `HttpClient` or curl call to a test Minimal API endpoint returns `Content-Type: application/problem+json`
 
 ## 3. Mvc mapper on the envelope
 
