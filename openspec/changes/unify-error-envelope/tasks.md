@@ -6,14 +6,14 @@
 
 **Compute:** model=sonnet effort=medium — new sealed POCOs + static switch factory; straightforward but the enum-coverage test and PublicAPI declaration require care
 
-- [ ] 1.1 Add `ErrorMessage` sealed record to `src/MiddleMan.Zero.Abstractions/` with `Message` (string) and `Code` (string) init-only properties and XML doc comments on all public members (D3)
-- [ ] 1.2 Add `ProblemResponse` sealed record to `src/MiddleMan.Zero.Abstractions/` with init-only properties `Type` (string), `Title` (string), `Status` (int), `Detail` (string), `Messages` (IReadOnlyList<ErrorMessage>), and optional `TraceId` (string?); add XML doc comments on all public members (D4)
-- [ ] 1.3 Implement `ProblemResponse.FromResult(ResultBase result, string? traceId = null)` static factory: one `switch` arm per non-success `ResultStatus` value (`Failure` → 500, `Invalid` → 400, `NotFound` → 404, `Forbidden` → 403, `Conflict` → 409 if present); throw `InvalidOperationException` on `Successful`; populate `Detail` from joined messages when no explicit detail string is provided (D5)
-- [ ] 1.4 Declare every new public member (`ErrorMessage`, `ProblemResponse`, and all their properties and the static factory) in `src/MiddleMan.Zero.Abstractions/PublicAPI.Unshipped.txt` so RS0016 does not break the build (D3, D4)
-- [ ] 1.5 Run `dotnet build` across all three TFMs (`net8.0`, `net9.0`, `net10.0`) and confirm zero RS0016 and zero CS1591 errors
-- [ ] 1.6 Add xUnit unit tests in `tests/MiddleMan.Zero.Tests/` (or a dedicated Abstractions test project) covering: `ErrorMessage` projection (only `Message` + `Code` properties serialized; no `Id`/`CorrelationId`/`CreatedAt` leakage); `ProblemResponse` JSON serialization (all required fields present; `traceId` key absent when `TraceId` is null); `FromResult` factory for every non-success `ResultStatus` value using an enumerate-all `[Theory]`; `FromResult` throws `InvalidOperationException` on `Successful`; `Detail` default-string path vs. joined-messages path (D5)
-- [ ] 1.7 Unit/integration test: covers happy path (each `ResultStatus` value maps correctly) + 1 error case (`Successful` throws)
-- [ ] 1.8 Checkpoint: `dotnet test --filter "ProblemResponse" --settings coverlet.runsettings` passes on net8.0, net9.0, net10.0; `dotnet build` reports no RS0016 errors; 95% coverage gate holds
+- [x] 1.1 Add `ErrorMessage` sealed record to `src/MiddleMan.Zero.Abstractions/` with `Message` (string) and `Code` (string) init-only properties and XML doc comments on all public members (D3)
+- [x] 1.2 Add `ProblemResponse` sealed record to `src/MiddleMan.Zero.Abstractions/` with init-only properties `Type` (string), `Title` (string), `Status` (int), `Detail` (string), `Messages` (IReadOnlyList<ErrorMessage>), and optional `TraceId` (string?); add XML doc comments on all public members (D4)
+- [x] 1.3 Implement `ProblemResponse.FromResult(ResultBase result, string? traceId = null)` static factory: one `switch` arm per non-success `ResultStatus` value (`Failure` → 500, `Invalid` → 400, `NotFound` → 404, `Forbidden` → 403, `Conflict` → 409 if present); throw `InvalidOperationException` on `Successful`; populate `Detail` from joined messages when no explicit detail string is provided (D5)
+- [x] 1.4 Declare every new public member (`ErrorMessage`, `ProblemResponse`, and all their properties and the static factory) in `src/MiddleMan.Zero.Abstractions/PublicAPI.Unshipped.txt` so RS0016 does not break the build (D3, D4)
+- [x] 1.5 Run `dotnet build` across all three TFMs (`net8.0`, `net9.0`, `net10.0`) and confirm zero RS0016 and zero CS1591 errors
+- [x] 1.6 Add xUnit unit tests in `tests/MiddleMan.Zero.Tests/` (or a dedicated Abstractions test project) covering: `ErrorMessage` projection (only `Message` + `Code` properties serialized; no `Id`/`CorrelationId`/`CreatedAt` leakage); `ProblemResponse` JSON serialization (all required fields present; `traceId` key absent when `TraceId` is null); `FromResult` factory for every non-success `ResultStatus` value using an enumerate-all `[Theory]`; `FromResult` throws `InvalidOperationException` on `Successful`; `Detail` default-string path vs. joined-messages path (D5)
+- [x] 1.7 Unit/integration test: covers happy path (each `ResultStatus` value maps correctly) + 1 error case (`Successful` throws)
+- [x] 1.8 Checkpoint: `dotnet test --filter "ProblemResponse" --settings coverlet.runsettings` passes on net8.0, net9.0, net10.0; `dotnet build` reports no RS0016 errors; 95% coverage gate holds
 
 ## 2. Http mapper on the envelope
 
