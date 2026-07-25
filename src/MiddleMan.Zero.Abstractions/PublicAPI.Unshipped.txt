@@ -1,0 +1,35 @@
+#nullable enable
+MiddleMan.Zero.Abstractions.IHandleAsync<TRequest, TResponse>
+MiddleMan.Zero.Abstractions.IHandleAsync<TRequest, TResponse>.HandleAsync(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase<TResponse>!>!
+MiddleMan.Zero.Abstractions.IHandleAsync<TRequest>
+MiddleMan.Zero.Abstractions.IHandleAsync<TRequest>.HandleAsync(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase!>!
+MiddleMan.Zero.Abstractions.MessageBase
+MiddleMan.Zero.Abstractions.MessageBase.Code.get -> string!
+MiddleMan.Zero.Abstractions.MessageBase.Code.init -> void
+MiddleMan.Zero.Abstractions.MessageBase.CorrelationId.get -> System.Guid
+MiddleMan.Zero.Abstractions.MessageBase.CorrelationId.init -> void
+MiddleMan.Zero.Abstractions.MessageBase.CreatedAt.get -> System.DateTime
+MiddleMan.Zero.Abstractions.MessageBase.CreatedAt.init -> void
+MiddleMan.Zero.Abstractions.MessageBase.Id.get -> System.Guid
+MiddleMan.Zero.Abstractions.MessageBase.Id.init -> void
+MiddleMan.Zero.Abstractions.MessageBase.Message.get -> string!
+MiddleMan.Zero.Abstractions.MessageBase.Message.init -> void
+MiddleMan.Zero.Abstractions.MessageBase.MessageBase() -> void
+MiddleMan.Zero.Abstractions.MessageBase.MessageBase(string! message) -> void
+MiddleMan.Zero.Abstractions.MessageBase.MessageBase(string! message, string! code) -> void
+MiddleMan.Zero.Abstractions.ResultBase
+MiddleMan.Zero.Abstractions.ResultBase.Messages.get -> MiddleMan.Zero.Abstractions.MessageBase![]!
+MiddleMan.Zero.Abstractions.ResultBase.ResultBase(MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void
+MiddleMan.Zero.Abstractions.ResultBase.ResultStatus.get -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultBase<TResponse>
+MiddleMan.Zero.Abstractions.ResultBase<TResponse>.Response.get -> TResponse?
+MiddleMan.Zero.Abstractions.ResultBase<TResponse>.ResultBase(TResponse? response, MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void
+MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.Conflict = 6 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.Failure = 2 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.Forbidden = 5 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.Invalid = 3 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.NotFound = 4 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.Successful = 1 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.ResultStatus.Undefined = 0 -> MiddleMan.Zero.Abstractions.ResultStatus
+override MiddleMan.Zero.Abstractions.MessageBase.ToString() -> string!

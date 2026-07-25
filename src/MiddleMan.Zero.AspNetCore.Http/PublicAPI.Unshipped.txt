@@ -1,0 +1,4 @@
+#nullable enable
+MiddleMan.Zero.AspNetCore.Http.ResultExtensions
+static MiddleMan.Zero.AspNetCore.Http.ResultExtensions.ToResult(this MiddleMan.Zero.Abstractions.ResultBase! result) -> Microsoft.AspNetCore.Http.IResult!
+static MiddleMan.Zero.AspNetCore.Http.ResultExtensions.ToResult<TResponse>(this MiddleMan.Zero.Abstractions.ResultBase<TResponse>! result) -> Microsoft.AspNetCore.Http.IResult!

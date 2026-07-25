@@ -85,6 +85,74 @@ dotnet nuget push ./artifacts/*.nupkg \
   --skip-duplicate
 ```
 
+## Public API surface & the CD compat gate
+
+Two mechanisms guard the public API of the five packages. They are complementary and
+both run inside the normal build/pack, so CI and the publish workflow already enforce them.
+
+| Guard | What it checks | Fires as | When |
+| --- | --- | --- | --- |
+| **PublicAPI ledger** (`Microsoft.CodeAnalysis.PublicApiAnalyzers`) | *Source* surface, including nullability annotations. Every public member must be listed in a `PublicAPI.*.txt`. | `RS0016` (undeclared add) / `RS0017` (declared member removed) — build **errors** (warnings-as-errors) | every `dotnet build` (local + CI) |
+| **Package Validation** (SDK `ApiCompat`) | *Binary* compat vs. the last published package, plus cross-TFM surface consistency. | `CP****`/`PKV****` — `dotnet pack` **errors** | every `dotnet pack` (local + publish workflow) |
+
+Boundary to keep in mind: nullability-only or `set`→`init` changes are **binary-compatible**, so
+Package Validation passes them — but they *are* source changes, so the PublicAPI ledger catches
+them. Neither detects *behavioral* breaks (same signature, changed semantics).
+
+### The `PublicAPI.{Shipped,Unshipped}.txt` files
+
+One pair lives next to each `src/*` project. `Shipped.txt` = the surface of the **last stable
+release**; `Unshipped.txt` = everything added/removed since. A new public member appends a line
+to `Unshipped.txt` (or the build breaks); a removed member is recorded as a `*REMOVED*<sig>` line.
+
+Currently `Shipped.txt` is **empty on purpose** — v2.0.0 has not shipped yet, so the entire
+current surface sits in `Unshipped.txt`. It is frozen into `Shipped.txt` at the v2.0.0 release
+(next step).
+
+### Per-release step: "mark shipped"
+
+When you cut **any stable release**, fold `Unshipped` into `Shipped` and clear it, in the same
+commit as the version bump. This snapshots "this is the surface we just shipped":
+
+```bash
+# From the repo root. Applies *REMOVED* deletions, promotes additions, clears Unshipped.
+python3 - <<'PY'
+import pathlib
+for d in pathlib.Path("src").iterdir():
+    if not d.is_dir(): continue
+    sh, un = d/"PublicAPI.Shipped.txt", d/"PublicAPI.Unshipped.txt"
+    if not un.exists(): continue
+    H="#nullable enable"
+    shipped = {l for l in sh.read_text().splitlines() if l.strip() and l.strip()!=H} if sh.exists() else set()
+    for l in (x for x in un.read_text().splitlines() if x.strip() and x.strip()!=H):
+        if l.startswith("*REMOVED*"): shipped.discard(l[len("*REMOVED*"):])
+        else: shipped.add(l)
+    sh.write_text(H+"\n"+"\n".join(sorted(shipped))+("\n" if shipped else ""))
+    un.write_text(H+"\n")
+PY
+```
+
+### One-time step at the v2.0.0 release: turn on the baseline gate
+
+Package Validation's baseline diff is intentionally **off** until 2.0.0 is on NuGet (v2
+deliberately breaks vs 1.2.0, and the baseline package must already be published). Right after
+2.0.0 publishes, uncomment and set the baseline in `src/Directory.Build.props`:
+
+```xml
+<PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion>
+```
+
+From then on, `dotnet pack` **fails** on any binary-breaking change vs. 2.0.0 — so a breaking
+change can never ship as a 2.0.x patch or 2.1.x minor. **Bump the baseline only when you
+intentionally release a new major** (e.g. to `3.0.0` when you cut 3.0.0).
+
+### Shipping an *intentional* breaking change
+
+1. Bump `<Version>` to a new **major**.
+2. Record removals/signature changes as `*REMOVED*` lines in the relevant `Unshipped.txt`
+   (the analyzer's code fix does this; or `dotnet format analyzers --diagnostics RS0016 RS0017`).
+3. After release, raise `PackageValidationBaselineVersion` to the new major.
+
 ## Package Details
 
 The following packages will be published:
@@ -155,9 +223,11 @@ If you get a version conflict error:
 
 - [ ] Update version in `src/Directory.Build.props`
 - [ ] Update `CHANGELOG.md` with changes
+- [ ] **Mark shipped**: fold `Unshipped` → `Shipped` (see "Per-release step" above), same commit
 - [ ] Run all tests locally: `dotnet test --configuration Release`
 - [ ] Commit and push changes to main
 - [ ] Wait for CI workflow to auto-create tag
 - [ ] Wait for Publish workflow to complete
 - [ ] Verify packages on NuGet.org
 - [ ] Update GitHub Release notes if needed
+- [ ] **At the 2.0.0 release only**: set `PackageValidationBaselineVersion` to `2.0.0` (turns on the binary CD gate for 2.0.x/2.1.x)

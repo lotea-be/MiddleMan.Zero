@@ -1,0 +1,18 @@
+# Scoped to the shipped packages under src/. Merges with the repo-root .editorconfig.
+#
+# Microsoft.CodeAnalysis.PublicApiAnalyzers is referenced only by src/ projects
+# (see src/Directory.Build.props). We use it for ONE thing: tracking the public
+# API surface via PublicAPI.Shipped.txt / PublicAPI.Unshipped.txt, so a new public
+# member breaks the build until it is declared. Its opinionated *design* rules about
+# optional-parameter overloads are intentionally disabled — the shipped v2 API
+# (IHandleAsync's `CancellationToken = default`, the AddMiddleManZero overloads)
+# deliberately uses that shape, and changing it would be a breaking change.
+
+[*.cs]
+# Surface tracking — keep as build-breaking errors.
+dotnet_diagnostic.RS0016.severity = error   # public symbol missing from the declared API
+dotnet_diagnostic.RS0017.severity = error   # symbol in the API file no longer exists
+
+# Opinionated optional-parameter design rules — not what we're enforcing here.
+dotnet_diagnostic.RS0026.severity = none     # multiple overloads with optional parameters
+dotnet_diagnostic.RS0027.severity = none     # optional-param overload should have the most parameters

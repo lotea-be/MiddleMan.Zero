@@ -1,0 +1,5 @@
+#nullable enable
+MiddleMan.Zero.AspNetCore.Mvc.ResultExtensions
+static MiddleMan.Zero.AspNetCore.Mvc.ResultExtensions.ToActionResult(this MiddleMan.Zero.Abstractions.ResultBase! result) -> Microsoft.AspNetCore.Mvc.IActionResult!
+static MiddleMan.Zero.AspNetCore.Mvc.ResultExtensions.ToActionResult<TResponse>(this MiddleMan.Zero.Abstractions.ResultBase<TResponse>! result) -> Microsoft.AspNetCore.Mvc.IActionResult!
+static MiddleMan.Zero.AspNetCore.Mvc.ResultExtensions.ToTypedActionResult<TResponse>(this MiddleMan.Zero.Abstractions.ResultBase<TResponse>! result) -> Microsoft.AspNetCore.Mvc.ActionResult<TResponse>!
