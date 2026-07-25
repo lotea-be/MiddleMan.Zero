@@ -30,12 +30,12 @@
 
 **Compute:** model=sonnet effort=low — mirrors Slice 2 exactly on the Mvc side; same factory call, same pattern, lower novelty
 
-- [ ] 3.1 Rewrite the non-success arms of `ToActionResult` and `ToTypedActionResult` in `src/MiddleMan.Zero.AspNetCore.Mvc/ResultExtensions.cs` to call `ProblemResponse.FromResult(result)` and return `new ObjectResult(problemResponse) { StatusCode = <code>, ContentTypes = { "application/problem+json" } }` for each non-success `ResultStatus`; remove the `ForbidResult` return (D6, D7)
-- [ ] 3.2 Verify that the 200 success arm of `ToActionResult`/`ToTypedActionResult` is left unchanged
-- [ ] 3.3 Run `dotnet build -f net10.0` (then net9.0, net8.0) and confirm clean build with no CS1591 warnings
-- [ ] 3.4 Update `tests/MiddleMan.Zero.AspNetCore.Mvc.Tests/` — replace the `ForbidResult` assertion with an `ObjectResult` 403 assertion; add or update assertions for status codes 400, 403, 404, 409, 500 to check `Content-Type: application/problem+json` and JSON body fields (`type`, `title`, `status`, `detail`, `messages`); assert `ToTypedActionResult` 200 success path is unchanged; assert `ForbidResult` is no longer returned (D6, D7)
-- [ ] 3.5 Unit/integration test: covers happy path (each non-success status returns `ObjectResult` with correct content type and body shape) + 1 error case (success path unchanged)
-- [ ] 3.6 Checkpoint: `dotnet test tests/MiddleMan.Zero.AspNetCore.Mvc.Tests --settings coverlet.runsettings` passes; 95% coverage gate holds
+- [x] 3.1 Rewrite the non-success arms of `ToActionResult` and `ToTypedActionResult` in `src/MiddleMan.Zero.AspNetCore.Mvc/ResultExtensions.cs` to call `ProblemResponse.FromResult(result)` and return `new ObjectResult(problemResponse) { StatusCode = <code>, ContentTypes = { "application/problem+json" } }` for each non-success `ResultStatus`; remove the `ForbidResult` return (D6, D7)
+- [x] 3.2 Verify that the 200 success arm of `ToActionResult`/`ToTypedActionResult` is left unchanged
+- [x] 3.3 Run `dotnet build -f net10.0` (then net9.0, net8.0) and confirm clean build with no CS1591 warnings
+- [x] 3.4 Update `tests/MiddleMan.Zero.AspNetCore.Mvc.Tests/` — replace the `ForbidResult` assertion with an `ObjectResult` 403 assertion; add or update assertions for status codes 400, 403, 404, 409, 500 to check `Content-Type: application/problem+json` and JSON body fields (`type`, `title`, `status`, `detail`, `messages`); assert `ToTypedActionResult` 200 success path is unchanged; assert `ForbidResult` is no longer returned (D6, D7)
+- [x] 3.5 Unit/integration test: covers happy path (each non-success status returns `ObjectResult` with correct content type and body shape) + 1 error case (success path unchanged)
+- [x] 3.6 Checkpoint: `dotnet test tests/MiddleMan.Zero.AspNetCore.Mvc.Tests --settings coverlet.runsettings` passes; 95% coverage gate holds
 
 ## 4. Lockstep proof + docs + version
 
