@@ -12,7 +12,7 @@ against the current source at `2.0.0-rc2`.
 
 ### #2 — Canonical, documented error-response envelope
 **Change id:** `unify-error-envelope`
-**Status:** in-progress (Q, R, D, S, V, P, I complete)
+**Status:** in-progress (PR #37 open)
 **Effort:** Medium · **Packages:** `AspNetCore.Http` + `AspNetCore.Mvc` (lockstep)
 
 `ToResult()` currently emits three different body shapes: `{ messages: [...] }`
