@@ -72,6 +72,7 @@ Run the sample API: `dotnet run --project samples/IceCreamTruck.WebApi -f net10.
   - Check merge state: `gh pr view <N> --json state,mergedAt`.
 - **Source-branch naming:** `features/<change-id>` (e.g. `features/add-conflict-status`), where `<change-id>` is the kebab-case QRSPI change id.
 - **Default target branch:** `main`. CI (`ci.yml`) runs on `push`/`pull_request` to `main`.
+- **`main` is a protected branch** — you cannot push commits directly to it. Always land work on a `features/<change-id>` branch and merge via PR. If local commits end up on `main`, move them to a feature branch (`git branch -f main origin/main` while checked out on the feature branch) before pushing.
 - No hard PR-description size cap, but keep it focused and reference the change folder.
 
 ## Dependency policy
