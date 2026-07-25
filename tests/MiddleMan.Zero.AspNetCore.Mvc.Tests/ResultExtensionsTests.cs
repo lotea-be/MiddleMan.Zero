@@ -4,6 +4,8 @@ namespace MiddleMan.Zero.AspNetCore.Mvc.Tests;
 
 public class ResultExtensionsTests
 {
+    private const string ProblemJsonContentType = "application/problem+json";
+
     #region ToActionResult (non-generic Result)
 
     [Fact]
@@ -16,14 +18,11 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<OkResult>()
-        );
+        actionResult.ShouldBeOfType<OkResult>();
     }
 
     [Fact]
-    public void ToActionResult_ReturnsNotFoundObjectResult_WhenResultIsNotFound()
+    public void ToActionResult_ReturnsEnvelope404_WhenResultIsNotFound()
     {
         // Arrange
         var messages = new MessageBase[] { new NotFoundMessage() };
@@ -33,37 +32,25 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<NotFoundObjectResult>()
-        );
-
-        var notFoundResult = (NotFoundObjectResult)actionResult;
-        notFoundResult.StatusCode.ShouldBe(404);
+        AssertEnvelope(actionResult, 404, "Not Found");
     }
 
     [Fact]
-    public void ToActionResult_ReturnsBadRequestObjectResult_WhenResultIsInvalid()
+    public void ToActionResult_ReturnsEnvelope400_WhenResultIsInvalid()
     {
         // Arrange
-        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid input") };
+        var messages = new MessageBase[] { new InvalidRequestMessage("Invalid input", "validation_error") };
         var result = new Result(ResultStatus.Invalid, messages);
 
         // Act
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<BadRequestObjectResult>()
-        );
-
-        var badRequestResult = (BadRequestObjectResult)actionResult;
-        badRequestResult.StatusCode.ShouldBe(400);
+        AssertEnvelope(actionResult, 400, "Bad Request");
     }
 
     [Fact]
-    public void ToActionResult_ReturnsObjectResultWith500_WhenResultIsFailure()
+    public void ToActionResult_ReturnsEnvelope500_WhenResultIsFailure()
     {
         // Arrange
         var messages = new MessageBase[] { new FailureMessage() };
@@ -73,33 +60,26 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
+        AssertEnvelope(actionResult, 500, "Internal Server Error");
     }
 
     [Fact]
-    public void ToActionResult_ReturnsForbidResult_WhenResultIsForbidden()
+    public void ToActionResult_ReturnsEnvelope403_AndNotForbidResult_WhenResultIsForbidden()
     {
         // Arrange
-        var result = new Result(ResultStatus.Forbidden, []);
+        var messages = new MessageBase[] { new ForbiddenMessage("Access denied", "access_denied") };
+        var result = new Result(ResultStatus.Forbidden, messages);
 
         // Act
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ForbidResult>()
-        );
+        actionResult.ShouldNotBeOfType<ForbidResult>();
+        AssertEnvelope(actionResult, 403, "Forbidden");
     }
 
     [Fact]
-    public void ToActionResult_ReturnsConflictObjectResult_WhenResultIsConflict()
+    public void ToActionResult_ReturnsEnvelope409_WhenResultIsConflict()
     {
         // Arrange
         var messages = new MessageBase[] { new ConflictMessage("Already exists") };
@@ -109,17 +89,11 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ConflictObjectResult>()
-        );
-
-        var conflictResult = (ConflictObjectResult)actionResult;
-        conflictResult.StatusCode.ShouldBe(409);
+        AssertEnvelope(actionResult, 409, "Conflict");
     }
 
     [Fact]
-    public void ToActionResult_ReturnsObjectResultWith500_WhenResultIsUndefined()
+    public void ToActionResult_ReturnsEnvelope500_WhenResultIsUndefined()
     {
         // Arrange
         var result = new Result(ResultStatus.Undefined, []);
@@ -128,13 +102,7 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
+        AssertEnvelope(actionResult, 500, "Internal Server Error");
     }
 
     #endregion
@@ -152,12 +120,7 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<OkObjectResult>()
-        );
-
-        var okResult = (OkObjectResult)actionResult;
+        var okResult = actionResult.ShouldBeOfType<OkObjectResult>();
         okResult.ShouldSatisfyAllConditions(
             () => okResult.StatusCode.ShouldBe(200),
             () => okResult.Value.ShouldBe(response)
@@ -176,7 +139,7 @@ public class ResultExtensionsTests
     }
 
     [Fact]
-    public void ToActionResult_Generic_ReturnsNotFoundObjectResult_WhenResultIsNotFound()
+    public void ToActionResult_Generic_ReturnsEnvelope404_WhenResultIsNotFound()
     {
         // Arrange
         var messages = new MessageBase[] { new NotFoundMessage() };
@@ -186,17 +149,11 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<NotFoundObjectResult>()
-        );
-
-        var notFoundResult = (NotFoundObjectResult)actionResult;
-        notFoundResult.StatusCode.ShouldBe(404);
+        AssertEnvelope(actionResult, 404, "Not Found");
     }
 
     [Fact]
-    public void ToActionResult_Generic_ReturnsBadRequestObjectResult_WhenResultIsInvalid()
+    public void ToActionResult_Generic_ReturnsEnvelope400_WhenResultIsInvalid()
     {
         // Arrange
         var messages = new MessageBase[] { new InvalidRequestMessage("Invalid") };
@@ -206,17 +163,11 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<BadRequestObjectResult>()
-        );
-
-        var badRequestResult = (BadRequestObjectResult)actionResult;
-        badRequestResult.StatusCode.ShouldBe(400);
+        AssertEnvelope(actionResult, 400, "Bad Request");
     }
 
     [Fact]
-    public void ToActionResult_Generic_ReturnsObjectResultWith500_WhenResultIsFailure()
+    public void ToActionResult_Generic_ReturnsEnvelope500_WhenResultIsFailure()
     {
         // Arrange
         var messages = new MessageBase[] { new FailureMessage() };
@@ -226,17 +177,11 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
+        AssertEnvelope(actionResult, 500, "Internal Server Error");
     }
 
     [Fact]
-    public void ToActionResult_Generic_ReturnsForbidResult_WhenResultIsForbidden()
+    public void ToActionResult_Generic_ReturnsEnvelope403_AndNotForbidResult_WhenResultIsForbidden()
     {
         // Arrange
         var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
@@ -245,14 +190,12 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ForbidResult>()
-        );
+        actionResult.ShouldNotBeOfType<ForbidResult>();
+        AssertEnvelope(actionResult, 403, "Forbidden");
     }
 
     [Fact]
-    public void ToActionResult_Generic_ReturnsConflictObjectResult_WhenResultIsConflict()
+    public void ToActionResult_Generic_ReturnsEnvelope409_WhenResultIsConflict()
     {
         // Arrange
         var messages = new MessageBase[] { new ConflictMessage("Already exists") };
@@ -262,17 +205,11 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ConflictObjectResult>()
-        );
-
-        var conflictResult = (ConflictObjectResult)actionResult;
-        conflictResult.StatusCode.ShouldBe(409);
+        AssertEnvelope(actionResult, 409, "Conflict");
     }
 
     [Fact]
-    public void ToActionResult_Generic_ReturnsObjectResultWith500_WhenResultIsUndefined()
+    public void ToActionResult_Generic_ReturnsEnvelope500_WhenResultIsUndefined()
     {
         // Arrange
         var result = new Result<TestResponse>(null, ResultStatus.Undefined, []);
@@ -281,13 +218,7 @@ public class ResultExtensionsTests
         var actionResult = result.ToActionResult();
 
         // Assert
-        actionResult.ShouldSatisfyAllConditions(
-            () => actionResult.ShouldNotBeNull(),
-            () => actionResult.ShouldBeOfType<ObjectResult>()
-        );
-
-        var objectResult = (ObjectResult)actionResult;
-        objectResult.StatusCode.ShouldBe(500);
+        AssertEnvelope(actionResult, 500, "Internal Server Error");
     }
 
     #endregion
@@ -311,7 +242,7 @@ public class ResultExtensionsTests
     }
 
     [Fact]
-    public void ToTypedActionResult_ReturnsNotFoundObjectResult_WhenResultIsNotFound()
+    public void ToTypedActionResult_ReturnsEnvelope404_WhenResultIsNotFound()
     {
         // Arrange
         var messages = new MessageBase[] { new NotFoundMessage() };
@@ -322,14 +253,11 @@ public class ResultExtensionsTests
 
         // Assert
         actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<NotFoundObjectResult>();
-
-        var notFoundResult = (NotFoundObjectResult)actionResult.Result!;
-        notFoundResult.StatusCode.ShouldBe(404);
+        AssertEnvelope(actionResult.Result!, 404, "Not Found");
     }
 
     [Fact]
-    public void ToTypedActionResult_ReturnsBadRequestObjectResult_WhenResultIsInvalid()
+    public void ToTypedActionResult_ReturnsEnvelope400_WhenResultIsInvalid()
     {
         // Arrange
         var messages = new MessageBase[] { new InvalidRequestMessage("Invalid") };
@@ -340,14 +268,11 @@ public class ResultExtensionsTests
 
         // Assert
         actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<BadRequestObjectResult>();
-
-        var badRequestResult = (BadRequestObjectResult)actionResult.Result!;
-        badRequestResult.StatusCode.ShouldBe(400);
+        AssertEnvelope(actionResult.Result!, 400, "Bad Request");
     }
 
     [Fact]
-    public void ToTypedActionResult_ReturnsObjectResultWith500_WhenResultIsFailure()
+    public void ToTypedActionResult_ReturnsEnvelope500_WhenResultIsFailure()
     {
         // Arrange
         var messages = new MessageBase[] { new FailureMessage() };
@@ -358,14 +283,11 @@ public class ResultExtensionsTests
 
         // Assert
         actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<ObjectResult>();
-
-        var objectResult = (ObjectResult)actionResult.Result!;
-        objectResult.StatusCode.ShouldBe(500);
+        AssertEnvelope(actionResult.Result!, 500, "Internal Server Error");
     }
 
     [Fact]
-    public void ToTypedActionResult_ReturnsForbidResult_WhenResultIsForbidden()
+    public void ToTypedActionResult_ReturnsEnvelope403_AndNotForbidResult_WhenResultIsForbidden()
     {
         // Arrange
         var result = new Result<TestResponse>(null, ResultStatus.Forbidden, []);
@@ -375,11 +297,12 @@ public class ResultExtensionsTests
 
         // Assert
         actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<ForbidResult>();
+        actionResult.Result.ShouldNotBeOfType<ForbidResult>();
+        AssertEnvelope(actionResult.Result!, 403, "Forbidden");
     }
 
     [Fact]
-    public void ToTypedActionResult_ReturnsConflictObjectResult_WhenResultIsConflict()
+    public void ToTypedActionResult_ReturnsEnvelope409_WhenResultIsConflict()
     {
         // Arrange
         var messages = new MessageBase[] { new ConflictMessage("Already exists") };
@@ -390,14 +313,11 @@ public class ResultExtensionsTests
 
         // Assert
         actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<ConflictObjectResult>();
-
-        var conflictResult = (ConflictObjectResult)actionResult.Result!;
-        conflictResult.StatusCode.ShouldBe(409);
+        AssertEnvelope(actionResult.Result!, 409, "Conflict");
     }
 
     [Fact]
-    public void ToTypedActionResult_ReturnsObjectResultWith500_WhenResultIsUndefined()
+    public void ToTypedActionResult_ReturnsEnvelope500_WhenResultIsUndefined()
     {
         // Arrange
         var result = new Result<TestResponse>(null, ResultStatus.Undefined, []);
@@ -407,10 +327,7 @@ public class ResultExtensionsTests
 
         // Assert
         actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<ObjectResult>();
-
-        var objectResult = (ObjectResult)actionResult.Result!;
-        objectResult.StatusCode.ShouldBe(500);
+        AssertEnvelope(actionResult.Result!, 500, "Internal Server Error");
     }
 
     #endregion
@@ -418,59 +335,65 @@ public class ResultExtensionsTests
     #region Messages in Response
 
     [Fact]
-    public void ToActionResult_IncludesMessages_WhenResultHasMessages()
+    public void ToActionResult_ProjectsMessagesToErrorMessage_WhenResultHasMessages()
     {
         // Arrange
-        var message1 = new InvalidRequestMessage("Error 1");
-        var message2 = new InvalidRequestMessage("Error 2");
-        var messages = new MessageBase[] { message1, message2 };
+        var messages = new MessageBase[]
+        {
+            new InvalidRequestMessage("Error 1", "code_1"),
+            new InvalidRequestMessage("Error 2", "code_2"),
+        };
         var result = new Result(ResultStatus.Invalid, messages);
 
         // Act
         var actionResult = result.ToActionResult();
 
         // Assert
-        var badRequestResult = (BadRequestObjectResult)actionResult;
-        var value = badRequestResult.Value;
-
-        value.ShouldNotBeNull();
-
-        // Use reflection to check the anonymous type
-        var messagesProperty = value.GetType().GetProperty("messages");
-        messagesProperty.ShouldNotBeNull();
-
-        var messagesValue = messagesProperty.GetValue(value) as MessageBase[];
-        messagesValue.ShouldNotBeNull();
-        messagesValue.Length.ShouldBe(2);
+        var body = AssertEnvelope(actionResult, 400, "Bad Request");
+        body.Messages.Count.ShouldBe(2);
+        body.Messages[0].Message.ShouldBe("Error 1");
+        body.Messages[0].Code.ShouldBe("code_1");
+        body.Messages[1].Message.ShouldBe("Error 2");
+        body.Messages[1].Code.ShouldBe("code_2");
+        // Detail is the joined message text when messages are present.
+        body.Detail.ShouldBe("Error 1; Error 2");
     }
 
     [Fact]
-    public void ToActionResult_Generic_IncludesMessages_WhenResultHasMessages()
+    public void ToActionResult_UsesDefaultDetail_WhenResultHasNoMessages()
     {
         // Arrange
-        var message1 = new NotFoundMessage();
-        var messages = new MessageBase[] { message1 };
-        var result = new Result<TestResponse>(null, ResultStatus.NotFound, messages);
+        var result = new Result(ResultStatus.Forbidden, []);
 
         // Act
         var actionResult = result.ToActionResult();
 
         // Assert
-        var notFoundResult = (NotFoundObjectResult)actionResult;
-        var value = notFoundResult.Value;
-
-        value.ShouldNotBeNull();
-
-        // Use reflection to check the anonymous type
-        var messagesProperty = value.GetType().GetProperty("messages");
-        messagesProperty.ShouldNotBeNull();
-
-        var messagesValue = messagesProperty.GetValue(value) as MessageBase[];
-        messagesValue.ShouldNotBeNull();
-        messagesValue.Length.ShouldBe(1);
+        var body = AssertEnvelope(actionResult, 403, "Forbidden");
+        body.Messages.ShouldBeEmpty();
+        body.Detail.ShouldBe("Access denied.");
     }
 
     #endregion
+
+    private static ProblemResponse AssertEnvelope(IActionResult actionResult, int expectedStatus, string expectedTitle)
+    {
+        var objectResult = actionResult.ShouldBeOfType<ObjectResult>();
+        objectResult.ShouldSatisfyAllConditions(
+            () => objectResult.StatusCode.ShouldBe(expectedStatus),
+            () => objectResult.ContentTypes.ShouldContain(ProblemJsonContentType)
+        );
+
+        var body = objectResult.Value.ShouldBeOfType<ProblemResponse>();
+        body.ShouldSatisfyAllConditions(
+            () => body.Status.ShouldBe(expectedStatus),
+            () => body.Title.ShouldBe(expectedTitle),
+            () => body.Type.ShouldNotBeNullOrEmpty(),
+            () => body.Detail.ShouldNotBeNullOrEmpty(),
+            () => body.Messages.ShouldNotBeNull()
+        );
+        return body;
+    }
 
     // Test helper class
     private class TestResponse

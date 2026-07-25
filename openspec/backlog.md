@@ -1,13 +1,18 @@
 # MiddleMan.Zero — Backlog
 
-Improvement ideas not yet scheduled as QRSPI changes. Promote an item by running
-`/qrspi:questions <change-id>` for it. Source for the initial batch: a handover
-scan of a real consumer (`abkf-registrations`, .NET 10) against `2.0.0-rc1`,
-re-grounded against the current source at `2.0.0-rc2`.
+Improvement ideas not yet scheduled as QRSPI changes. Each item carries a
+folder-safe **Change id** (verb-first kebab-case); promote an item by running
+`/qrspi:questions <change-id>` with that id. The `#N` label is a stable
+cross-reference; the change id is what becomes the `openspec/changes/<id>/`
+folder and feature branch. Source for the initial batch: a handover scan of a
+real consumer (`abkf-registrations`, .NET 10) against `2.0.0-rc1`, re-grounded
+against the current source at `2.0.0-rc2`.
 
 ## Active
 
 ### #2 — Canonical, documented error-response envelope
+**Change id:** `unify-error-envelope`
+**Status:** in-progress (PR #37 open)
 **Effort:** Medium · **Packages:** `AspNetCore.Http` + `AspNetCore.Mvc` (lockstep)
 
 `ToResult()` currently emits three different body shapes: `{ messages: [...] }`
@@ -20,6 +25,7 @@ document the shape; keep Http and Mvc mappings in sync. Ties into #4 (surface
 `CorrelationId`/`traceId` in the envelope).
 
 ### #3 — CancellationToken auto-bind at the HTTP boundary
+**Change id:** `bind-cancellation-token`
 **Effort:** Small–Medium · **Packages:** `AspNetCore.Http`
 
 The `IHandleAsync` interface already accepts a `CancellationToken`, but it is
@@ -32,6 +38,7 @@ document the footgun prominently. (A Roslyn analyzer that warns on a token-less
 await in an ASP.NET context is a larger, separate follow-up.)
 
 ### #4 — CorrelationId propagation + observability
+**Change id:** `propagate-correlation-id`
 **Effort:** Larger · **Packages:** `Abstractions`, `MiddleMan.Zero`, HTTP mappers
 
 `MessageBase` exposes `Id`, `CorrelationId`, `CreatedAt`, but `CorrelationId`
@@ -43,6 +50,7 @@ Share one correlation id per `HandlerContext`, propagate it into logs and
 `Activity`/`System.Diagnostics` for OpenTelemetry traces.
 
 ### #5 — Validation ergonomics (opt-in)
+**Change id:** `add-validation-ergonomics`
 **Effort:** Medium · **Packages:** `MiddleMan.Zero`
 
 The consumer has **133** near-identical `context.Log(new InvalidRequestMessage(...))`
@@ -56,6 +64,7 @@ calls. Keep the "accumulate, never throw" semantics but reduce boilerplate:
 Must stay **opt-in** — the explicit style remains fully supported.
 
 ### #7a — Documentation fixes
+**Change id:** `fix-abstractions-docs`
 **Effort:** Quick · **Packages:** docs only
 
 - `MiddleMan.Zero.Abstractions/README.md` lists **`MiddleMan.Zero.AspNetCore.Mvc`**
@@ -68,6 +77,7 @@ Must stay **opt-in** — the explicit style remains fully supported.
 ## Parked / future direction
 
 ### #6 — Pluggable behavior pipeline (deferred)
+**Change id:** `add-behavior-pipeline`
 **Status:** Not scheduled — revisit after MiddleMan.Zero matures.
 
 There is no MediatR-style `IPipelineBehavior` / middleware chain; consumers bake

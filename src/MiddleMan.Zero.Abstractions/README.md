@@ -25,6 +25,14 @@ This package contains the fundamental building blocks for implementing the media
 - **`ResultBase`**: Represents operation results without a specific response
 - **`ResultBase<TResponse>`**: Represents operation results with a typed response
 
+### Error response types
+
+- **`ProblemResponse`**: The canonical RFC 9457 (RFC 7807-compatible) error body returned for every
+  non-success result by the ASP.NET Core integration packages. Construct one from a result with
+  `ProblemResponse.FromResult(result)`.
+- **`ErrorMessage`**: A `{ message, code }` projection of a logged message, carried in
+  `ProblemResponse.Messages`.
+
 ### Enums
 
 - **`ResultStatus`**: Defines the outcome of an operation
@@ -34,10 +42,15 @@ This package contains the fundamental building blocks for implementing the media
   - `Invalid`: Operation had invalid input
   - `NotFound`: Requested resource not found
   - `Forbidden`: Caller lacks the required permissions
+  - `Conflict`: Request conflicts with the current state of the resource
 
 ## Usage
 
-This package is typically not used directly. Instead, reference it when building custom handlers or extending the MiddleMan.Zero framework.
+These abstractions are the contract consumers depend on directly: handlers implement
+`IHandleAsync<>`, and ASP.NET Core endpoints work with `ResultBase` / `ResultBase<TResponse>` (and
+receive the `ProblemResponse` envelope on the wire). You typically reference this package
+transitively through `MiddleMan.Zero` and one of the ASP.NET Core integration packages rather than
+adding it on its own.
 
 ```csharp
 using MiddleMan.Zero.Abstractions;
@@ -59,12 +72,13 @@ public class MyHandler : IHandleAsync<MyRequest, MyResponse>
 dotnet add package MiddleMan.Zero.Abstractions
 ```
 
-## Dependencies
+## Target frameworks
 
-- .NET Standard 2.1 or higher
+- `net8.0`, `net9.0`, `net10.0`
 
 ## Related Packages
 
 - **MiddleMan.Zero**: Core implementation
 - **MiddleMan.Zero.DependencyInjection**: DI container registration
-- **MiddleMan.Zero.AspNetCore.Mvc**: ASP.NET Core MVC integration
+- **MiddleMan.Zero.AspNetCore.Http**: ASP.NET Core Minimal API integration (`ToResult()`)
+- **MiddleMan.Zero.AspNetCore.Mvc**: ASP.NET Core MVC integration (`ToActionResult()` / `ToTypedActionResult()`)

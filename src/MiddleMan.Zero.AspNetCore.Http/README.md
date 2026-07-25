@@ -81,12 +81,19 @@ IResult httpResult = result.ToResult();
 | ResultStatus | HTTP Status Code | Response Body |
 |---|---|---|
 | `Successful` (no data) | 200 OK | Empty |
-| `Successful` (with data) | 200 OK | Response object |
-| `NotFound` | 404 Not Found | `{ messages: [...] }` |
-| `Invalid` | 400 Bad Request | `{ messages: [...] }` |
-| `Forbidden` | 403 Forbidden | Empty |
-| `Failure` | 500 Internal Server Error | Problem details |
-| `Undefined` | 500 Internal Server Error | Problem details |
+| `Successful` (with data) | 200 OK | Response object (`application/json`) |
+| `Invalid` | 400 Bad Request | `ProblemResponse` (`application/problem+json`) |
+| `Forbidden` | 403 Forbidden | `ProblemResponse` (`application/problem+json`) |
+| `NotFound` | 404 Not Found | `ProblemResponse` (`application/problem+json`) |
+| `Conflict` | 409 Conflict | `ProblemResponse` (`application/problem+json`) |
+| `Failure` | 500 Internal Server Error | `ProblemResponse` (`application/problem+json`) |
+| `Undefined` | 500 Internal Server Error | `ProblemResponse` (`application/problem+json`) |
+
+Non-success results are serialized as an RFC 9457 (`ProblemResponse`) problem document defined in
+`MiddleMan.Zero.Abstractions`, identical to the body produced by `MiddleMan.Zero.AspNetCore.Mvc`.
+Each `type` links to a per-status document under [`docs/errors`](../../docs/errors); `messages[]`
+carries each logged message projected to `{ message, code }`. See the Mvc package README for the
+full envelope example.
 
 ## Examples
 
@@ -99,22 +106,23 @@ var result = new Result<Flavor[]>(flavors, ResultStatus.Successful, []);
 
 ### Not Found Response
 ```csharp
-var messages = new[] { new NotFoundMessage { Message = "Flavor not found" } };
+var messages = new MessageBase[] { new NotFoundMessage("Flavor not found", "flavor_not_found") };
 var result = new Result<Flavor>(null, ResultStatus.NotFound, messages);
-// Returns: 404 Not Found with { messages: [...] }
+// Returns: 404 Not Found with a ProblemResponse (application/problem+json)
 ```
 
 ### Validation Error Response
 ```csharp
-var messages = new[] { new InvalidRequestMessage("Flavor name is required.") };
+var messages = new MessageBase[] { new InvalidRequestMessage("Flavor name is required.", "flavor_name_required") };
 var result = new Result(ResultStatus.Invalid, messages);
-// Returns: 400 Bad Request with { messages: [...] }
+// Returns: 400 Bad Request with a ProblemResponse (application/problem+json)
 ```
 
 ### Forbidden Response
 ```csharp
-var result = new Result(ResultStatus.Forbidden, []);
-// Returns: 403 Forbidden
+var messages = new MessageBase[] { new ForbiddenMessage("Access denied", "access_denied") };
+var result = new Result(ResultStatus.Forbidden, messages);
+// Returns: 403 Forbidden with a ProblemResponse (application/problem+json)
 ```
 
 ## Comparison with MiddleMan.Zero.AspNetCore.Mvc

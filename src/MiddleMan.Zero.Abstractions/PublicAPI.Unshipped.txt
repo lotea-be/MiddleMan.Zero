@@ -1,4 +1,17 @@
 #nullable enable
+MiddleMan.Zero.Abstractions.ErrorMessage
+MiddleMan.Zero.Abstractions.ErrorMessage.<Clone>$() -> MiddleMan.Zero.Abstractions.ErrorMessage!
+MiddleMan.Zero.Abstractions.ErrorMessage.Code.get -> string!
+MiddleMan.Zero.Abstractions.ErrorMessage.Code.init -> void
+MiddleMan.Zero.Abstractions.ErrorMessage.Equals(MiddleMan.Zero.Abstractions.ErrorMessage? other) -> bool
+MiddleMan.Zero.Abstractions.ErrorMessage.ErrorMessage() -> void
+MiddleMan.Zero.Abstractions.ErrorMessage.Message.get -> string!
+MiddleMan.Zero.Abstractions.ErrorMessage.Message.init -> void
+override MiddleMan.Zero.Abstractions.ErrorMessage.Equals(object? obj) -> bool
+override MiddleMan.Zero.Abstractions.ErrorMessage.GetHashCode() -> int
+override MiddleMan.Zero.Abstractions.ErrorMessage.ToString() -> string!
+static MiddleMan.Zero.Abstractions.ErrorMessage.operator !=(MiddleMan.Zero.Abstractions.ErrorMessage? left, MiddleMan.Zero.Abstractions.ErrorMessage? right) -> bool
+static MiddleMan.Zero.Abstractions.ErrorMessage.operator ==(MiddleMan.Zero.Abstractions.ErrorMessage? left, MiddleMan.Zero.Abstractions.ErrorMessage? right) -> bool
 MiddleMan.Zero.Abstractions.IHandleAsync<TRequest, TResponse>
 MiddleMan.Zero.Abstractions.IHandleAsync<TRequest, TResponse>.HandleAsync(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase<TResponse>!>!
 MiddleMan.Zero.Abstractions.IHandleAsync<TRequest>
@@ -17,6 +30,28 @@ MiddleMan.Zero.Abstractions.MessageBase.Message.init -> void
 MiddleMan.Zero.Abstractions.MessageBase.MessageBase() -> void
 MiddleMan.Zero.Abstractions.MessageBase.MessageBase(string! message) -> void
 MiddleMan.Zero.Abstractions.MessageBase.MessageBase(string! message, string! code) -> void
+MiddleMan.Zero.Abstractions.ProblemResponse
+MiddleMan.Zero.Abstractions.ProblemResponse.<Clone>$() -> MiddleMan.Zero.Abstractions.ProblemResponse!
+MiddleMan.Zero.Abstractions.ProblemResponse.Detail.get -> string!
+MiddleMan.Zero.Abstractions.ProblemResponse.Detail.init -> void
+MiddleMan.Zero.Abstractions.ProblemResponse.Equals(MiddleMan.Zero.Abstractions.ProblemResponse? other) -> bool
+MiddleMan.Zero.Abstractions.ProblemResponse.Messages.get -> System.Collections.Generic.IReadOnlyList<MiddleMan.Zero.Abstractions.ErrorMessage!>!
+MiddleMan.Zero.Abstractions.ProblemResponse.Messages.init -> void
+MiddleMan.Zero.Abstractions.ProblemResponse.ProblemResponse() -> void
+MiddleMan.Zero.Abstractions.ProblemResponse.Status.get -> int
+MiddleMan.Zero.Abstractions.ProblemResponse.Status.init -> void
+MiddleMan.Zero.Abstractions.ProblemResponse.Title.get -> string!
+MiddleMan.Zero.Abstractions.ProblemResponse.Title.init -> void
+MiddleMan.Zero.Abstractions.ProblemResponse.TraceId.get -> string?
+MiddleMan.Zero.Abstractions.ProblemResponse.TraceId.init -> void
+MiddleMan.Zero.Abstractions.ProblemResponse.Type.get -> string!
+MiddleMan.Zero.Abstractions.ProblemResponse.Type.init -> void
+override MiddleMan.Zero.Abstractions.ProblemResponse.Equals(object? obj) -> bool
+override MiddleMan.Zero.Abstractions.ProblemResponse.GetHashCode() -> int
+override MiddleMan.Zero.Abstractions.ProblemResponse.ToString() -> string!
+static MiddleMan.Zero.Abstractions.ProblemResponse.FromResult(MiddleMan.Zero.Abstractions.ResultBase! result, string? traceId = null) -> MiddleMan.Zero.Abstractions.ProblemResponse!
+static MiddleMan.Zero.Abstractions.ProblemResponse.operator !=(MiddleMan.Zero.Abstractions.ProblemResponse? left, MiddleMan.Zero.Abstractions.ProblemResponse? right) -> bool
+static MiddleMan.Zero.Abstractions.ProblemResponse.operator ==(MiddleMan.Zero.Abstractions.ProblemResponse? left, MiddleMan.Zero.Abstractions.ProblemResponse? right) -> bool
 MiddleMan.Zero.Abstractions.ResultBase
 MiddleMan.Zero.Abstractions.ResultBase.Messages.get -> MiddleMan.Zero.Abstractions.MessageBase![]!
 MiddleMan.Zero.Abstractions.ResultBase.ResultBase(MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void

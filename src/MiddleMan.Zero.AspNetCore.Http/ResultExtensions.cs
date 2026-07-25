@@ -11,51 +11,40 @@ public static class ResultExtensions
 {
     /// <summary>
     /// Converts a Result to an appropriate IResult based on the ResultStatus.
+    /// Non-success statuses produce an RFC 9457 problem detail body with
+    /// <c>Content-Type: application/problem+json</c>.
     /// </summary>
     /// <param name="result">The result to convert.</param>
     /// <returns>An IResult representing the result status and messages.</returns>
     public static IResult ToResult(this ResultBase result)
     {
-        return result.ResultStatus switch
+        if (result.ResultStatus == ResultStatus.Successful)
         {
-            ResultStatus.Successful => Results.Ok(),
-            ResultStatus.NotFound => Results.NotFound(new { messages = result.Messages }),
-            ResultStatus.Invalid => Results.BadRequest(new { messages = result.Messages }),
-            ResultStatus.Failure => Results.Problem(
-                detail: JoinMessages(result.Messages),
-                statusCode: 500),
-            ResultStatus.Forbidden => Results.Forbid(),
-            ResultStatus.Conflict => Results.Conflict(new { messages = result.Messages }),
-            _ => Results.Problem(
-                detail: JoinMessages(result.Messages),
-                statusCode: 500),
-        };
+            return Results.Ok();
+        }
+
+        var problem = ProblemResponse.FromResult(result);
+
+        return Results.Json(problem, contentType: "application/problem+json", statusCode: problem.Status);
     }
 
     /// <summary>
     /// Converts a Result&lt;TResponse&gt; to an appropriate IResult based on the ResultStatus.
+    /// Non-success statuses produce an RFC 9457 problem detail body with
+    /// <c>Content-Type: application/problem+json</c>.
     /// </summary>
     /// <typeparam name="TResponse">The type of the response.</typeparam>
     /// <param name="result">The result to convert.</param>
     /// <returns>An IResult representing the result status, response, and messages.</returns>
     public static IResult ToResult<TResponse>(this ResultBase<TResponse> result)
     {
-        return result.ResultStatus switch
+        if (result.ResultStatus == ResultStatus.Successful)
         {
-            ResultStatus.Successful => Results.Ok(result.Response),
-            ResultStatus.NotFound => Results.NotFound(new { messages = result.Messages }),
-            ResultStatus.Invalid => Results.BadRequest(new { messages = result.Messages }),
-            ResultStatus.Failure => Results.Problem(
-                detail: JoinMessages(result.Messages),
-                statusCode: 500),
-            ResultStatus.Forbidden => Results.Forbid(),
-            ResultStatus.Conflict => Results.Conflict(new { messages = result.Messages }),
-            _ => Results.Problem(
-                detail: JoinMessages(result.Messages),
-                statusCode: 500)
-        };
-    }
+            return Results.Ok(result.Response);
+        }
 
-    private static string JoinMessages(IEnumerable<MessageBase> messages)
-        => string.Join("; ", messages.Select(m => m.Message));
+        var problem = ProblemResponse.FromResult(result);
+
+        return Results.Json(problem, contentType: "application/problem+json", statusCode: problem.Status);
+    }
 }

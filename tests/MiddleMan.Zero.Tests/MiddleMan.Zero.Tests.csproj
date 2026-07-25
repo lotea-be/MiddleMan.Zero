@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\MiddleMan.Zero\MiddleMan.Zero.csproj" />
     <ProjectReference Include="..\..\src\MiddleMan.Zero.Abstractions\MiddleMan.Zero.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\MiddleMan.Zero.AspNetCore.Http\MiddleMan.Zero.AspNetCore.Http.csproj" />
+    <ProjectReference Include="..\..\src\MiddleMan.Zero.AspNetCore.Mvc\MiddleMan.Zero.AspNetCore.Mvc.csproj" />
   </ItemGroup>
 
 </Project>
