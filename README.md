@@ -196,10 +196,15 @@ Explore complete working examples:
 | ResultStatus | HTTP Status Code | Use Case |
 |--------------|------------------|----------|
 | `Successful` | 200 OK | Operation completed successfully |
-| `NotFound` | 404 Not Found | Resource doesn't exist |
 | `Invalid` | 400 Bad Request | Validation failed |
 | `Forbidden` | 403 Forbidden | Caller lacks required permissions |
+| `NotFound` | 404 Not Found | Resource doesn't exist |
+| `Conflict` | 409 Conflict | Request conflicts with current resource state |
 | `Failure` | 500 Internal Server Error | Operation failed |
+
+Non-success statuses are returned by the ASP.NET Core integration packages as a canonical RFC 9457
+`ProblemResponse` body (`application/problem+json`). See the `AspNetCore.Http` / `AspNetCore.Mvc`
+package READMEs and [`docs/errors`](docs/errors) for the envelope shape.
 
 ### Handler Context
 
