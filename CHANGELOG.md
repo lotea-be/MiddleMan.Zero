@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-rc3]
+
+### Breaking changes
+
+#### Unified error-response envelope (`MiddleMan.Zero.AspNetCore.Http` + `MiddleMan.Zero.AspNetCore.Mvc`)
+
+Every non-success `ResultStatus` now returns one canonical RFC 9457 (RFC 7807-compatible) body,
+served as `Content-Type: application/problem+json`, identical across both the Minimal API
+(`ToResult()`) and MVC (`ToActionResult()` / `ToTypedActionResult()`) mappers.
+
+- **New public types in `MiddleMan.Zero.Abstractions`:** `ProblemResponse` (the envelope, with
+  `type` / `title` / `status` / `detail` / `messages` and a reserved nullable `traceId`) and
+  `ErrorMessage` (a `{ message, code }` projection). Build one with `ProblemResponse.FromResult(result)`.
+- **The old body shape is removed.** Error responses previously returned an anonymous
+  `{ messages: MessageBase[] }` object that leaked `Id`, `CorrelationId`, and `CreatedAt`. Those
+  fields are gone; each entry in `messages` now exposes only `message` and `code`.
+  - **Migration:** update clients that parsed the old body to read the RFC 9457 fields; the per-error
+    list is still named `messages`, so `messages[].message` / `messages[].code` are the stable fields.
+- **403 Forbidden now has a body.** It previously returned an empty `Results.Forbid()` / `ForbidResult`.
+  It now returns the `application/problem+json` envelope, populated from any logged `ForbiddenMessage`s.
+  - **Migration:** clients that treated 403 as body-less should tolerate the new problem body.
+- **`Failure`/`Undefined` bodies are now consistent** between the two packages (both emit the envelope;
+  previously Http emitted `ProblemDetails` and Mvc emitted the anonymous object).
+- Each `type` URI links to a per-status document under [`docs/errors`](docs/errors).
+
 ## [2.0.0] - 2026-05-08
 
 This release tightens up the public API after a full audit. Most changes are non-breaking;

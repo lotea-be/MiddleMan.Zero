@@ -10,7 +10,6 @@ namespace IceCreamTruck.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Produces("application/json")]
 public class OrdersController(
     ILogger<OrdersController> logger) : ControllerBase
 {
