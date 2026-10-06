@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-rc4]
+
+### Added
+
+- **`ResultStatus.Unauthorized` (401)** (`MiddleMan.Zero.Abstractions`, `MiddleMan.Zero`). Log an
+  `UnauthorizedMessage` (new; same three constructors as the other messages) to return a
+  `401 Unauthorized` problem body from both `ToResult()` and `ToActionResult()`. `HandlerContext`
+  gains `IsUnauthorized`. `Unauthorized` takes precedence over every other status. See
+  [`docs/errors/unauthorized.md`](docs/errors/unauthorized.md).
+- **Pipeline behaviors** (`MiddleMan.Zero.Abstractions`, `MiddleMan.Zero.DependencyInjection`).
+  New `IHandlerBehavior<TRequest>` / `IHandlerBehavior<TRequest, TResponse>` contracts (with the
+  `HandlerDelegate` / `HandlerDelegate<TResponse>` continuations) let you wrap every handler with
+  logging, metrics, transactions, etc. Register them as open or closed generics; `AddMiddleManZero()`
+  applies them in registration order (first registered = outermost). With no behaviors registered,
+  the handler itself is resolved, as before.
+
+### Changed
+
+- **`HandlerBase` observes cancellation.** It now calls `ThrowIfCancellationRequested()` before
+  `ValidateAsync` and before `HandleAsync`, so an already-cancelled token surfaces as
+  `OperationCanceledException` instead of running the handler. Handlers remain responsible for
+  passing the token to their own I/O.
+- **`HandlerBase` uses `ConfigureAwait(false)`** on its internal awaits.
+- **`AddMiddleManZero()` registration shape.** Each handler is now also registered as its concrete
+  type, and its `IHandleAsync<…>` interface is registered through a factory (so behaviors can be
+  applied) instead of an `ImplementationType`. Resolution is unchanged. Open generic handler types
+  are now skipped (they previously produced unusable registrations), and an interface the consumer
+  already registered for the same handler is left untouched.
+
+### Documentation
+
+- Documented that a non-success result carries only the messages of the type that decided its
+  status (e.g. `DebugMessage`s are dropped from a `Failure` result), so diagnostic breadcrumbs never
+  reach an HTTP error body. Successful results still carry every message.
+
 ## [2.0.0-rc3]
 
 ### Breaking changes

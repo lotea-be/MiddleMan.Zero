@@ -50,6 +50,29 @@ public class ResultExtensionsTests
     }
 
     [Fact]
+    public void ToResult_ReturnsJsonEnvelope401_WhenResultIsUnauthorized()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new UnauthorizedMessage("Sign in required", "sign_in_required") };
+        var result = new Result(ResultStatus.Unauthorized, messages);
+
+        // Act
+        var iResult = result.ToResult();
+
+        // Assert
+        var jsonResult = iResult.ShouldBeOfType<JsonHttpResult<ProblemResponse>>();
+        jsonResult.StatusCode.ShouldBe(401);
+        jsonResult.ContentType.ShouldBe(ProblemJsonContentType);
+
+        var body = jsonResult.Value;
+        body.ShouldNotBeNull();
+        body.Status.ShouldBe(401);
+        body.Title.ShouldBe("Unauthorized");
+        body.Detail.ShouldBe("Sign in required");
+        body.Messages.ShouldHaveSingleItem().Code.ShouldBe("sign_in_required");
+    }
+
+    [Fact]
     public void ToResult_ReturnsJsonEnvelope403_WhenResultIsForbidden()
     {
         // Arrange

@@ -43,6 +43,14 @@ This package contains the fundamental building blocks for implementing the media
   - `NotFound`: Requested resource not found
   - `Forbidden`: Caller lacks the required permissions
   - `Conflict`: Request conflicts with the current state of the resource
+  - `Unauthorized`: Caller must be authenticated
+
+### Pipeline behaviors
+
+- **`IHandlerBehavior<TRequest>`** / **`IHandlerBehavior<TRequest, TResponse>`**: Wrap a handler's
+  execution for cross-cutting concerns. Call the `HandlerDelegate` / `HandlerDelegate<TResponse>`
+  `next` to continue the pipeline, or return a result to short-circuit it. Applied by
+  `MiddleMan.Zero.DependencyInjection`.
 
 ## Usage
 

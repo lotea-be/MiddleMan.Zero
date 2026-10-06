@@ -86,11 +86,108 @@ public class MiddleManServiceCollectionExtensionsTests
         services.AddMiddleManZero();
         services.AddMiddleManZero();
 
-        // Assert - exactly one (TestRequest -> TestHandler) descriptor
-        var matching = services.Where(d =>
-            d.ServiceType == typeof(IHandleAsync<TestRequest>) &&
-            d.ImplementationType == typeof(TestHandler));
-        matching.Count().ShouldBe(1);
+        // Assert - exactly one interface descriptor and one concrete descriptor for TestHandler
+        services.Count(d => d.ServiceType == typeof(IHandleAsync<TestRequest>)).ShouldBe(1);
+        services.Count(d => d.ServiceType == typeof(TestHandler)).ShouldBe(1);
+    }
+
+    [Fact]
+    public void AddMiddleMan_SkipsHandler_WhenConsumerAlreadyRegisteredIt()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddScoped<IHandleAsync<TestRequest>, TestHandler>();
+
+        // Act
+        services.AddMiddleManZero(typeof(MiddleManServiceCollectionExtensionsTests).Assembly);
+
+        // Assert - the consumer's own registration is kept as the only one
+        services.Single(d => d.ServiceType == typeof(IHandleAsync<TestRequest>)).Lifetime.ShouldBe(ServiceLifetime.Scoped);
+    }
+
+    [Fact]
+    public void AddMiddleMan_SkipsOpenGenericHandlers()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddMiddleManZero(typeof(MiddleManServiceCollectionExtensionsTests).Assembly);
+
+        // Assert
+        services.ShouldNotContain(d => d.ServiceType == typeof(OpenGenericHandler<>));
+        services.ShouldNotContain(d => d.ServiceType.ContainsGenericParameters);
+    }
+
+    [Fact]
+    public void AddMiddleMan_RegistersConcreteHandlerType()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddMiddleManZero(typeof(MiddleManServiceCollectionExtensionsTests).Assembly);
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        provider.GetService<TestHandler>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task AddMiddleMan_WrapsHandlerInBehaviors_InRegistrationOrder()
+    {
+        // Arrange
+        var calls = new List<string>();
+        var services = new ServiceCollection();
+        services.AddSingleton(calls);
+        services.AddTransient<IHandlerBehavior<TestRequest>, OuterBehavior>();
+        services.AddTransient<IHandlerBehavior<TestRequest>, InnerBehavior>();
+        services.AddMiddleManZero(typeof(MiddleManServiceCollectionExtensionsTests).Assembly);
+        var provider = services.BuildServiceProvider();
+
+        // Act
+        var handler = provider.GetRequiredService<IHandleAsync<TestRequest>>();
+        var result = await handler.HandleAsync(new TestRequest(), TestContext.Current.CancellationToken);
+
+        // Assert
+        handler.ShouldNotBeOfType<TestHandler>();
+        result.ResultStatus.ShouldBe(ResultStatus.Successful);
+        calls.ShouldBe(["outer:before", "inner:before", "inner:after", "outer:after"]);
+    }
+
+    [Fact]
+    public async Task AddMiddleMan_AppliesOpenGenericBehaviors_ToHandlersWithResponse()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddTransient(typeof(IHandlerBehavior<,>), typeof(ShortCircuitBehavior<,>));
+        services.AddMiddleManZero(typeof(MiddleManServiceCollectionExtensionsTests).Assembly);
+        var provider = services.BuildServiceProvider();
+
+        // Act
+        var handler = provider.GetRequiredService<IHandleAsync<TestRequestWithResponse, string>>();
+        var result = await handler.HandleAsync(new TestRequestWithResponse(), TestContext.Current.CancellationToken);
+
+        // Assert - the behavior short-circuited, so the handler never produced "Test"
+        result.ResultStatus.ShouldBe(ResultStatus.Forbidden);
+        result.Response.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task AddMiddleMan_BehaviorCanReplaceCancellationToken()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddTransient<IHandlerBehavior<TestRequestWithResponse, string>, CancellingBehavior>();
+        services.AddMiddleManZero(typeof(MiddleManServiceCollectionExtensionsTests).Assembly);
+        var provider = services.BuildServiceProvider();
+
+        // Act
+        var handler = provider.GetRequiredService<IHandleAsync<TestRequestWithResponse, string>>();
+
+        // Assert - the cancelled token handed to next() reaches HandlerBase
+        await Should.ThrowAsync<OperationCanceledException>(
+            () => handler.HandleAsync(new TestRequestWithResponse(), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -139,6 +236,41 @@ public class MiddleManServiceCollectionExtensionsTests
                 new Exception?[] { new TypeLoadException("simulated") });
     }
 
+    // Behaviors
+    public sealed class OuterBehavior(List<string> calls) : IHandlerBehavior<TestRequest>
+    {
+        public async Task<ResultBase> HandleAsync(TestRequest request, HandlerDelegate next, CancellationToken cancellationToken)
+        {
+            calls.Add("outer:before");
+            var result = await next(cancellationToken);
+            calls.Add("outer:after");
+            return result;
+        }
+    }
+
+    public sealed class InnerBehavior(List<string> calls) : IHandlerBehavior<TestRequest>
+    {
+        public async Task<ResultBase> HandleAsync(TestRequest request, HandlerDelegate next, CancellationToken cancellationToken)
+        {
+            calls.Add("inner:before");
+            var result = await next(cancellationToken);
+            calls.Add("inner:after");
+            return result;
+        }
+    }
+
+    public sealed class ShortCircuitBehavior<TRequest, TResponse> : IHandlerBehavior<TRequest, TResponse>
+    {
+        public Task<ResultBase<TResponse>> HandleAsync(TRequest request, HandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+            => Task.FromResult<ResultBase<TResponse>>(new Result<TResponse>(default, ResultStatus.Forbidden, [new ForbiddenMessage()]));
+    }
+
+    public sealed class CancellingBehavior : IHandlerBehavior<TestRequestWithResponse, string>
+    {
+        public Task<ResultBase<string>> HandleAsync(TestRequestWithResponse request, HandlerDelegate<string> next, CancellationToken cancellationToken)
+            => next(new CancellationToken(canceled: true));
+    }
+
     // Test classes
     public class TestRequest { }
 
@@ -150,6 +282,15 @@ public class MiddleManServiceCollectionExtensionsTests
             => Task.CompletedTask;
 
         protected override Task ValidateAsync(TestRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+    }
+
+    public class OpenGenericHandler<TRequest> : HandlerBase<TRequest>
+    {
+        protected override Task HandleAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        protected override Task ValidateAsync(TRequest request, HandlerContext context, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
     }
 

@@ -64,6 +64,21 @@ public class ResultExtensionsTests
     }
 
     [Fact]
+    public void ToActionResult_ReturnsEnvelope401_WhenResultIsUnauthorized()
+    {
+        // Arrange
+        var messages = new MessageBase[] { new UnauthorizedMessage("Sign in required", "sign_in_required") };
+        var result = new Result(ResultStatus.Unauthorized, messages);
+
+        // Act
+        var actionResult = result.ToActionResult();
+
+        // Assert
+        actionResult.ShouldNotBeOfType<UnauthorizedResult>();
+        AssertEnvelope(actionResult, 401, "Unauthorized");
+    }
+
+    [Fact]
     public void ToActionResult_ReturnsEnvelope403_AndNotForbidResult_WhenResultIsForbidden()
     {
         // Arrange

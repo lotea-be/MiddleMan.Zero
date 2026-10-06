@@ -68,3 +68,12 @@ MiddleMan.Zero.Abstractions.ResultStatus.NotFound = 4 -> MiddleMan.Zero.Abstract
 MiddleMan.Zero.Abstractions.ResultStatus.Successful = 1 -> MiddleMan.Zero.Abstractions.ResultStatus
 MiddleMan.Zero.Abstractions.ResultStatus.Undefined = 0 -> MiddleMan.Zero.Abstractions.ResultStatus
 override MiddleMan.Zero.Abstractions.MessageBase.ToString() -> string!
+MiddleMan.Zero.Abstractions.ResultStatus.Unauthorized = 7 -> MiddleMan.Zero.Abstractions.ResultStatus
+MiddleMan.Zero.Abstractions.HandlerDelegate
+MiddleMan.Zero.Abstractions.HandlerDelegate<TResponse>
+MiddleMan.Zero.Abstractions.IHandlerBehavior<TRequest, TResponse>
+MiddleMan.Zero.Abstractions.IHandlerBehavior<TRequest, TResponse>.HandleAsync(TRequest request, MiddleMan.Zero.Abstractions.HandlerDelegate<TResponse>! next, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase<TResponse>!>!
+MiddleMan.Zero.Abstractions.IHandlerBehavior<TRequest>
+MiddleMan.Zero.Abstractions.IHandlerBehavior<TRequest>.HandleAsync(TRequest request, MiddleMan.Zero.Abstractions.HandlerDelegate! next, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase!>!
+virtual MiddleMan.Zero.Abstractions.HandlerDelegate.Invoke(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase!>!
+virtual MiddleMan.Zero.Abstractions.HandlerDelegate<TResponse>.Invoke(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<MiddleMan.Zero.Abstractions.ResultBase<TResponse>!>!

@@ -71,7 +71,29 @@ namespace MiddleMan.Zero.Tests
                 () => context.IsSuccessful.ShouldBeFalse(),
                 () => context.IsRequestValid.ShouldBeTrue(),
                 () => context.IsNotFound.ShouldBeFalse(),
-                () => context.IsForbidden.ShouldBeFalse()
+                () => context.IsForbidden.ShouldBeFalse(),
+                () => context.IsUnauthorized.ShouldBeFalse()
+            );
+        }
+
+        [Fact]
+        public void IsUnauthorized_ReturnsTrue_AndOnlyFlipsUnauthorizedAndSuccessful_WhenUnauthorizedMessageLogged()
+        {
+            // Arrange
+            var context = new HandlerContext();
+
+            // Act
+            context.Log(new UnauthorizedMessage("Sign in required."));
+
+            // Assert
+            context.ShouldSatisfyAllConditions(
+                () => context.IsUnauthorized.ShouldBeTrue(),
+                () => context.IsSuccessful.ShouldBeFalse(),
+                () => context.IsRequestValid.ShouldBeTrue(),
+                () => context.IsNotFound.ShouldBeFalse(),
+                () => context.IsForbidden.ShouldBeFalse(),
+                () => context.IsConflict.ShouldBeFalse(),
+                () => context.Messages.ShouldHaveSingleItem().ShouldBeOfType<UnauthorizedMessage>()
             );
         }
     }

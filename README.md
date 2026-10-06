@@ -191,12 +191,50 @@ Explore complete working examples:
 4. **Processing**: Business logic executes in `HandleAsync()`
 5. **Result Creation**: Automatic result generation based on context state
 
+Status precedence when several message types are logged:
+`Unauthorized` > `Forbidden` > `Invalid` > `Conflict` > `Successful` > `NotFound` > `Failure`.
+A successful result carries every logged message; a non-success result carries **only** the messages
+of the type that decided its status, so `DebugMessage` breadcrumbs never reach an HTTP error body.
+
+**Cancellation:** the base class throws `OperationCanceledException` if the token is already
+cancelled before `ValidateAsync()` or before `HandleAsync()`. Inside those methods, your code is
+responsible for passing the token on to I/O calls. On Minimal APIs, add a `CancellationToken`
+parameter to the endpoint (bound to `HttpContext.RequestAborted`) and pass it to `HandleAsync`.
+
+### Pipeline Behaviors
+
+Cross-cutting concerns (logging, metrics, transactions, retries) can wrap every handler without
+touching it. Implement `IHandlerBehavior<TRequest>` / `IHandlerBehavior<TRequest, TResponse>` and
+register it; `AddMiddleManZero()` applies registered behaviors whenever a handler is resolved.
+
+```csharp
+public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
+    : IHandlerBehavior<TRequest, TResponse>
+{
+    public async Task<ResultBase<TResponse>> HandleAsync(
+        TRequest request, HandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Handling {Request}", typeof(TRequest).Name);
+        var result = await next(cancellationToken);
+        logger.LogInformation("Handled {Request}: {Status}", typeof(TRequest).Name, result.ResultStatus);
+        return result;
+    }
+}
+
+builder.Services.AddTransient(typeof(IHandlerBehavior<,>), typeof(LoggingBehavior<,>));
+builder.Services.AddMiddleManZero();
+```
+
+Behaviors run in registration order (first registered = outermost) and can short-circuit by
+returning a result without calling `next`.
+
 ### Result Status Mapping
 
 | ResultStatus | HTTP Status Code | Use Case |
 |--------------|------------------|----------|
 | `Successful` | 200 OK | Operation completed successfully |
 | `Invalid` | 400 Bad Request | Validation failed |
+| `Unauthorized` | 401 Unauthorized | Caller must be authenticated |
 | `Forbidden` | 403 Forbidden | Caller lacks required permissions |
 | `NotFound` | 404 Not Found | Resource doesn't exist |
 | `Conflict` | 409 Conflict | Request conflicts with current resource state |
@@ -219,6 +257,9 @@ context.Log(new InvalidRequestMessage("Order ID must be valid.", "order_id_inval
 // Mark resource as not found
 context.Log(new NotFoundMessage());
 context.Log(new NotFoundMessage("Order not found."));
+
+// Require authentication (401)
+context.Log(new UnauthorizedMessage("Sign in to place an order."));
 
 // Deny access when the caller lacks permissions
 context.Log(new ForbiddenMessage());

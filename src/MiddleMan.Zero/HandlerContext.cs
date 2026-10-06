@@ -36,6 +36,11 @@ public class HandlerContext
     public bool IsForbidden { get; private set; } = false;
 
     /// <summary>
+    /// Gets a value indicating whether the operation requires the caller to be authenticated.
+    /// </summary>
+    public bool IsUnauthorized { get; private set; } = false;
+
+    /// <summary>
     /// Gets a value indicating whether the operation conflicts with the current state of the resource.
     /// </summary>
     public bool IsConflict { get; private set; } = false;
@@ -106,6 +111,17 @@ public class HandlerContext
         IsSuccessful = false;
         IsForbidden = true;
         LogMessage(forbiddenMessage);
+    }
+
+    /// <summary>
+    /// Logs an unauthorized message to the context and marks the operation as requiring authentication.
+    /// </summary>
+    /// <param name="unauthorizedMessage">The message to log.</param>
+    public void Log(UnauthorizedMessage unauthorizedMessage)
+    {
+        IsSuccessful = false;
+        IsUnauthorized = true;
+        LogMessage(unauthorizedMessage);
     }
 
     /// <summary>

@@ -94,6 +94,7 @@ public class ProblemResponseTests
         new()
         {
             { ResultStatus.Invalid,   400, "Bad Request",            "bad-request" },
+            { ResultStatus.Unauthorized, 401, "Unauthorized",        "unauthorized" },
             { ResultStatus.Forbidden, 403, "Forbidden",              "forbidden" },
             { ResultStatus.NotFound,  404, "Not Found",              "not-found" },
             { ResultStatus.Conflict,  409, "Conflict",               "conflict" },

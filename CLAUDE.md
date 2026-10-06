@@ -53,7 +53,7 @@ Central Package Management is enabled (`ManagePackageVersionsCentrally=true`). V
 
 The repo is five thin packages that compose into a request → result → HTTP pipeline. Understand the flow before editing any one piece — a behavioral change in `HandlerBase` or `HandlerContext` ripples through every consumer.
 
-**1. Contract (`MiddleMan.Zero.Abstractions`).** `IHandleAsync<TRequest>` and `IHandleAsync<TRequest, TResponse>` are the only interfaces consumers depend on. They return `ResultBase` / `ResultBase<TResponse>`, which carry a `ResultStatus` enum (`Successful | Failure | Invalid | NotFound | Forbidden`) and a `MessageBase[]`. `ResultBase<TResponse>` throws `ArgumentNullException` if `Successful` is paired with a null response — this invariant is load-bearing.
+**1. Contract (`MiddleMan.Zero.Abstractions`).** `IHandleAsync<TRequest>` and `IHandleAsync<TRequest, TResponse>` are the only interfaces consumers depend on. They return `ResultBase` / `ResultBase<TResponse>`, which carry a `ResultStatus` enum (`Successful | Failure | Invalid | NotFound | Forbidden | Conflict | Unauthorized`) and a `MessageBase[]`. `ResultBase<TResponse>` throws `ArgumentNullException` if `Successful` is paired with a null response — this invariant is load-bearing.
 
 **2. Template (`MiddleMan.Zero.HandlerBase`).** Concrete handlers extend `HandlerBase<TRequest>` or `HandlerBase<TRequest, TResponse>` and override two methods: `ValidateAsync` and `HandleAsync`. The base class enforces a fixed pipeline:
 
@@ -62,7 +62,7 @@ The repo is five thin packages that compose into a request → result → HTTP p
    3. Call `HandleAsync` (and capture the response in the generic variant).
    4. Synthesize a `Result` from `HandlerContext` state.
 
-   Status precedence in `CreateResult`: `Forbidden` > `Invalid` > `Successful` > `NotFound` > `Failure`. If you add a new status, edit both `HandlerBase` overloads and both `ResultExtensions` files.
+   Status precedence in `CreateResult`: `Unauthorized` > `Forbidden` > `Invalid` > `Conflict` > `Successful` > `NotFound` > `Failure`. A non-success result carries only the messages of the deciding type (intentional — keeps `DebugMessage`s out of HTTP bodies). The base throws `OperationCanceledException` if the token is cancelled before validate/handle, and uses `ConfigureAwait(false)`. If you add a new status, edit both `HandlerBase` overloads and the `ProblemResponse.FromResult` mapping (both `ResultExtensions` delegate to it), and add a `docs/errors/<slug>.md` page.
 
 **3. State accumulator (`HandlerContext`).** Handlers don't return errors — they `context.Log(...)` typed messages, and the message *type* mutates context flags:
 
@@ -70,13 +70,15 @@ The repo is five thin packages that compose into a request → result → HTTP p
    - `FailureMessage` → flips `IsSuccessful=false`.
    - `NotFoundMessage` → flips `IsSuccessful=false`, `IsNotFound=true`.
    - `ForbiddenMessage` → flips `IsSuccessful=false`, `IsForbidden=true`.
+   - `UnauthorizedMessage` → flips `IsSuccessful=false`, `IsUnauthorized=true`.
+   - `ConflictMessage` → flips `IsSuccessful=false`, `IsConflict=true`.
    - `DebugMessage` → no flag change, just logged.
 
    A new message type means: new class in `src/MiddleMan.Zero/Messages/`, new `Log(...)` overload on `HandlerContext`, new branch in `HandlerBase.CreateResult`, and new mappings in both `ResultExtensions`.
 
-**4. Discovery (`MiddleMan.Zero.DependencyInjection`).** `services.AddMiddleManZero()` scans **all** loaded `AppDomain` assemblies for non-abstract types implementing `IHandleAsync<>` or `IHandleAsync<,>` and registers each closed interface → handler. Default lifetime is `Transient`. Note: this means handlers must be in an assembly that is loaded by the time `AddMiddleManZero` runs — usually fine because handler libraries are referenced by the host, but worth knowing if you add lazy-loaded plugins.
+**4. Discovery (`MiddleMan.Zero.DependencyInjection`).** `services.AddMiddleManZero()` scans **all** loaded `AppDomain` assemblies (or the ones passed in) for non-abstract, closed types implementing `IHandleAsync<>` or `IHandleAsync<,>`. Each handler is registered as its concrete type, and each interface through a `HandlerFactory` that wraps it in any registered `IHandlerBehavior<>` / `IHandlerBehavior<,>` (`HandlerPipeline.cs`; first registered = outermost). Default lifetime is `Transient`. Note: this means handlers must be in an assembly that is loaded by the time `AddMiddleManZero` runs — usually fine because handler libraries are referenced by the host, but worth knowing if you add lazy-loaded plugins.
 
-**5. HTTP mapping.** `MiddleMan.Zero.AspNetCore.Mvc` (`ToActionResult`/`ToTypedActionResult`) and `MiddleMan.Zero.AspNetCore.Http` (`ToResult`) translate `ResultStatus` to MVC `IActionResult` / Minimal API `IResult`. Both packages ship the same status → HTTP code mapping (200/400/403/404/500). Keep them in sync when the enum changes.
+**5. HTTP mapping.** `MiddleMan.Zero.AspNetCore.Mvc` (`ToActionResult`/`ToTypedActionResult`) and `MiddleMan.Zero.AspNetCore.Http` (`ToResult`) translate `ResultStatus` to MVC `IActionResult` / Minimal API `IResult`. Both packages delegate to `ProblemResponse.FromResult`, so they share the same status → HTTP code mapping (200/400/401/403/404/409/500). Keep them in sync when the enum changes.
 
 The `samples/IceCreamTruck` and `samples/IceCreamTruck.WebApi` projects are the canonical end-to-end example — handlers live in the library, controllers/endpoints in the WebApi, and `IceCreamTruck.WebApi.Tests` runs against the real pipeline via `Microsoft.AspNetCore.Mvc.Testing`.
 
