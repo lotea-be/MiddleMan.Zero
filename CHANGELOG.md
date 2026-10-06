@@ -34,6 +34,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   are now skipped (they previously produced unusable registrations), and an interface the consumer
   already registered for the same handler is left untouched.
 
+### Dependencies
+
+- `Microsoft.SourceLink.GitHub` 10.0.301 → 10.0.401 — clears NU1902 (GHSA-23fw-v26w-5fgq on the
+  transitive `Microsoft.Build.Tasks.Git`), which was failing restore.
+- `Microsoft.Extensions.DependencyInjection.Abstractions` 10.0.10 → 10.0.12.
+- Tests/samples: `Microsoft.AspNetCore.Mvc.Testing` / `Microsoft.AspNetCore.OpenApi` to 8.0.31 /
+  9.0.20 / 10.0.12, `Microsoft.OpenApi` pin 2.7.6 → 2.12.2, `Scalar.AspNetCore` 2.17.13,
+  `Microsoft.Extensions.DependencyInjection` / `Options` 10.0.12, `Microsoft.NET.Test.Sdk` 18.10.1,
+  `coverlet.collector` 10.1.0. xunit stays on 3.x (4.x requires migrating off VSTest).
+
 ### Documentation
 
 - Documented that a non-success result carries only the messages of the type that decided its
