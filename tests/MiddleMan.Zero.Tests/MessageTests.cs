@@ -74,6 +74,7 @@ public class MessageTests
             Add(typeof(DebugMessage));
             Add(typeof(FailureMessage));
             Add(typeof(ForbiddenMessage));
+            Add(typeof(UnauthorizedMessage));
             Add(typeof(ConflictMessage));
             Add(typeof(NotFoundMessage));
             Add(typeof(InvalidRequestMessage));

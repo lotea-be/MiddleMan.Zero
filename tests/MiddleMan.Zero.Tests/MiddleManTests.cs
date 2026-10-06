@@ -236,6 +236,138 @@ public class MiddleManTests
         result.ResultStatus.ShouldBe(ResultStatus.Invalid);
     }
 
+    [Fact]
+    public async Task MiddleMan_ReturnsUnauthorized_WhenHandlerLogsUnauthorizedMessage()
+    {
+        // Arrange - non-generic (void) handler path
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DelegateHandler((_, context) => context.Log(new UnauthorizedMessage("Sign in required.")));
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Unauthorized),
+            () => result.Messages.ShouldHaveSingleItem().ShouldBeOfType<UnauthorizedMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_WithResponse_ReturnsUnauthorized_WhenHandlerLogsUnauthorizedMessage()
+    {
+        // Arrange - generic handler path
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DelegateHandlerWithResponse((_, context) => context.Log(new UnauthorizedMessage()));
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Unauthorized),
+            () => result.Response.ShouldBeNull(),
+            () => result.Messages.ShouldHaveSingleItem().ShouldBeOfType<UnauthorizedMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_UnauthorizedWinsOverForbidden_WhenBothAreLogged()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DelegateHandler((_, context) =>
+        {
+            context.Log(new ForbiddenMessage());
+            context.Log(new UnauthorizedMessage());
+        });
+        var requestHandlerWithResponse = new DelegateHandlerWithResponse((_, context) =>
+        {
+            context.Log(new ForbiddenMessage());
+            context.Log(new UnauthorizedMessage());
+        });
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+        var resultWithResponse = await requestHandlerWithResponse.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ResultStatus.ShouldBe(ResultStatus.Unauthorized);
+        resultWithResponse.ResultStatus.ShouldBe(ResultStatus.Unauthorized);
+    }
+
+    [Fact]
+    public async Task MiddleMan_NonSuccessResult_OnlyCarriesMessagesOfTheDominantType()
+    {
+        // Arrange - debug breadcrumbs and lower-precedence messages must not reach the result
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DelegateHandler((_, context) =>
+        {
+            context.Log(new DebugMessage("Loaded order 42."));
+            context.Log(new NotFoundMessage("Customer not found."));
+            context.Log(new FailureMessage("Downstream call failed."));
+        });
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.NotFound),
+            () => result.Messages.ShouldHaveSingleItem().ShouldBeOfType<NotFoundMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_SuccessfulResult_CarriesAllMessages()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DelegateHandlerWithResponse((_, context) => context.Log(new DebugMessage("Loaded order 42.")));
+
+        // Act
+        var result = await requestHandler.HandleAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldSatisfyAllConditions(
+            () => result.ResultStatus.ShouldBe(ResultStatus.Successful),
+            () => result.Messages.ShouldHaveSingleItem().ShouldBeOfType<DebugMessage>()
+        );
+    }
+
+    [Fact]
+    public async Task MiddleMan_ThrowsOperationCanceled_AndDoesNotValidate_WhenTokenAlreadyCancelled()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "Foo" };
+        var requestHandler = new DelegateHandler((_, _) => { });
+        var requestHandlerWithResponse = new DelegateHandlerWithResponse((_, _) => { });
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(() => requestHandler.HandleAsync(request, cts.Token));
+        await Should.ThrowAsync<OperationCanceledException>(() => requestHandlerWithResponse.HandleAsync(request, cts.Token));
+        requestHandler.ValidateCalls.ShouldBe(0);
+        requestHandlerWithResponse.ValidateCalls.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task MiddleMan_ThrowsOperationCanceled_AndDoesNotHandle_WhenCancelledDuringValidation()
+    {
+        // Arrange
+        var request = new DummyRequest() { MyInput = "Foo" };
+        using var cts = new CancellationTokenSource();
+        var requestHandler = new DelegateHandler((_, _) => { }, onValidate: cts.Cancel);
+        var requestHandlerWithResponse = new DelegateHandlerWithResponse((_, _) => { }, onValidate: cts.Cancel);
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(() => requestHandler.HandleAsync(request, cts.Token));
+        await Should.ThrowAsync<OperationCanceledException>(() => requestHandlerWithResponse.HandleAsync(request, cts.Token));
+        requestHandler.HandleCalls.ShouldBe(0);
+        requestHandlerWithResponse.HandleCalls.ShouldBe(0);
+    }
+
     public class DummyRequest { public required string MyInput { get; set; } }
     public class DummyResponse { public required string MyOutput { get; set; } }
 
@@ -362,6 +494,48 @@ public class MiddleManTests
         {
             context.Log(new ConflictMessage("Resource state conflicts with request.", "dummy_conflict"));
             return Task.FromResult<DummyResponse?>(null);
+        }
+    }
+
+    public class DelegateHandler(Action<DummyRequest, HandlerContext> handle, Action? onValidate = null) : HandlerBase<DummyRequest>
+    {
+        public int ValidateCalls { get; private set; }
+
+        public int HandleCalls { get; private set; }
+
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            ValidateCalls++;
+            onValidate?.Invoke();
+            return Task.CompletedTask;
+        }
+
+        protected override Task HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            HandleCalls++;
+            handle(request, context);
+            return Task.CompletedTask;
+        }
+    }
+
+    public class DelegateHandlerWithResponse(Action<DummyRequest, HandlerContext> handle, Action? onValidate = null) : HandlerBase<DummyRequest, DummyResponse>
+    {
+        public int ValidateCalls { get; private set; }
+
+        public int HandleCalls { get; private set; }
+
+        protected override Task ValidateAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            ValidateCalls++;
+            onValidate?.Invoke();
+            return Task.CompletedTask;
+        }
+
+        protected override Task<DummyResponse?> HandleAsync(DummyRequest request, HandlerContext context, CancellationToken cancellationToken = default)
+        {
+            HandleCalls++;
+            handle(request, context);
+            return Task.FromResult<DummyResponse?>(new DummyResponse { MyOutput = request.MyInput });
         }
     }
 

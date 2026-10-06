@@ -6,6 +6,28 @@ using System.Threading.Tasks;
 using MiddleMan.Zero.Abstractions;
 
 /// <inheritdoc/>
+/// <remarks>
+/// <para>
+/// The resulting status follows a fixed precedence: <see cref="ResultStatus.Unauthorized"/> &gt;
+/// <see cref="ResultStatus.Forbidden"/> &gt; <see cref="ResultStatus.Invalid"/> &gt;
+/// <see cref="ResultStatus.Conflict"/> &gt; <see cref="ResultStatus.Successful"/> &gt;
+/// <see cref="ResultStatus.NotFound"/> &gt; <see cref="ResultStatus.Failure"/>.
+/// </para>
+/// <para>
+/// A successful result carries every logged message. A non-success result carries <b>only</b> the
+/// messages of the type that determined its status (e.g. only <see cref="ForbiddenMessage"/>s for
+/// <see cref="ResultStatus.Forbidden"/>). This is intentional: non-success messages are surfaced to
+/// HTTP clients in the problem body, so <see cref="DebugMessage"/> breadcrumbs and messages for
+/// lower-precedence statuses are never leaked. Read <see cref="HandlerContext.Messages"/> inside the
+/// handler if you need them (for example, to write them to your own logger).
+/// </para>
+/// <para>
+/// Cancellation: the base class calls <see cref="CancellationToken.ThrowIfCancellationRequested"/>
+/// before validation and before handling, so an already-cancelled token surfaces as an
+/// <see cref="OperationCanceledException"/>. Long-running work inside <c>ValidateAsync</c> and
+/// <c>HandleAsync</c> must still observe the token itself.
+/// </para>
+/// </remarks>
 public abstract class HandlerBase<TRequest> : IHandleAsync<TRequest>
 {
     /// <inheritdoc/>
@@ -20,8 +42,10 @@ public abstract class HandlerBase<TRequest> : IHandleAsync<TRequest>
             return CreateResult(context);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         // Validate request before handling
-        await ValidateAsync(request, context, cancellationToken);
+        await ValidateAsync(request, context, cancellationToken).ConfigureAwait(false);
 
         // Fail fast if the request is not valid
         if (!context.IsRequestValid)
@@ -29,7 +53,9 @@ public abstract class HandlerBase<TRequest> : IHandleAsync<TRequest>
             return CreateResult(context);
         }
 
-        await HandleAsync(request, context, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await HandleAsync(request, context, cancellationToken).ConfigureAwait(false);
 
         return CreateResult(context);
     }
@@ -61,6 +87,12 @@ public abstract class HandlerBase<TRequest> : IHandleAsync<TRequest>
     /// <returns>A <see cref="Result"/> with the appropriate status and messages.</returns>
     private static Result CreateResult(HandlerContext context)
     {
+        // Check for unauthorized
+        if (context.IsUnauthorized)
+        {
+            return new(ResultStatus.Unauthorized, context.Get<UnauthorizedMessage>());
+        }
+
         // Check for forbidden
         if (context.IsForbidden)
         {
@@ -92,7 +124,7 @@ public abstract class HandlerBase<TRequest> : IHandleAsync<TRequest>
     }
 }
 
-/// <inheritdoc/>
+/// <inheritdoc cref="HandlerBase{TRequest}"/>
 public abstract class HandlerBase<TRequest, TResponse> : IHandleAsync<TRequest, TResponse>
 {
     /// <inheritdoc/>
@@ -107,8 +139,10 @@ public abstract class HandlerBase<TRequest, TResponse> : IHandleAsync<TRequest, 
             return CreateResult(context);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         // Validate request before handling
-        await ValidateAsync(request, context, cancellationToken);
+        await ValidateAsync(request, context, cancellationToken).ConfigureAwait(false);
 
         // Fail fast if the request is not valid
         if (!context.IsRequestValid)
@@ -117,7 +151,9 @@ public abstract class HandlerBase<TRequest, TResponse> : IHandleAsync<TRequest, 
             return CreateResult(context);
         }
 
-        var response = await HandleAsync(request, context, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var response = await HandleAsync(request, context, cancellationToken).ConfigureAwait(false);
 
         return CreateResult(context, response);
     }
@@ -150,6 +186,12 @@ public abstract class HandlerBase<TRequest, TResponse> : IHandleAsync<TRequest, 
     /// <returns>A <see cref="Result{TResponse}"/> with the appropriate status, messages, and response.</returns>
     private static Result<TResponse> CreateResult(HandlerContext context, TResponse? response = default)
     {
+        // Check for unauthorized
+        if (context.IsUnauthorized)
+        {
+            return new(default, ResultStatus.Unauthorized, context.Get<UnauthorizedMessage>());
+        }
+
         // Check for forbidden
         if (context.IsForbidden)
         {

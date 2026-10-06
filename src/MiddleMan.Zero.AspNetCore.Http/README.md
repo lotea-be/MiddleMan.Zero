@@ -9,6 +9,7 @@ ASP.NET Core Minimal API integration for MiddleMan.Zero, providing automatic con
   - `Successful` → 200 OK
   - `NotFound` → 404 Not Found
   - `Invalid` → 400 Bad Request
+  - `Unauthorized` → 401 Unauthorized
   - `Forbidden` → 403 Forbidden
   - `Failure` → 500 Internal Server Error
 
@@ -83,6 +84,7 @@ IResult httpResult = result.ToResult();
 | `Successful` (no data) | 200 OK | Empty |
 | `Successful` (with data) | 200 OK | Response object (`application/json`) |
 | `Invalid` | 400 Bad Request | `ProblemResponse` (`application/problem+json`) |
+| `Unauthorized` | 401 Unauthorized | `ProblemResponse` (`application/problem+json`) |
 | `Forbidden` | 403 Forbidden | `ProblemResponse` (`application/problem+json`) |
 | `NotFound` | 404 Not Found | `ProblemResponse` (`application/problem+json`) |
 | `Conflict` | 409 Conflict | `ProblemResponse` (`application/problem+json`) |

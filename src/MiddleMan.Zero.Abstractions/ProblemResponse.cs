@@ -90,6 +90,15 @@ public sealed record ProblemResponse
                 projectedMessages: projectedMessages,
                 traceId: traceId),
 
+            ResultStatus.Unauthorized => Build(
+                status: 401,
+                title: "Unauthorized",
+                slug: "unauthorized",
+                defaultDetail: "Authentication is required.",
+                joinedMessages: joinedMessages,
+                projectedMessages: projectedMessages,
+                traceId: traceId),
+
             ResultStatus.Forbidden => Build(
                 status: 403,
                 title: "Forbidden",

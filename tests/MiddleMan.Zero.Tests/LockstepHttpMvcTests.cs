@@ -29,6 +29,7 @@ public class LockstepHttpMvcTests
         new()
         {
             { ResultStatus.Invalid,   new InvalidRequestMessage("Field is required", "field_required") },
+            { ResultStatus.Unauthorized, new UnauthorizedMessage("Sign in required", "sign_in_required") },
             { ResultStatus.Forbidden, new ForbiddenMessage("Access denied", "access_denied") },
             { ResultStatus.NotFound,  new NotFoundMessage("Item not found", "item_not_found") },
             { ResultStatus.Conflict,  new ConflictMessage("Already exists", "already_exists") },

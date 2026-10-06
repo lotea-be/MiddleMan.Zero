@@ -51,3 +51,9 @@ MiddleMan.Zero.Result
 MiddleMan.Zero.Result.Result(MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void
 MiddleMan.Zero.Result<TResponse>
 MiddleMan.Zero.Result<TResponse>.Result(TResponse? response, MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void
+MiddleMan.Zero.HandlerContext.IsUnauthorized.get -> bool
+MiddleMan.Zero.HandlerContext.Log(MiddleMan.Zero.UnauthorizedMessage! unauthorizedMessage) -> void
+MiddleMan.Zero.UnauthorizedMessage
+MiddleMan.Zero.UnauthorizedMessage.UnauthorizedMessage() -> void
+MiddleMan.Zero.UnauthorizedMessage.UnauthorizedMessage(string! message) -> void
+MiddleMan.Zero.UnauthorizedMessage.UnauthorizedMessage(string! message, string! code) -> void

@@ -30,7 +30,7 @@ public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageB
 /// when <see cref="ResultBase.ResultStatus"/> is <see cref="ResultStatus.Successful"/>. For all
 /// other statuses (<see cref="ResultStatus.NotFound"/>, <see cref="ResultStatus.Invalid"/>,
 /// <see cref="ResultStatus.Failure"/>, <see cref="ResultStatus.Forbidden"/>,
-/// <see cref="ResultStatus.Conflict"/>) the response is the default value of
+/// <see cref="ResultStatus.Conflict"/>, <see cref="ResultStatus.Unauthorized"/>) the response is the default value of
 /// <typeparamref name="TResponse"/> (null for reference types).
 /// </remarks>
 /// <exception cref="ArgumentNullException">Thrown when response is null and resultStatus is Successful.</exception>
