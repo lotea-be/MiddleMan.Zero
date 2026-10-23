@@ -5,177 +5,125 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0-rc5]
+## [2.0.0] - 2026-10-23
 
-Final public-API tightening before the 2.0.0 freeze (after 2.0.0, the Package Validation baseline
-makes changes like these impossible until v3).
+The first stable 2.x release: a public-API audit and lock-down, one canonical HTTP error envelope,
+two new statuses (`Conflict`, `Unauthorized`), and pipeline behaviors. It consolidates
+`2.0.0-rc1` … `2.0.0-rc5`. **Upgrading from 1.2.0:** work through *Breaking changes* below; each
+item has a migration note.
+
+From this release on, the public API is tracked (`PublicAPI.Shipped.txt`) and Package Validation
+compares every pack against 2.0.0, so breaking changes can only ship in a new major version.
 
 ### Breaking changes
 
-- **Problem `type` URIs now point at the rendered GitHub page** (`MiddleMan.Zero.Abstractions`).
-  `ProblemResponse.Type` changed from
-  `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/<slug>.md` to
-  `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/<slug>.md`. These URIs are
-  now considered stable identifiers.
-  - **Migration:** clients that matched on the full `type` string should update the prefix, or
-    match on the trailing `<slug>.md` / the `status` field.
-- **`MessageBase.CorrelationId` removed** (`MiddleMan.Zero.Abstractions`). It defaulted to a new
-  `Guid` per message, so it never correlated anything. It was already excluded from HTTP bodies.
-  - **Migration:** drop any reads/initializers of `CorrelationId`. Correlation will come through
+#### HTTP error responses (`MiddleMan.Zero.AspNetCore.Http` + `MiddleMan.Zero.AspNetCore.Mvc`)
+
+- **One canonical RFC 9457 error envelope.** Every non-success status now returns the same
+  `application/problem+json` body (`type`, `title`, `status`, `detail`, `messages`, optional
+  `traceId`) from `ToResult()`, `ToActionResult()` and `ToTypedActionResult()` alike. The old
+  anonymous `{ messages: MessageBase[] }` body (which leaked `Id`, `CorrelationId` and `CreatedAt`)
+  and the Http-only `ProblemDetails` 500 body are gone; each entry in `messages` now has only
+  `message` and `code`.
+  - **Migration:** clients that parsed the old body should read the RFC 9457 fields; the per-error
+    list is still called `messages`, so `messages[].message` / `messages[].code` keep working.
+- **403 Forbidden now has a body.** It previously returned an empty `Results.Forbid()` /
+  `ForbidResult` (which also required an authentication scheme); it now returns the problem
+  envelope populated from the logged `ForbiddenMessage`s.
+  - **Migration:** clients that treated 403 as body-less should tolerate the problem body.
+- **`type` URIs** have the form
+  `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/<slug>.md` and are stable
+  identifiers from now on.
+
+#### `MiddleMan.Zero.Abstractions`
+
+- **`MessageBase` properties are `init`-only.** `Id`, `CreatedAt`, `Message` and `Code` can no
+  longer be reassigned after construction.
+  - **Migration:** set them in an object initializer or use the new `(message)` /
+    `(message, code)` constructors.
+- **`MessageBase.CorrelationId` removed.** It defaulted to a new `Guid` per message, so it never
+  correlated anything.
+  - **Migration:** drop reads/initializers of `CorrelationId`. Correlation is planned through
     `ProblemResponse.TraceId` / `Activity` in a later, additive release.
-- **`ResultBase.Messages` is now `IReadOnlyList<MessageBase>`** (was `MessageBase[]`), so a result's
-  messages can no longer be mutated after creation.
-  - **Migration:** replace `.Length` with `.Count`; indexing and LINQ work unchanged. Call
+- **`ResultBase.Messages` is `IReadOnlyList<MessageBase>`** (was `MessageBase[]`).
+  - **Migration:** replace `.Length` with `.Count`; indexing and LINQ are unchanged. Use
     `.ToArray()` if you need an array.
-- **Built-in message classes are now `sealed`** (`MiddleMan.Zero`): `DebugMessage`,
-  `FailureMessage`, `InvalidRequestMessage`, `NotFoundMessage`, `ForbiddenMessage`,
-  `UnauthorizedMessage`, `ConflictMessage`.
+- **`ResultBase<TResponse>.Response` is annotated `TResponse?`.** It was already null for every
+  non-success status. The constructor still throws `ArgumentNullException` for a null `Successful`
+  response.
+  - **Migration:** check `ResultStatus == Successful` before reading `Response`, or use `!` once
+    you have.
+
+#### `MiddleMan.Zero`
+
+- **`HandlerBase<TRequest, TResponse>` implements `IHandleAsync<TRequest, TResponse>`** (was
+  `IHandleAsync<TRequest, TResponse?>`). Runtime types and DI resolution are unchanged; only the
+  nullability annotation differs.
+  - **Migration:** drop the `?` from any `IHandleAsync<TRequest, TResponse?>` dependencies.
+- **Built-in message classes are `sealed`**: `DebugMessage`, `FailureMessage`,
+  `InvalidRequestMessage`, `NotFoundMessage`, `ForbiddenMessage`, `UnauthorizedMessage`,
+  `ConflictMessage`.
   - **Migration:** replace subclasses with the base message type plus a distinguishing `Code`.
 
-## [2.0.0-rc4]
+#### `MiddleMan.Zero.DependencyInjection`
+
+- **Registration shape changed.** Each handler is registered as its concrete type, and its
+  `IHandleAsync<…>` interface through a factory (so behaviors can wrap it) instead of an
+  `ImplementationType`. Resolution is unchanged. Open generic handler types are skipped (they
+  previously produced unusable registrations), and an interface registration the consumer already
+  made for the same handler is left alone.
+  - **Migration:** only affects code that inspects `ServiceDescriptor`s for handlers.
 
 ### Added
 
-- **`ResultStatus.Unauthorized` (401)** (`MiddleMan.Zero.Abstractions`, `MiddleMan.Zero`). Log an
-  `UnauthorizedMessage` (new; same three constructors as the other messages) to return a
-  `401 Unauthorized` problem body from both `ToResult()` and `ToActionResult()`. `HandlerContext`
-  gains `IsUnauthorized`. `Unauthorized` takes precedence over every other status. See
-  [`docs/errors/unauthorized.md`](docs/errors/unauthorized.md).
-- **Pipeline behaviors** (`MiddleMan.Zero.Abstractions`, `MiddleMan.Zero.DependencyInjection`).
-  New `IHandlerBehavior<TRequest>` / `IHandlerBehavior<TRequest, TResponse>` contracts (with the
-  `HandlerDelegate` / `HandlerDelegate<TResponse>` continuations) let you wrap every handler with
-  logging, metrics, transactions, etc. Register them as open or closed generics; `AddMiddleManZero()`
-  applies them in registration order (first registered = outermost). With no behaviors registered,
-  the handler itself is resolved, as before.
+- **`ResultStatus.Conflict` (409)** with `ConflictMessage` and `HandlerContext.IsConflict`.
+- **`ResultStatus.Unauthorized` (401)** with `UnauthorizedMessage` and
+  `HandlerContext.IsUnauthorized`. Status precedence is now
+  `Unauthorized` > `Forbidden` > `Invalid` > `Conflict` > `Successful` > `NotFound` > `Failure`.
+- **Pipeline behaviors:** `IHandlerBehavior<TRequest>` / `IHandlerBehavior<TRequest, TResponse>`
+  with the `HandlerDelegate` / `HandlerDelegate<TResponse>` continuations. Register them as open or
+  closed generics; `AddMiddleManZero()` applies them in registration order (first registered =
+  outermost). With none registered, the handler itself is resolved.
+- **`ProblemResponse` and `ErrorMessage`** (`MiddleMan.Zero.Abstractions`): the error envelope
+  types, built with `ProblemResponse.FromResult(result)`. Each status links to a page under
+  [`docs/errors`](docs/errors).
+- Every message type has three constructors: parameterless, `(string message)` and
+  `(string message, string code)`. `MessageBase.ToString()` returns `Message`.
+- `AddMiddleManZero(params Assembly[])` and `AddMiddleManZero(IEnumerable<Assembly>, ServiceLifetime)`
+  overloads for scoped scanning.
+- `ToTypedActionResult<TResponse>` no longer requires `TResponse : class`, so value-typed responses
+  (e.g. `Guid`) work.
 
 ### Changed
 
-- **`HandlerBase` observes cancellation.** It now calls `ThrowIfCancellationRequested()` before
-  `ValidateAsync` and before `HandleAsync`, so an already-cancelled token surfaces as
-  `OperationCanceledException` instead of running the handler. Handlers remain responsible for
-  passing the token to their own I/O.
-- **`HandlerBase` uses `ConfigureAwait(false)`** on its internal awaits.
-- **`AddMiddleManZero()` registration shape.** Each handler is now also registered as its concrete
-  type, and its `IHandleAsync<…>` interface is registered through a factory (so behaviors can be
-  applied) instead of an `ImplementationType`. Resolution is unchanged. Open generic handler types
-  are now skipped (they previously produced unusable registrations), and an interface the consumer
-  already registered for the same handler is left untouched.
-
-### Dependencies
-
-- `Microsoft.SourceLink.GitHub` 10.0.301 → 10.0.401 — clears NU1902 (GHSA-23fw-v26w-5fgq on the
-  transitive `Microsoft.Build.Tasks.Git`), which was failing restore.
-- `Microsoft.Extensions.DependencyInjection.Abstractions` 10.0.10 → 10.0.12.
-- Tests/samples: `Microsoft.AspNetCore.Mvc.Testing` / `Microsoft.AspNetCore.OpenApi` to 8.0.31 /
-  9.0.20 / 10.0.12, `Microsoft.OpenApi` pin 2.7.6 → 2.12.2, `Scalar.AspNetCore` 2.17.13,
-  `Microsoft.Extensions.DependencyInjection` / `Options` 10.0.12, `Microsoft.NET.Test.Sdk` 18.10.1,
-  `coverlet.collector` 10.1.0. xunit stays on 3.x (4.x requires migrating off VSTest).
-
-### Documentation
-
+- `HandlerBase` calls `ThrowIfCancellationRequested()` before `ValidateAsync` and before
+  `HandleAsync`, so an already-cancelled token surfaces as `OperationCanceledException`. Handlers
+  remain responsible for passing the token to their own I/O.
+- `HandlerBase` uses `ConfigureAwait(false)` internally.
+- `AddMiddleManZero()` is idempotent (repeat calls add no duplicate registrations) and tolerates
+  `ReflectionTypeLoadException` from third-party assemblies by scanning only their loadable types.
 - Documented that a non-success result carries only the messages of the type that decided its
-  status (e.g. `DebugMessage`s are dropped from a `Failure` result), so diagnostic breadcrumbs never
-  reach an HTTP error body. Successful results still carry every message.
-
-## [2.0.0-rc3]
-
-### Breaking changes
-
-#### Unified error-response envelope (`MiddleMan.Zero.AspNetCore.Http` + `MiddleMan.Zero.AspNetCore.Mvc`)
-
-Every non-success `ResultStatus` now returns one canonical RFC 9457 (RFC 7807-compatible) body,
-served as `Content-Type: application/problem+json`, identical across both the Minimal API
-(`ToResult()`) and MVC (`ToActionResult()` / `ToTypedActionResult()`) mappers.
-
-- **New public types in `MiddleMan.Zero.Abstractions`:** `ProblemResponse` (the envelope, with
-  `type` / `title` / `status` / `detail` / `messages` and a reserved nullable `traceId`) and
-  `ErrorMessage` (a `{ message, code }` projection). Build one with `ProblemResponse.FromResult(result)`.
-- **The old body shape is removed.** Error responses previously returned an anonymous
-  `{ messages: MessageBase[] }` object that leaked `Id`, `CorrelationId`, and `CreatedAt`. Those
-  fields are gone; each entry in `messages` now exposes only `message` and `code`.
-  - **Migration:** update clients that parsed the old body to read the RFC 9457 fields; the per-error
-    list is still named `messages`, so `messages[].message` / `messages[].code` are the stable fields.
-- **403 Forbidden now has a body.** It previously returned an empty `Results.Forbid()` / `ForbidResult`.
-  It now returns the `application/problem+json` envelope, populated from any logged `ForbiddenMessage`s.
-  - **Migration:** clients that treated 403 as body-less should tolerate the new problem body.
-- **`Failure`/`Undefined` bodies are now consistent** between the two packages (both emit the envelope;
-  previously Http emitted `ProblemDetails` and Mvc emitted the anonymous object).
-- Each `type` URI links to a per-status document under [`docs/errors`](docs/errors).
-
-## [2.0.0] - 2026-05-08
-
-This release tightens up the public API after a full audit. Most changes are non-breaking;
-the breaking ones are listed first with migration steps.
-
-### Breaking changes
-
-#### MiddleMan.Zero.Abstractions
-- **`MessageBase` properties are now `init`-only.** `Id`, `CorrelationId`, `CreatedAt`, `Message`,
-  and `Code` can no longer be reassigned after construction.
-  - **Migration:** if you mutated these post-construction (rare), set them via object initializer
-    or one of the new `(string message)` / `(string message, string code)` constructors.
-- **`ResultBase<TResponse>.Response` is now annotated as `TResponse?`.** It was already null in every
-  non-`Successful` path; the type system now reflects that. The constructor still throws
-  `ArgumentNullException` if `Response` is null when `ResultStatus` is `Successful`.
-  - **Migration:** consumers reading `result.Response` from a result of unknown status will get
-    nullable warnings under `Nullable=enable`. Either check `result.ResultStatus == Successful` first,
-    or apply the null-forgiving operator (`result.Response!`) when you have already verified status.
-- **`HandlerBase<TRequest, TResponse>` now implements `IHandleAsync<TRequest, TResponse>`** instead
-  of `IHandleAsync<TRequest, TResponse?>`. The runtime type was identical for unconstrained generics,
-  so DI registration and resolution are unchanged. Only nullability annotations differ.
-  - **Migration:** if you previously declared dependencies as `IHandleAsync<TRequest, TResponse?>`,
-    drop the `?` to match the cleaner annotation. The `?`-form continues to resolve at runtime.
-
-### Added
-
-#### MiddleMan.Zero.Abstractions
-- Added `Conflict` status to `ResultStatus` enum for state-conflict errors (e.g., duplicate resource
-  creation, optimistic-concurrency violations).
-
-#### MiddleMan.Zero
-- `DebugMessage`, `FailureMessage`, `ForbiddenMessage`, `NotFoundMessage`, and `InvalidRequestMessage`
-  all now expose three constructors: parameterless, `(string message)`, and `(string message, string code)`.
-  Previously only `InvalidRequestMessage` had constructors; everything else required object-initializer syntax.
-- `MessageBase.ToString()` now returns the `Message` property text (was: type name).
-- Added `ConflictMessage` class for representing state-conflict errors. Logging it via
-  `HandlerContext.Log(ConflictMessage)` flips the new `IsConflict` flag and yields
-  `ResultStatus.Conflict`. Precedence in `HandlerBase.CreateResult`:
-  `Forbidden` > `Invalid` > `Conflict` > `Successful` > `NotFound` > `Failure`.
-
-#### MiddleMan.Zero.AspNetCore.Mvc
-- Added support for `Conflict` status mapping to HTTP 409 Conflict.
-
-#### MiddleMan.Zero.AspNetCore.Http
-- Added support for `Conflict` status mapping to HTTP 409 Conflict.
-
-#### MiddleMan.Zero.DependencyInjection
-- New `AddMiddleManZero(params Assembly[] assemblies)` overload for scoped scanning.
-- New `AddMiddleManZero(IEnumerable<Assembly> assemblies, ServiceLifetime lifetime)` overload.
-- `AddMiddleManZero` is now idempotent — calling it multiple times does not produce duplicate
-  registrations of the same `(serviceType, implementationType)` pair.
-- `AddMiddleManZero` is now resilient to `ReflectionTypeLoadException` from third-party assemblies
-  with unresolvable references; only loadable types are scanned.
-
-#### MiddleMan.Zero.AspNetCore.Mvc
-- `ToTypedActionResult<TResponse>` no longer requires `where TResponse : class`. Value-typed
-  responses (e.g., `Guid`) now work with the typed extension.
+  status, so `DebugMessage` breadcrumbs never reach an HTTP error body. Successful results carry
+  every message.
 
 ### Fixed
 
-#### MiddleMan.Zero.AspNetCore.Http
-- `Failure` (HTTP 500) responses now serialize the actual message text in the ProblemDetails
-  `detail` field. Previously it joined `MessageBase.ToString()`, which produced type names
-  (e.g., `"MiddleMan.Zero.FailureMessage; …"`).
+- Http `Failure` responses serialized message type names (`"MiddleMan.Zero.FailureMessage; …"`)
+  instead of message text.
+- Removed a duplicated `<summary>` on `HandlerBase<TRequest>.ValidateAsync` and a redundant null
+  check in `HandlerBase<TRequest, TResponse>.CreateResult`.
+- Samples: `IOrderRepository` moved into the `IceCreamTruck.Repositories` namespace; the in-memory
+  repositories are thread-safe under concurrent integration tests.
 
-#### MiddleMan.Zero
-- Removed a duplicated `<summary>` block on `HandlerBase<TRequest>.ValidateAsync` XML doc.
-- Removed a redundant `ArgumentNullException` check in `HandlerBase<TRequest, TResponse>.CreateResult`
-  — the same check is enforced by `ResultBase<TResponse>`'s constructor.
+### Dependencies
 
-#### Samples (IceCreamTruck)
-- `IOrderRepository` now correctly lives in the `IceCreamTruck.Repositories` namespace
-  (was: leaked into the global namespace).
-- `OrderRepository` and `FlavorRepository` are now thread-safe under concurrent integration tests.
+- `Microsoft.SourceLink.GitHub` 10.0.402 (10.0.401+ clears NU1902 / GHSA-23fw-v26w-5fgq on the
+  transitive `Microsoft.Build.Tasks.Git`).
+- `Microsoft.Extensions.DependencyInjection.Abstractions` 10.0.13.
+- Tests/samples: `Microsoft.AspNetCore.Mvc.Testing` / `Microsoft.AspNetCore.OpenApi` 8.0.32 /
+  9.0.21 / 10.0.13, `Microsoft.Extensions.DependencyInjection` / `Options` 10.0.13,
+  `Microsoft.NET.Test.Sdk` 18.11.0, `Scalar.AspNetCore` 2.18.3. xunit stays on 3.x (4.x requires
+  migrating off VSTest).
 
 ### Package Links
 - [MiddleMan.Zero](https://www.nuget.org/packages/MiddleMan.Zero/2.0.0)
