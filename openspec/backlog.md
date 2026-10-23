@@ -10,20 +10,6 @@ against the current source at `2.0.0-rc2`.
 
 ## Active
 
-### #2 — Canonical, documented error-response envelope
-**Change id:** `unify-error-envelope`
-**Status:** in-progress (PR #37 open)
-**Effort:** Medium · **Packages:** `AspNetCore.Http` + `AspNetCore.Mvc` (lockstep)
-
-`ToResult()` currently emits three different body shapes: `{ messages: [...] }`
-for 400/404/409, an RFC 7807 `ProblemDetails` for 500, and an **empty body** for
-403 (`Results.Forbid()`). A consumer extending the contract (e.g. the 409
-workaround that predated `ResultStatus.Conflict`) has nothing stable to target.
-
-Route **every** status through one canonical, `ProblemDetails`-compatible DTO;
-document the shape; keep Http and Mvc mappings in sync. Ties into #4 (surface
-`CorrelationId`/`traceId` in the envelope).
-
 ### #3 — CancellationToken auto-bind at the HTTP boundary
 **Change id:** `bind-cancellation-token`
 **Effort:** Small–Medium · **Packages:** `AspNetCore.Http`
