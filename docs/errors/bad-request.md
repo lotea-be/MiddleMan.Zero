@@ -1,7 +1,7 @@
 # Bad Request (400)
 
 - **HTTP status:** `400 Bad Request`
-- **`type`:** `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/bad-request.md`
+- **`type`:** `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/bad-request.md`
 - **`ResultStatus`:** `Invalid`
 
 The request could not be processed because it failed validation. One or more logged
@@ -12,7 +12,7 @@ human-readable `message` and a stable `code`.
 
 ```json
 {
-  "type": "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/bad-request.md",
+  "type": "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/bad-request.md",
   "title": "Bad Request",
   "status": 400,
   "detail": "The order id is required.",

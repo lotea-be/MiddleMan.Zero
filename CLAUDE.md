@@ -53,7 +53,7 @@ Central Package Management is enabled (`ManagePackageVersionsCentrally=true`). V
 
 The repo is five thin packages that compose into a request → result → HTTP pipeline. Understand the flow before editing any one piece — a behavioral change in `HandlerBase` or `HandlerContext` ripples through every consumer.
 
-**1. Contract (`MiddleMan.Zero.Abstractions`).** `IHandleAsync<TRequest>` and `IHandleAsync<TRequest, TResponse>` are the only interfaces consumers depend on. They return `ResultBase` / `ResultBase<TResponse>`, which carry a `ResultStatus` enum (`Successful | Failure | Invalid | NotFound | Forbidden | Conflict | Unauthorized`) and a `MessageBase[]`. `ResultBase<TResponse>` throws `ArgumentNullException` if `Successful` is paired with a null response — this invariant is load-bearing.
+**1. Contract (`MiddleMan.Zero.Abstractions`).** `IHandleAsync<TRequest>` and `IHandleAsync<TRequest, TResponse>` are the only interfaces consumers depend on. They return `ResultBase` / `ResultBase<TResponse>`, which carry a `ResultStatus` enum (`Successful | Failure | Invalid | NotFound | Forbidden | Conflict | Unauthorized`) and an `IReadOnlyList<MessageBase>`. `ResultBase<TResponse>` throws `ArgumentNullException` if `Successful` is paired with a null response — this invariant is load-bearing.
 
 **2. Template (`MiddleMan.Zero.HandlerBase`).** Concrete handlers extend `HandlerBase<TRequest>` or `HandlerBase<TRequest, TResponse>` and override two methods: `ValidateAsync` and `HandleAsync`. The base class enforces a fixed pipeline:
 

@@ -43,12 +43,6 @@ public abstract class MessageBase
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
-    /// Gets the correlation identifier used to track related messages.
-    /// Automatically initialized with a new GUID.
-    /// </summary>
-    public Guid CorrelationId { get; init; } = Guid.NewGuid();
-
-    /// <summary>
     /// Gets the creation timestamp of this message.
     /// Automatically set to the current UTC time when instantiated.
     /// </summary>

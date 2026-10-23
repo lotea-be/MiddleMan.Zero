@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-rc5]
+
+Final public-API tightening before the 2.0.0 freeze (after 2.0.0, the Package Validation baseline
+makes changes like these impossible until v3).
+
+### Breaking changes
+
+- **Problem `type` URIs now point at the rendered GitHub page** (`MiddleMan.Zero.Abstractions`).
+  `ProblemResponse.Type` changed from
+  `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/<slug>.md` to
+  `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/<slug>.md`. These URIs are
+  now considered stable identifiers.
+  - **Migration:** clients that matched on the full `type` string should update the prefix, or
+    match on the trailing `<slug>.md` / the `status` field.
+- **`MessageBase.CorrelationId` removed** (`MiddleMan.Zero.Abstractions`). It defaulted to a new
+  `Guid` per message, so it never correlated anything. It was already excluded from HTTP bodies.
+  - **Migration:** drop any reads/initializers of `CorrelationId`. Correlation will come through
+    `ProblemResponse.TraceId` / `Activity` in a later, additive release.
+- **`ResultBase.Messages` is now `IReadOnlyList<MessageBase>`** (was `MessageBase[]`), so a result's
+  messages can no longer be mutated after creation.
+  - **Migration:** replace `.Length` with `.Count`; indexing and LINQ work unchanged. Call
+    `.ToArray()` if you need an array.
+- **Built-in message classes are now `sealed`** (`MiddleMan.Zero`): `DebugMessage`,
+  `FailureMessage`, `InvalidRequestMessage`, `NotFoundMessage`, `ForbiddenMessage`,
+  `UnauthorizedMessage`, `ConflictMessage`.
+  - **Migration:** replace subclasses with the base message type plus a distinguishing `Code`.
+
 ## [2.0.0-rc4]
 
 ### Added

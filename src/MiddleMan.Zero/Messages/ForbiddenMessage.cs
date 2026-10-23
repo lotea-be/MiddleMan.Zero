@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a message indicating that the operation was forbidden due to insufficient permissions.
 /// </summary>
-public class ForbiddenMessage : MessageBase
+public sealed class ForbiddenMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ForbiddenMessage"/> class.

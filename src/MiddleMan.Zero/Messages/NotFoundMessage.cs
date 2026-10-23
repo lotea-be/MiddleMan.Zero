@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a message indicating that the requested resource was not found.
 /// </summary>
-public class NotFoundMessage : MessageBase
+public sealed class NotFoundMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotFoundMessage"/> class.

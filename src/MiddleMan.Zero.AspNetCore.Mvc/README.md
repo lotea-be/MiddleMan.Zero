@@ -93,7 +93,7 @@ Non-success results are serialized as an RFC 9457 (RFC 7807-compatible) problem 
 ```jsonc
 // HTTP 400, Content-Type: application/problem+json
 {
-  "type": "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/bad-request.md",
+  "type": "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/bad-request.md",
   "title": "Bad Request",
   "status": 400,
   "detail": "The order id is required.",

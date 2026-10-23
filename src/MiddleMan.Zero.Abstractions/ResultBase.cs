@@ -15,7 +15,7 @@ public abstract class ResultBase(ResultStatus resultStatus, IEnumerable<MessageB
     /// <summary>
     /// Gets the collection of messages associated with the operation.
     /// </summary>
-    public MessageBase[] Messages { get; } = [.. messages];
+    public IReadOnlyList<MessageBase> Messages { get; } = [.. messages];
 }
 
 /// <summary>

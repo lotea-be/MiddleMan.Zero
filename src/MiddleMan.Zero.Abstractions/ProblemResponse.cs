@@ -55,7 +55,7 @@ public sealed record ProblemResponse
     public IReadOnlyList<ErrorMessage> Messages { get; init; } = [];
 
     private const string BaseTypeUri =
-        "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/";
+        "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/";
 
     /// <summary>
     /// Creates a <see cref="ProblemResponse"/> from a non-success <see cref="ResultBase"/>.

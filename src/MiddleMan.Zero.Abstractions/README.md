@@ -17,7 +17,6 @@ This package contains the fundamental building blocks for implementing the media
 
 - **`MessageBase`**: Base class for all message types with common properties:
   - `Id`: Unique identifier for the message
-  - `CorrelationId`: Identifier for tracking related messages
   - `CreatedAt`: UTC timestamp of message creation
   - `Message`: Human-readable description
   - `Code`: Categorization or identification code

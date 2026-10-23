@@ -1,7 +1,7 @@
 # Unauthorized (401)
 
 - **HTTP status:** `401 Unauthorized`
-- **`type`:** `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/unauthorized.md`
+- **`type`:** `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/unauthorized.md`
 - **`ResultStatus`:** `Unauthorized`
 
 The caller must be authenticated to perform the operation. Use this when the handler itself decides
@@ -15,7 +15,7 @@ It does **not** add a `WWW-Authenticate` header — that is the job of your auth
 
 ```json
 {
-  "type": "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/unauthorized.md",
+  "type": "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/unauthorized.md",
   "title": "Unauthorized",
   "status": 401,
   "detail": "Sign in to place an order.",

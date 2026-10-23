@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a message indicating a failure during processing.
 /// </summary>
-public class FailureMessage : MessageBase
+public sealed class FailureMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FailureMessage"/> class.

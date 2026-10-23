@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a debug message for logging purposes.
 /// </summary>
-public class DebugMessage : MessageBase
+public sealed class DebugMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DebugMessage"/> class.

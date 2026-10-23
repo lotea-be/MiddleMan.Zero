@@ -27,13 +27,14 @@ await in an ASP.NET context is a larger, separate follow-up.)
 **Change id:** `propagate-correlation-id`
 **Effort:** Larger · **Packages:** `Abstractions`, `MiddleMan.Zero`, HTTP mappers
 
-`MessageBase` exposes `Id`, `CorrelationId`, `CreatedAt`, but `CorrelationId`
-defaults to a **fresh `Guid.NewGuid()` per message**, so it correlates nothing,
-and nothing flows it into logs or the HTTP response.
+`MessageBase.CorrelationId` was removed before 2.0.0 (it defaulted to a fresh
+`Guid.NewGuid()` per message, so it correlated nothing). Nothing currently flows a
+correlation/trace id into logs or the HTTP response.
 
-Share one correlation id per `HandlerContext`, propagate it into logs and
-(optionally) the error envelope (#2), and integrate with
-`Activity`/`System.Diagnostics` for OpenTelemetry traces.
+Populate the reserved `ProblemResponse.TraceId` (e.g. from `Activity.Current` /
+`HttpContext.TraceIdentifier`) in both HTTP mappers, and integrate with
+`Activity`/`System.Diagnostics` for OpenTelemetry traces — additively, without
+reintroducing a per-message correlation field.
 
 ### #5 — Validation ergonomics (opt-in)
 **Change id:** `add-validation-ergonomics`

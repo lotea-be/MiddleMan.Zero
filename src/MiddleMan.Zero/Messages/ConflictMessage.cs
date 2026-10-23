@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a message indicating that the operation conflicts with the current state of the resource.
 /// </summary>
-public class ConflictMessage : MessageBase
+public sealed class ConflictMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ConflictMessage"/> class.

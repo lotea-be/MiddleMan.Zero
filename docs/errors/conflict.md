@@ -1,7 +1,7 @@
 # Conflict (409)
 
 - **HTTP status:** `409 Conflict`
-- **`type`:** `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/conflict.md`
+- **`type`:** `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/conflict.md`
 - **`ResultStatus`:** `Conflict`
 
 The request could not be completed because it conflicts with the current state of the resource
@@ -12,7 +12,7 @@ The request could not be completed because it conflicts with the current state o
 
 ```json
 {
-  "type": "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/conflict.md",
+  "type": "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/conflict.md",
   "title": "Conflict",
   "status": 409,
   "detail": "An order with this reference already exists.",

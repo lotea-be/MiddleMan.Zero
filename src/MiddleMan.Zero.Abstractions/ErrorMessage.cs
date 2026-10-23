@@ -5,7 +5,7 @@ namespace MiddleMan.Zero.Abstractions;
 /// <summary>
 /// A projection of a handler message for inclusion in an HTTP problem response body.
 /// Only exposes the human-readable message text and the machine-readable code; the internal
-/// tracking fields (<c>Id</c>, <c>CorrelationId</c>, <c>CreatedAt</c>) are intentionally omitted.
+/// tracking fields (<c>Id</c>, <c>CreatedAt</c>) are intentionally omitted.
 /// </summary>
 public sealed record ErrorMessage
 {
