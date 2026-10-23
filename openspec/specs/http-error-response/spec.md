@@ -53,7 +53,7 @@ purpose of constructing an error body. The factory MUST produce the following ma
 | `Undefined` (default arm) | 500    | `"Internal Server Error"` | `internal-server-error.md` | `"An unexpected error occurred."`                  |
 
 The `type` URI MUST be the concatenation of
-`https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/` and the slug.
+`https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/` and the slug.
 When the result's `Messages` list is non-empty, `Detail` MUST be the `Message` strings
 joined by `"; "`. When `Messages` is empty, `Detail` MUST be the per-status default string.
 The factory MUST throw `InvalidOperationException` when called with a `ResultBase` whose

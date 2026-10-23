@@ -31,7 +31,7 @@ public class ResultTests
         // Assert
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.Failure),
-            () => result.Messages.Length.ShouldBe(1)
+            () => result.Messages.Count.ShouldBe(1)
         );
     }
 
@@ -95,7 +95,7 @@ public class ResultTests
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.NotFound),
             () => result.Response.ShouldBeNull(),
-            () => result.Messages.Length.ShouldBe(1)
+            () => result.Messages.Count.ShouldBe(1)
         );
     }
 
@@ -112,7 +112,7 @@ public class ResultTests
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.Invalid),
             () => result.Response.ShouldBeNull(),
-            () => result.Messages.Length.ShouldBe(1)
+            () => result.Messages.Count.ShouldBe(1)
         );
     }
 
@@ -129,7 +129,7 @@ public class ResultTests
         result.ShouldSatisfyAllConditions(
             () => result.ResultStatus.ShouldBe(ResultStatus.Failure),
             () => result.Response.ShouldBeNull(),
-            () => result.Messages.Length.ShouldBe(1)
+            () => result.Messages.Count.ShouldBe(1)
         );
     }
 

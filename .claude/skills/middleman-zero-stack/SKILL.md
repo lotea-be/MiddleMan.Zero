@@ -21,7 +21,7 @@ MiddleMan.Zero is a lightweight **mediator / CQRS handler** library (5 NuGet pac
 ## Project layout
 
 - `src/` — the five shipped packages:
-  - `MiddleMan.Zero.Abstractions` — contract: `IHandleAsync<TRequest>` / `IHandleAsync<TRequest,TResponse>`, `ResultBase`/`ResultBase<T>`, `ResultStatus` enum, `MessageBase[]`.
+  - `MiddleMan.Zero.Abstractions` — contract: `IHandleAsync<TRequest>` / `IHandleAsync<TRequest,TResponse>`, `ResultBase`/`ResultBase<T>`, `ResultStatus` enum, `IReadOnlyList<MessageBase>` messages.
   - `MiddleMan.Zero` — `HandlerBase<…>` template, `HandlerContext` state accumulator, `Messages/` typed messages.
   - `MiddleMan.Zero.DependencyInjection` — `AddMiddleManZero()` assembly scanning.
   - `MiddleMan.Zero.AspNetCore.Mvc` — `ToActionResult` / `ToTypedActionResult`.

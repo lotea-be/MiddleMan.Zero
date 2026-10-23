@@ -1,7 +1,7 @@
 # Forbidden (403)
 
 - **HTTP status:** `403 Forbidden`
-- **`type`:** `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/forbidden.md`
+- **`type`:** `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/forbidden.md`
 - **`ResultStatus`:** `Forbidden`
 
 The caller is authenticated but lacks permission for the requested operation. Unlike earlier
@@ -12,7 +12,7 @@ from any logged `ForbiddenMessage`s. Only reasons the handler explicitly logged 
 
 ```json
 {
-  "type": "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/forbidden.md",
+  "type": "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/forbidden.md",
   "title": "Forbidden",
   "status": 403,
   "detail": "You may not cancel another customer's order.",

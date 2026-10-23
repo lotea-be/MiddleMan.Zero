@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a message indicating that the caller must be authenticated to perform the operation.
 /// </summary>
-public class UnauthorizedMessage : MessageBase
+public sealed class UnauthorizedMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="UnauthorizedMessage"/> class.

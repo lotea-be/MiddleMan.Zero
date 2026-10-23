@@ -3,7 +3,7 @@ namespace MiddleMan.Zero;
 /// <summary>
 /// Represents a message indicating an invalid request.
 /// </summary>
-public class InvalidRequestMessage : MessageBase
+public sealed class InvalidRequestMessage : MessageBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="InvalidRequestMessage"/> class.

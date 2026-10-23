@@ -24,11 +24,17 @@ public class MessageTests
 
         msg.ShouldSatisfyAllConditions(
             () => msg.Id.ShouldNotBe(Guid.Empty),
-            () => msg.CorrelationId.ShouldNotBe(Guid.Empty),
             () => msg.CreatedAt.ShouldBeGreaterThanOrEqualTo(before),
             () => msg.Message.ShouldBe(string.Empty),
             () => msg.Code.ShouldBe(string.Empty)
         );
+    }
+
+    [Theory]
+    [ClassData(typeof(MessageTypeData))]
+    public void Message_IsSealed(Type messageType)
+    {
+        messageType.IsSealed.ShouldBeTrue();
     }
 
     [Theory]

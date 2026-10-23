@@ -24,10 +24,9 @@ public class ProblemResponseTests
             () => msg.Code.ShouldBe("err_42")
         );
 
-        // The projection must NOT have Id / CorrelationId / CreatedAt
+        // The projection must NOT have Id / CreatedAt
         var type = typeof(ErrorMessage);
         type.GetProperty("Id").ShouldBeNull();
-        type.GetProperty("CorrelationId").ShouldBeNull();
         type.GetProperty("CreatedAt").ShouldBeNull();
     }
 
@@ -116,7 +115,7 @@ public class ProblemResponseTests
         problem.ShouldSatisfyAllConditions(
             () => problem.Status.ShouldBe(expectedHttpStatus),
             () => problem.Title.ShouldBe(expectedTitle),
-            () => problem.Type.ShouldEndWith($"{expectedSlug}.md")
+            () => problem.Type.ShouldBe($"https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/{expectedSlug}.md")
         );
     }
 

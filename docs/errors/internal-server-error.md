@@ -1,7 +1,7 @@
 # Internal Server Error (500)
 
 - **HTTP status:** `500 Internal Server Error`
-- **`type`:** `https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/internal-server-error.md`
+- **`type`:** `https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/internal-server-error.md`
 - **`ResultStatus`:** `Failure` (and any unmapped / `Undefined` status)
 
 An unexpected error occurred while processing the request. This is the fallback for `Failure` as well
@@ -12,7 +12,7 @@ as for any `ResultStatus` value not explicitly mapped (including `Undefined`). A
 
 ```json
 {
-  "type": "https://raw.githubusercontent.com/lotea-be/MiddleMan.Zero/main/docs/errors/internal-server-error.md",
+  "type": "https://github.com/lotea-be/MiddleMan.Zero/blob/main/docs/errors/internal-server-error.md",
   "title": "Internal Server Error",
   "status": 500,
   "detail": "An unexpected error occurred.",

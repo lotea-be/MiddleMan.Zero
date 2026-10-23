@@ -19,8 +19,6 @@ MiddleMan.Zero.Abstractions.IHandleAsync<TRequest>.HandleAsync(TRequest request,
 MiddleMan.Zero.Abstractions.MessageBase
 MiddleMan.Zero.Abstractions.MessageBase.Code.get -> string!
 MiddleMan.Zero.Abstractions.MessageBase.Code.init -> void
-MiddleMan.Zero.Abstractions.MessageBase.CorrelationId.get -> System.Guid
-MiddleMan.Zero.Abstractions.MessageBase.CorrelationId.init -> void
 MiddleMan.Zero.Abstractions.MessageBase.CreatedAt.get -> System.DateTime
 MiddleMan.Zero.Abstractions.MessageBase.CreatedAt.init -> void
 MiddleMan.Zero.Abstractions.MessageBase.Id.get -> System.Guid
@@ -53,7 +51,7 @@ static MiddleMan.Zero.Abstractions.ProblemResponse.FromResult(MiddleMan.Zero.Abs
 static MiddleMan.Zero.Abstractions.ProblemResponse.operator !=(MiddleMan.Zero.Abstractions.ProblemResponse? left, MiddleMan.Zero.Abstractions.ProblemResponse? right) -> bool
 static MiddleMan.Zero.Abstractions.ProblemResponse.operator ==(MiddleMan.Zero.Abstractions.ProblemResponse? left, MiddleMan.Zero.Abstractions.ProblemResponse? right) -> bool
 MiddleMan.Zero.Abstractions.ResultBase
-MiddleMan.Zero.Abstractions.ResultBase.Messages.get -> MiddleMan.Zero.Abstractions.MessageBase![]!
+MiddleMan.Zero.Abstractions.ResultBase.Messages.get -> System.Collections.Generic.IReadOnlyList<MiddleMan.Zero.Abstractions.MessageBase!>!
 MiddleMan.Zero.Abstractions.ResultBase.ResultBase(MiddleMan.Zero.Abstractions.ResultStatus resultStatus, System.Collections.Generic.IEnumerable<MiddleMan.Zero.Abstractions.MessageBase!>! messages) -> void
 MiddleMan.Zero.Abstractions.ResultBase.ResultStatus.get -> MiddleMan.Zero.Abstractions.ResultStatus
 MiddleMan.Zero.Abstractions.ResultBase<TResponse>
