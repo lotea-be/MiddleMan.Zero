@@ -6,7 +6,7 @@ folder-safe **Change id** (verb-first kebab-case); promote an item by running
 cross-reference; the change id is what becomes the `openspec/changes/<id>/`
 folder and feature branch. Source for the initial batch: a handover scan of a
 real consumer (`abkf-registrations`, .NET 10) against `2.0.0-rc1`, re-grounded
-against the current source at `2.0.0-rc2`.
+against the current source at `2.0.0-rc2`, and pruned after the `2.0.0` release.
 
 ## Active
 
@@ -50,45 +50,29 @@ calls. Keep the "accumulate, never throw" semantics but reduce boilerplate:
 
 Must stay **opt-in** — the explicit style remains fully supported.
 
-### #7a — Documentation fixes
-**Change id:** `fix-abstractions-docs`
-**Effort:** Quick · **Packages:** docs only
+## Constraint since 2.0.0
 
-- `MiddleMan.Zero.Abstractions/README.md` lists **`MiddleMan.Zero.AspNetCore.Mvc`**
-  under related packages, but Minimal-API consumers use **`.AspNetCore.Http`** —
-  make the related-packages list reflect both integration paths.
-- README says the Abstractions types are "typically not used directly," yet
-  endpoints reference `IHandleAsync<>` / `ResultBase` directly. Clarify the
-  intended public surface.
+`PackageValidationBaselineVersion` is `2.0.0`, so every item above must ship as an
+**additive** 2.x change; anything binary-breaking waits for 3.0.0.
 
-## Parked / future direction
+## Done (shipped in 2.0.0)
 
-### #6 — Pluggable behavior pipeline (deferred)
-**Change id:** `add-behavior-pipeline`
-**Status:** Not scheduled — revisit after MiddleMan.Zero matures.
+- **#1 — `Conflict` (409) status.** `ResultStatus.Conflict` + `ConflictMessage`;
+  both HTTP packages map it to 409.
+- **#2 — Unified error envelope** (`unify-error-envelope`, archived
+  `2026-10-23`). One RFC 9457 `application/problem+json` body for every
+  non-success status; spec `openspec/specs/http-error-response`.
+- **#6 — Pipeline behaviors.** `IHandlerBehavior<TRequest>` /
+  `IHandlerBehavior<TRequest, TResponse>` with `HandlerDelegate` continuations,
+  applied by `AddMiddleManZero()`. Shipped in `.Zero` itself rather than the
+  previously planned separate `MiddleMan.x` variant package.
+- **#7a — Documentation fixes** (`fix-abstractions-docs`). The Abstractions
+  README lists both `.AspNetCore.Http` and `.AspNetCore.Mvc` and no longer calls
+  its types "typically not used directly".
 
-There is no MediatR-style `IPipelineBehavior` / middleware chain; consumers bake
-cross-cutting concerns (transactions, user resolution) into a project-owned
-`TransactionalHandlerBase` inherited by every write handler.
+## Resolved verify-against-source notes
 
-Direction: rather than growing `MiddleMan.Zero`, the pipeline (and other
-batteries-included, cross-cutting features) will live in a **separate variant
-package** — referred to here by the placeholder **`MiddleMan.x`** until a name
-is chosen. Keeping it out of `.Zero` preserves the ".Zero = minimal,
-no-dependency" promise, and lets the variant take dependencies `.Zero` refuses
-(UoW/transaction abstractions, logging).
-
-Lean: develop `MiddleMan.Zero` first; stand up `MiddleMan.x` later, once the
-core is mature. Name to be decided at that point.
-
-## Done (from the original handover, already shipped)
-
-- **#1 — `Conflict` (409) status.** `ResultStatus.Conflict` + `ConflictMessage`
-  landed post-handover (commit `50611d7`); both `AspNetCore.Http` and
-  `AspNetCore.Mvc` map it to HTTP 409.
-
-## Verify-against-source notes (open questions, not work items)
-
-- Exact JSON shape emitted by `ToResult()` per status — feeds #2.
-- Whether the void `IHandleAsync<TRequest>` (no-response) variant is
-  tested/used; the scanned consumer only used the typed form.
+- Exact JSON shape emitted by `ToResult()` per status: defined by #2's spec.
+- The void `IHandleAsync<TRequest>` variant is covered by tests
+  (`MiddleMan.Zero.Tests`, `DependencyInjection.Tests`, `CancelOrderHandlerTests`)
+  and used in the IceCreamTruck sample.
