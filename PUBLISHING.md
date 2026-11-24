@@ -105,9 +105,9 @@ One pair lives next to each `src/*` project. `Shipped.txt` = the surface of the 
 release**; `Unshipped.txt` = everything added/removed since. A new public member appends a line
 to `Unshipped.txt` (or the build breaks); a removed member is recorded as a `*REMOVED*<sig>` line.
 
-Currently `Shipped.txt` is **empty on purpose** — v2.0.0 has not shipped yet, so the entire
-current surface sits in `Unshipped.txt`. It is frozen into `Shipped.txt` at the v2.0.0 release
-(next step).
+The v2.0.0 surface is frozen in `Shipped.txt`, and every `Unshipped.txt` starts out empty
+(just `#nullable enable`). Anything added or removed after 2.0.0 lands in `Unshipped.txt` until the
+next stable release folds it in (next step).
 
 ### Per-release step: "mark shipped"
 
