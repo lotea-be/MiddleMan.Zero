@@ -16,10 +16,10 @@ jobs:
         dotnet-version: ['8.0.x', '9.0.x', '10.0.x']
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup .NET ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
 
@@ -65,7 +65,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
         token: ${{ secrets.PAT_TOKEN || github.token }}

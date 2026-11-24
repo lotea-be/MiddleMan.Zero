@@ -133,19 +133,12 @@ for d in pathlib.Path("src").iterdir():
 PY
 ```
 
-### One-time step at the v2.0.0 release: turn on the baseline gate
+### The baseline gate (active since 2.0.0)
 
-Package Validation's baseline diff is intentionally **off** until 2.0.0 is on NuGet (v2
-deliberately breaks vs 1.2.0, and the baseline package must already be published). Right after
-2.0.0 publishes, uncomment and set the baseline in `src/Directory.Build.props`:
-
-```xml
-<PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion>
-```
-
-From then on, `dotnet pack` **fails** on any binary-breaking change vs. 2.0.0 — so a breaking
-change can never ship as a 2.0.x patch or 2.1.x minor. **Bump the baseline only when you
-intentionally release a new major** (e.g. to `3.0.0` when you cut 3.0.0).
+`src/Directory.Build.props` sets `<PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion>`,
+so `dotnet pack` **fails** on any binary-breaking change vs. 2.0.0. A breaking change can never ship
+as a 2.0.x patch or 2.1.x minor. **Bump the baseline only when you intentionally release a new major**
+(e.g. to `3.0.0` when you cut 3.0.0).
 
 ### Shipping an *intentional* breaking change
 
@@ -231,4 +224,3 @@ If you get a version conflict error:
 - [ ] Wait for Publish workflow to complete
 - [ ] Verify packages on NuGet.org
 - [ ] Update GitHub Release notes if needed
-- [ ] **At the 2.0.0 release only**: set `PackageValidationBaselineVersion` to `2.0.0` (turns on the binary CD gate for 2.0.x/2.1.x)
