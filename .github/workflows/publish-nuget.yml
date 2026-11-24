@@ -124,6 +124,7 @@ jobs:
     needs: pack
     permissions:
       contents: read
+      id-token: write  # OIDC token for NuGet Trusted Publishing
 
     steps:
     - name: Download artifacts
@@ -137,9 +138,18 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
+    # Trusted Publishing: exchanges the GitHub OIDC token for a short-lived (1h) nuget.org API key.
+    # Needs a nuget.org trusted publishing policy for lotea-be/MiddleMan.Zero + publish-nuget.yml,
+    # and the repo variable NUGET_USER = the nuget.org username (profile name, not email) that owns the policy.
+    - name: NuGet login (OIDC)
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: ${{ vars.NUGET_USER }}
+
     - name: Publish to NuGet.org
       env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
       run: |
         for file in ./artifacts/*.nupkg; do
           if [[ ! "$file" =~ \.symbols\.nupkg$ ]]; then

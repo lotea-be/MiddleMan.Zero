@@ -4,17 +4,18 @@ This guide explains how to publish MiddleMan.Zero packages to NuGet.org.
 
 ## Prerequisites
 
-1. **NuGet API Key**: Get your API key from [nuget.org](https://www.nuget.org/account/apikeys)
-2. **GitHub Repository Secrets**: Add your NuGet API key as a secret named `NUGET_API_KEY`
+Publishing to NuGet.org uses **Trusted Publishing** (OIDC), so no long-lived API key is stored in
+the repository. Each publish run exchanges a GitHub OIDC token for a short-lived (1 hour) key.
 
-## Setting Up GitHub Secrets
+1. **Trusted publishing policy** on nuget.org (Account → Trusted Publishing), owned by `lotea-be`:
+   - Repository owner: `lotea-be`, repository: `MiddleMan.Zero`
+   - Workflow file: `publish-nuget.yml`, environment: *(empty)*
+   - Scope: push new package versions, glob `MiddleMan.Zero*`
+2. **Repository variable** `NUGET_USER` (Settings → Secrets and variables → Actions → *Variables*):
+   the nuget.org **username** (profile name, not email) of the account that created the policy.
 
-1. Go to your repository on GitHub
-2. Navigate to Settings → Secrets and variables → Actions
-3. Click "New repository secret"
-4. Name: `NUGET_API_KEY`
-5. Value: Your NuGet.org API key
-6. Click "Add secret"
+The `publish-nuget` job needs `permissions: id-token: write` and runs `NuGet/login@v1` before
+`dotnet nuget push`. GitHub Packages still uses the built-in `GITHUB_TOKEN`.
 
 ## Publishing Process
 
